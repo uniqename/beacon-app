@@ -1,0 +1,31 @@
+name: ngo_support_app
+description: "Beacon of New Beginnings - Minimal iOS Build"
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.8.1
+
+# Minimal dependencies without Firebase for iOS build
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  geolocator: ^10.1.0
+  geocoding: ^2.1.1
+  url_launcher: ^6.2.2
+  image_picker: ^1.0.4
+  shared_preferences: ^2.2.2
+  provider: ^6.1.1
+  intl: ^0.19.0
+  encrypt: ^5.0.1
+  uuid: ^4.2.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true

@@ -1,0 +1,79 @@
+{
+  "app_info": {
+    "name": "Beacon of New Beginnings",
+    "subtitle": "Safe Haven Support & Resources",
+    "description": "Beacon of New Beginnings provides critical support and resources for survivors of abuse and homelessness. Our app connects individuals to safety, healing services, and empowerment programs.\n\nKey Features:\n• Emergency Safety Resources: Immediate access to crisis hotlines and safe shelters\n• Resource Directory: Comprehensive database of local support services\n• Anonymous Support: Confidential communication with trained counselors\n• Community Groups: Connect with support groups and healing communities\n• Safety Planning: Tools to create personalized safety plans\n• Educational Resources: Information on legal rights, financial assistance, and health services\n• Crisis Chat: Secure messaging with crisis intervention specialists\n• Location-Based Services: Find nearby resources and safe spaces\n\nWhy Choose Beacon of New Beginnings:\n✓ Confidential and secure platform designed for survivor safety\n✓ 24/7 access to emergency resources and crisis support\n✓ Comprehensive directory of verified support services\n✓ Created by survivors, for survivors\n✓ No identifying information required for basic access\n✓ Multi-language support for accessibility\n✓ Trauma-informed design and user experience\n✓ Partnership with national and local support organizations\n\nServices Available:\n• Crisis Intervention and Emergency Support\n• Domestic Violence Resources\n• Homelessness Support Services\n• Legal Aid and Advocacy\n• Mental Health and Counseling Services\n• Financial Assistance Programs\n• Housing and Shelter Information\n• Job Training and Employment Support\n• Children's Services and Family Support\n• Substance Abuse Treatment Resources\n\nFor Crisis Support:\nOur app provides immediate access to crisis resources while maintaining user anonymity and safety. All communications are encrypted and secure.\n\nDownload Beacon of New Beginnings today and take the first step toward safety, healing, and empowerment.",
+    "keywords": "domestic violence,abuse support,crisis help,homelessness,safety,counseling,emergency,shelter,survivor,resources",
+    "primary_category": "Medical",
+    "secondary_category": "Lifestyle",
+    "version": "1.0.0",
+    "copyright": "© 2025 Beacon of New Beginnings",
+    "age_rating": "17+",
+    "content_rating": "Everyone 17+",
+    "target_audience": "Adults (18+)"
+  },
+  "contact_info": {
+    "support_url": "https://beaconnewbeginnings.org/support",
+    "marketing_url": "https://beaconnewbeginnings.org",
+    "privacy_policy_url": "https://beaconnewbeginnings.org/privacy",
+    "terms_of_service_url": "https://beaconnewbeginnings.org/terms",
+    "support_email": "support@beaconnewbeginnings.org",
+    "phone": "+1 (555) 123-4567"
+  },
+  "localization": {
+    "primary_language": "en-US",
+    "supported_languages": [
+      "en-US",
+      "es-US"
+    ]
+  },
+  "screenshots": {
+    "iphone_6_5": [
+      "screenshot_1_welcome.png",
+      "screenshot_2_resources.png", 
+      "screenshot_3_crisis_support.png",
+      "screenshot_4_community.png",
+      "screenshot_5_safety_tools.png"
+    ],
+    "iphone_5_5": [
+      "screenshot_1_welcome_55.png",
+      "screenshot_2_resources_55.png", 
+      "screenshot_3_crisis_support_55.png",
+      "screenshot_4_community_55.png",
+      "screenshot_5_safety_tools_55.png"
+    ],
+    "ipad_pro_12_9": [
+      "screenshot_1_welcome_ipad.png",
+      "screenshot_2_resources_ipad.png", 
+      "screenshot_3_crisis_support_ipad.png"
+    ]
+  },
+  "app_review_info": {
+    "demo_account": {
+      "username": "reviewer@beaconnewbeginnings.org",
+      "password": "SafeReview2025!",
+      "notes": "This demo account provides access to all app features while maintaining the sensitive nature of the content. All crisis resources shown are real and functional."
+    },
+    "review_notes": "Beacon of New Beginnings is a legitimate crisis support app for abuse survivors and homeless individuals. All crisis resources are real and verified. The app prioritizes user safety and anonymity. Content is sensitive but appropriate for helping vulnerable populations access critical support services.",
+    "additional_info": "The app requires location permissions only for finding nearby resources when users explicitly request it. All communications are encrypted. The app is designed with trauma-informed principles and does not require personal information for basic access to resources."
+  },
+  "technical_info": {
+    "minimum_ios_version": "13.0",
+    "device_compatibility": ["iPhone", "iPad"],
+    "app_bundle_id": "org.beaconnewbeginnings.app",
+    "uses_third_party_content": false,
+    "contains_ads": false,
+    "in_app_purchases": false,
+    "data_collection": {
+      "collects_data": false,
+      "data_types": [],
+      "linked_to_user": false,
+      "used_for_tracking": false,
+      "user_can_delete_data": true,
+      "deletion_process": "Users can clear all data through app settings or by contacting support@beaconnewbeginnings.org"
+    }
+  },
+  "release_notes": {
+    "v1.0.0": "🏠 Welcome to Beacon of New Beginnings!\n\n• Launch of comprehensive crisis support platform\n• Emergency resources and crisis hotlines\n• Anonymous support and secure messaging\n• Resource directory for local support services\n• Community support groups and healing programs\n• Safety planning tools and educational resources\n• 24/7 access to verified crisis support\n• Multi-language support for accessibility\n\nDesigned by survivors, for survivors. Your safety and privacy are our top priorities."
+  }
+}
