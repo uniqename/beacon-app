@@ -1,0 +1,1 @@
+ /Users/enamegyir/Documents/Projects/beacon-app/.dart_tool/flutter_build/efe82d34d5fd016484226deef41b200f/native_assets.json: 
