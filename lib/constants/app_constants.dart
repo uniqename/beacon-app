@@ -35,8 +35,10 @@ class AppConstants {
   static const String privacyPolicyUrl = 'https://beaconnewbeginnings.org/privacy';
   static const String termsOfServiceUrl = 'https://beaconnewbeginnings.org/terms';
   
-  // Colors
-  static const int primaryColorValue = 0xFF00796B;
-  static const int accentColorValue = 0xFF4CAF50;
-  static const int emergencyColorValue = 0xFFE53935;
+  // Beacon Brand Colors (from Brand Guideline)
+  static const int primaryColorValue = 0xFFF0562D; // Vibrant Orange - courage, transformation
+  static const int accentColorValue = 0xFFC6DEAD; // Soft Sage Green - growth, healing
+  static const int emergencyColorValue = 0xFFE53935; // Keep red for emergencies
+  static const int darkCharcoalValue = 0xFF221E1F; // Deep Charcoal - strength, stability
+  static const int warmOffWhiteValue = 0xFFEAEADA; // Warm Off-White - clarity, calm
 }

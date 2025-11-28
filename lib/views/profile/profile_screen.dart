@@ -4,6 +4,7 @@ import '../../services/auth_service.dart';
 import 'feedback_screen.dart';
 import 'help_screen.dart';
 import 'notification_settings_screen.dart';
+import 'accessibility_settings_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -190,6 +191,21 @@ class ProfileScreen extends StatelessWidget {
                   context,
                   MaterialPageRoute(
                     builder: (context) => NotificationSettingsScreen(),
+                  ),
+                );
+              },
+            ),
+            const Divider(),
+            _buildSettingsItem(
+              context,
+              icon: Icons.accessibility_new,
+              title: 'Accessibility',
+              subtitle: 'Font size & display settings',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const AccessibilitySettingsScreen(),
                   ),
                 );
               },

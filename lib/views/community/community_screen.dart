@@ -34,6 +34,9 @@ class _CommunityScreenState extends State<CommunityScreen> with TickerProviderSt
         automaticallyImplyLeading: false,
         bottom: TabBar(
           controller: _tabController,
+          labelColor: Colors.white,
+          unselectedLabelColor: Colors.white70,
+          indicatorColor: Colors.white,
           tabs: const [
             Tab(
               icon: Icon(Icons.groups),

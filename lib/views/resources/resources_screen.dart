@@ -206,6 +206,9 @@ class _ResourcesScreenState extends State<ResourcesScreen> with TickerProviderSt
                     child: TabBar(
                       controller: _tabController,
                       isScrollable: true,
+                      labelColor: Colors.white,
+                      unselectedLabelColor: Colors.white70,
+                      indicatorColor: Colors.white,
                       tabs: _resourceTypes.map((type) {
                         return Tab(
                           child: Row(
