@@ -7,8 +7,8 @@ import 'services/auth_service.dart';
 import 'services/location_service.dart';
 import 'services/accessibility_service.dart';
 import 'services/chat_service.dart';
-import 'constants/app_branding.dart';
 import 'constants/app_constants.dart';
+import 'services/app_config_service.dart';
 import 'views/auth/enhanced_login_screen.dart';
 import 'views/services/service_divisions_screen.dart';
 import 'views/home/home_screen.dart';
@@ -67,11 +67,16 @@ import 'views/documents/document_checklist_screen.dart';
 
 // New features
 import 'services/notification_service.dart';
+import 'services/supabase_sync_service.dart';
 import 'views/safety/safety_checkin_screen.dart';
 import 'views/community/video_devotionals_screen.dart';
 import 'views/community/events_screen.dart';
 import 'views/volunteer/volunteer_shifts_screen.dart';
 import 'views/community/peer_mentorship_screen.dart';
+import 'views/admin/case_management_screen.dart';
+import 'views/admin/client_intake_screen.dart';
+import 'views/admin/case_plan_screen.dart';
+import 'views/home/my_support_plan_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -104,6 +109,13 @@ void main() async {
 
   // Initialize chat service
   ChatService().initialize();
+
+  // Initialize Supabase sync service (Supabase-first, SQLite fallback)
+  try {
+    await SupabaseSyncService().initialize();
+  } catch (e) {
+    debugPrint('SupabaseSyncService init skipped: $e');
+  }
 
   // Initialize notification service (local + FCM — safe, won't crash if Firebase unconfigured)
   try {
@@ -140,11 +152,14 @@ class NGOSupportApp extends StatelessWidget {
         ChangeNotifierProvider<AccessibilityService>.value(
           value: accessibilityService,
         ),
+        ChangeNotifierProvider<AppConfigService>.value(
+          value: AppConfigService.instance,
+        ),
       ],
-      child: Consumer<AccessibilityService>(
-        builder: (context, accessibility, _) {
+      child: Consumer2<AccessibilityService, AppConfigService>(
+        builder: (context, accessibility, appConfig, _) {
           return MaterialApp(
-            title: AppBranding.appName,
+            title: appConfig.config.orgName,
             debugShowCheckedModeBanner: false,
             builder: (context, child) => child ?? const SizedBox(),
             theme: accessibility.getAccessibleTheme(
@@ -267,6 +282,21 @@ class NGOSupportApp extends StatelessWidget {
               '/services': (context) => ServiceDivisionsScreen(),
               '/emergency': (context) => EmergencyScreen(),
               '/admin': (context) => AdminDashboardScreen(user: AppUser.anonymous().copyWith(userType: UserType.admin)),
+
+              // Case Management Routes
+              '/case_management': (context) {
+                final authService = Provider.of<AuthService>(context, listen: false);
+                return CaseManagementScreen(user: authService.currentUser ?? AppUser.anonymous().copyWith(userType: UserType.admin));
+              },
+              '/client_intake': (context) {
+                final authService = Provider.of<AuthService>(context, listen: false);
+                return ClientIntakeScreen(user: authService.currentUser ?? AppUser.anonymous().copyWith(userType: UserType.admin));
+              },
+              '/my_support_plan': (context) {
+                final authService = Provider.of<AuthService>(context, listen: false);
+                final userId = authService.currentUser?.id ?? '';
+                return MySupportPlanScreen(userId: userId);
+              },
 
               // Safety Planning Routes
               '/safety_plan': (context) {

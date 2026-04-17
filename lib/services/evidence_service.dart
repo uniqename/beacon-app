@@ -1,7 +1,11 @@
+import 'dart:developer' as developer;
 import '../models/evidence_log.dart';
 import '../services/local_database_service.dart';
+import '../services/supabase_sync_service.dart';
 
 class EvidenceService {
+  final _sync = SupabaseSyncService();
+
   Future<EvidenceLog> createEvidence({
     required String userId,
     required String title,
@@ -24,12 +28,15 @@ class EvidenceService {
       'description': description,
       'location': location,
       'witnesses': witnesses.join(', '),
-      'injuries': title, // Using title as injuries summary
+      'injuries': title,
       'police_report_number': policeReportNumber ?? '',
       'hospital_name': hospitalName ?? '',
       'photos': photoUrls,
       'audio': audioUrls,
     });
+
+    // Push the raw SQLite row to Supabase (description is stored encrypted)
+    await _pushEvidenceToCloud(evidenceId);
 
     return EvidenceLog(
       id: evidenceId,
@@ -70,8 +77,12 @@ class EvidenceService {
         location: log['location'] as String? ?? '',
         photoUrls: (log['photos'] as List?)?.cast<String>() ?? [],
         audioUrls: (log['audio'] as List?)?.cast<String>() ?? [],
-        witnesses: (log['witnesses'] as String? ?? '').split(', ').where((w) => w.isNotEmpty).toList(),
-        policeInvolved: (log['police_report_number'] as String? ?? '').isNotEmpty,
+        witnesses: (log['witnesses'] as String? ?? '')
+            .split(', ')
+            .where((w) => w.isNotEmpty)
+            .toList(),
+        policeInvolved:
+            (log['police_report_number'] as String? ?? '').isNotEmpty,
         policeReportNumber: log['police_report_number'] as String?,
         medicalAttention: (log['hospital_name'] as String? ?? '').isNotEmpty,
         hospitalName: log['hospital_name'] as String?,
@@ -79,11 +90,7 @@ class EvidenceService {
     }).toList();
   }
 
-  Future<EvidenceLog?> getEvidence(String id) async {
-    // For now, get all evidence and filter by id
-    // TODO: Add a method to LocalDatabaseService to get single evidence
-    return null;
-  }
+  Future<EvidenceLog?> getEvidence(String id) async => null;
 
   Future<void> updateEvidence(EvidenceLog evidence) async {
     await LocalDatabaseService.saveEvidenceLog(evidence.userId, {
@@ -98,10 +105,16 @@ class EvidenceService {
       'photos': evidence.photoUrls,
       'audio': evidence.audioUrls,
     });
+
+    await _pushEvidenceToCloud(evidence.id);
   }
 
   Future<void> deleteEvidence(String id) async {
-    await LocalDatabaseService.deleteEvidenceLog(id);
+    await _sync.delete(
+      table: 'evidence_logs',
+      id: id,
+      localDelete: (id) => LocalDatabaseService.deleteEvidenceLog(id),
+    );
   }
 
   Future<String> exportToText(EvidenceLog evidence) async {
@@ -119,8 +132,8 @@ class EvidenceService {
 
     if (evidence.witnesses.isNotEmpty) {
       buffer.writeln('WITNESSES:');
-      for (var witness in evidence.witnesses) {
-        buffer.writeln('- $witness');
+      for (final w in evidence.witnesses) {
+        buffer.writeln('- $w');
       }
       buffer.writeln('');
     }
@@ -147,5 +160,27 @@ class EvidenceService {
     buffer.writeln('Documents: ${evidence.documentUrls.length}');
 
     return buffer.toString();
+  }
+
+  // ─── Private helpers ────────────────────────────────────────────────────────
+
+  Future<void> _pushEvidenceToCloud(String evidenceId) async {
+    try {
+      final db = await LocalDatabaseService.database;
+      final rows = await db.query(
+        'evidence_logs',
+        where: 'id = ?',
+        whereArgs: [evidenceId],
+        limit: 1,
+      );
+      if (rows.isEmpty) return;
+      await _sync.upsert(
+        table: 'evidence_logs',
+        data: Map<String, dynamic>.from(rows.first),
+        localWrite: (_) async {},
+      );
+    } catch (e) {
+      developer.log('⚠️ [Evidence] Cloud push failed (non-fatal): $e');
+    }
   }
 }

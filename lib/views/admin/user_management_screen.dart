@@ -2,9 +2,11 @@ import 'dart:convert';
 import 'dart:developer' as developer;
 import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
+import 'package:sqflite/sqflite.dart';
 import 'package:uuid/uuid.dart';
 import '../../models/user.dart';
 import '../../services/local_database_service.dart';
+import '../../services/supabase_sync_service.dart';
 
 class UserManagementScreen extends StatefulWidget {
   const UserManagementScreen({super.key});
@@ -18,6 +20,7 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
   final Map<String, bool> _userAvailability = {}; // Track availability separately since it's final
   bool _isLoading = true;
   String _searchQuery = '';
+  final _sync = SupabaseSyncService();
 
   @override
   void initState() {
@@ -408,10 +411,9 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
               onPressed: () async {
                 if (!formKey.currentState!.validate()) return;
                 try {
-                  final db = await LocalDatabaseService.database;
                   final id = const Uuid().v4();
                   final now = DateTime.now().toIso8601String();
-                  await db.insert('users', {
+                  final userData = {
                     'id': id,
                     'display_name': nameController.text.trim(),
                     'email': emailController.text.trim().toLowerCase(),
@@ -422,7 +424,15 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
                     'is_available': 1,
                     'created_at': now,
                     'last_updated': now,
-                  });
+                  };
+                  await _sync.upsert(
+                    table: 'users',
+                    data: userData,
+                    localWrite: (data) async {
+                      final db = await LocalDatabaseService.database;
+                      await db.insert('users', data, conflictAlgorithm: ConflictAlgorithm.replace);
+                    },
+                  );
                   if (mounted) {
                     Navigator.pop(ctx);
                     _loadUsers();
@@ -514,6 +524,15 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
                     updates['password_hash'] = _hashPassword(passwordController.text);
                   }
                   await db.update('users', updates, where: 'id = ?', whereArgs: [user.id]);
+                  // Read back full row and sync to Supabase
+                  final rows = await db.query('users', where: 'id = ?', whereArgs: [user.id], limit: 1);
+                  if (rows.isNotEmpty) {
+                    await _sync.upsert(
+                      table: 'users',
+                      data: Map<String, dynamic>.from(rows.first),
+                      localWrite: (_) async {},
+                    );
+                  }
                   if (mounted) {
                     Navigator.pop(ctx);
                     _loadUsers();
@@ -541,6 +560,10 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
       final newStatus = user.isAvailable ? 0 : 1;
       await db.update('users', {'is_available': newStatus, 'last_updated': DateTime.now().toIso8601String()},
           where: 'id = ?', whereArgs: [user.id]);
+      final rows = await db.query('users', where: 'id = ?', whereArgs: [user.id], limit: 1);
+      if (rows.isNotEmpty) {
+        await _sync.upsert(table: 'users', data: Map<String, dynamic>.from(rows.first), localWrite: (_) async {});
+      }
       _loadUsers();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -567,7 +590,13 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
             onPressed: () async {
               try {
                 final db = await LocalDatabaseService.database;
-                await db.delete('users', where: 'id = ?', whereArgs: [user.id]);
+                await _sync.delete(
+                  table: 'users',
+                  id: user.id,
+                  localDelete: (id) async {
+                    await db.delete('users', where: 'id = ?', whereArgs: [id]);
+                  },
+                );
                 if (mounted) {
                   Navigator.pop(ctx);
                   _loadUsers();

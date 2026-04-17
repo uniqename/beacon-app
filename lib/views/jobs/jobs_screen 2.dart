@@ -4,6 +4,8 @@ import '../../services/smart_ai_service.dart';
 import 'job_detail_screen.dart';
 
 class JobsScreen extends StatefulWidget {
+  const JobsScreen({super.key});
+
   @override
   _JobsScreenState createState() => _JobsScreenState();
 }

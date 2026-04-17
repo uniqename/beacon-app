@@ -52,7 +52,7 @@ class _AudioRoomScreenState extends State<AudioRoomScreen> with TickerProviderSt
   bool _isLoading = true;
   bool _hasRaisedHand = false;
   bool _audioUnavailable = false;
-  bool _screenShareGranted = false;
+  final bool _screenShareGranted = false;
   String? _errorMessage;
 
   // Screen sharing

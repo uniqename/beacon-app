@@ -6,6 +6,10 @@ import '../../services/auth_service.dart';
 import '../../services/local_database_service.dart';
 import '../admin/admin_inquiry_management_screen.dart';
 import '../community/support_groups_tab.dart';
+import '../admin/case_management_screen.dart';
+import '../admin/case_plan_screen.dart';
+import '../../models/case_plan.dart';
+import '../../services/case_management_service.dart';
 
 class HelperDashboardScreen extends StatefulWidget {
   const HelperDashboardScreen({super.key});
@@ -17,12 +21,22 @@ class HelperDashboardScreen extends StatefulWidget {
 class _HelperDashboardScreenState extends State<HelperDashboardScreen> {
   Map<String, int> _stats = {};
   List<Map<String, dynamic>> _recentTickets = [];
+  List<CasePlan> _myCases = [];
   bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
     _loadDashboard();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final authService = Provider.of<AuthService>(context, listen: false);
+      final userId = authService.currentUser?.id ?? '';
+      if (userId.isNotEmpty) {
+        final cases =
+            await CaseManagementService.getCasePlansForManager(userId);
+        if (mounted) setState(() => _myCases = cases);
+      }
+    });
   }
 
   Future<void> _loadDashboard() async {
@@ -219,6 +233,12 @@ class _HelperDashboardScreenState extends State<HelperDashboardScreen> {
                   // Quick Actions
                   _buildQuickActions(),
                   const SizedBox(height: 24),
+
+                  // My Cases
+                  if (_myCases.isNotEmpty) ...[
+                    _buildMyCases(),
+                    const SizedBox(height: 24),
+                  ],
 
                   // Recent Tickets
                   _buildRecentTickets(),
@@ -489,8 +509,129 @@ class _HelperDashboardScreenState extends State<HelperDashboardScreen> {
                 Navigator.pushNamed(context, '/content_library');
               },
             ),
+            _buildActionCard(
+              'Case Management',
+              'View and manage client support plans',
+              Icons.folder_special,
+              const Color(0xFFE65100),
+              () {
+                final authService =
+                    Provider.of<AuthService>(context, listen: false);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => CaseManagementScreen(
+                        user: authService.currentUser!),
+                  ),
+                ).then((_) => _loadDashboard());
+              },
+            ),
           ],
         ),
+      ],
+    );
+  }
+
+  Widget _buildMyCases() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              'My Cases',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFFF0562D),
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                final authService =
+                    Provider.of<AuthService>(context, listen: false);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => CaseManagementScreen(
+                        user: authService.currentUser!),
+                  ),
+                ).then((_) => _loadDashboard());
+              },
+              child: const Text('View All'),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        ..._myCases.take(3).map((plan) {
+          Color statusColor;
+          switch (plan.planStatus) {
+            case 'active':
+              statusColor = Colors.green;
+              break;
+            case 'under_review':
+              statusColor = Colors.amber[700]!;
+              break;
+            default:
+              statusColor = Colors.grey;
+          }
+          return Card(
+            margin: const EdgeInsets.only(bottom: 10),
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12)),
+            child: ListTile(
+              leading: CircleAvatar(
+                backgroundColor:
+                    const Color(0xFFE65100).withValues(alpha: 0.1),
+                child: Text(
+                  plan.clientName.isNotEmpty
+                      ? plan.clientName[0].toUpperCase()
+                      : '?',
+                  style: const TextStyle(
+                      color: Color(0xFFE65100),
+                      fontWeight: FontWeight.bold),
+                ),
+              ),
+              title: Text(plan.clientName,
+                  style: const TextStyle(fontWeight: FontWeight.bold)),
+              subtitle: plan.nextReviewDate != null
+                  ? Text(
+                      'Review: ${plan.nextReviewDate!.day}/${plan.nextReviewDate!.month}/${plan.nextReviewDate!.year}',
+                      style: const TextStyle(fontSize: 12))
+                  : null,
+              trailing: Container(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: statusColor.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  plan.planStatus == 'active'
+                      ? 'Active'
+                      : plan.planStatus == 'under_review'
+                          ? 'Review'
+                          : plan.planStatus,
+                  style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                      color: statusColor),
+                ),
+              ),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => CasePlanScreen(
+                      casePlanId: plan.id,
+                    ),
+                  ),
+                );
+              },
+            ),
+          );
+        }),
       ],
     );
   }

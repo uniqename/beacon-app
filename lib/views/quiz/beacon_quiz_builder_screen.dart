@@ -244,7 +244,7 @@ class _BeaconQuizBuilderScreenState extends State<BeaconQuizBuilderScreen> {
               maxLines: 2),
           const SizedBox(height: 10),
           DropdownButtonFormField<String>(
-            value: _category,
+            initialValue: _category,
             dropdownColor: const Color(0xFF1A2D42),
             decoration: _inputDecor('Category', Icons.category),
             items: BeaconQuizService.quizCategories

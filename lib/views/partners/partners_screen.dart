@@ -25,7 +25,7 @@ class _PartnersScreenState extends State<PartnersScreen> {
   static const _typeFilters = [
     ('all', 'All Partners', Icons.handshake),
     ('church', 'Churches', Icons.church),
-    ('police', 'Police / DOVVSU', Icons.local_police),
+    ('police', 'Police / DV Authority', Icons.local_police),
     ('hospital', 'Hospitals', Icons.local_hospital),
     ('counselor', 'Counselors', Icons.psychology),
     ('shelter', 'Shelters', Icons.home),
@@ -640,7 +640,7 @@ class _PartnerFormSheetState extends State<_PartnerFormSheet> {
             _field(_nameCtrl, 'Organisation Name *', Icons.business),
             const SizedBox(height: 10),
             DropdownButtonFormField<String>(
-              value: _type,
+              initialValue: _type,
               decoration: _decor('Type', Icons.category),
               items: PartnerService.partnerTypes
                   .map((t) => DropdownMenuItem(
@@ -676,7 +676,7 @@ class _PartnerFormSheetState extends State<_PartnerFormSheet> {
               subtitle: const Text('Officially partnered with Beacon'),
               value: _isBeaconPartner,
               onChanged: (v) => setState(() => _isBeaconPartner = v),
-              activeColor: BeaconColors.vibrantOrange,
+              activeThumbColor: BeaconColors.vibrantOrange,
               contentPadding: EdgeInsets.zero,
             ),
             SwitchListTile(
@@ -684,7 +684,7 @@ class _PartnerFormSheetState extends State<_PartnerFormSheet> {
               subtitle: const Text('Verified and active organisation'),
               value: _isVerified,
               onChanged: (v) => setState(() => _isVerified = v),
-              activeColor: const Color(0xFF1565C0),
+              activeThumbColor: const Color(0xFF1565C0),
               contentPadding: EdgeInsets.zero,
             ),
             const SizedBox(height: 16),

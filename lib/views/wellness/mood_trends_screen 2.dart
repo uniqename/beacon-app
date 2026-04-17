@@ -5,7 +5,7 @@ import '../../services/mood_tracking_service.dart';
 class MoodTrendsScreen extends StatefulWidget {
   final String userId;
 
-  const MoodTrendsScreen({Key? key, required this.userId}) : super(key: key);
+  const MoodTrendsScreen({super.key, required this.userId});
 
   @override
   State<MoodTrendsScreen> createState() => _MoodTrendsScreenState();
@@ -14,7 +14,7 @@ class MoodTrendsScreen extends StatefulWidget {
 class _MoodTrendsScreenState extends State<MoodTrendsScreen> {
   final MoodTrackingService _service = MoodTrackingService();
   List<MoodEntry> _entries = [];
-  int _selectedDays = 14;
+  final int _selectedDays = 14;
   bool _isLoading = true;
 
   @override
@@ -74,7 +74,7 @@ class _MoodTrendsScreenState extends State<MoodTrendsScreen> {
                       children: [
                         Text('Mood Chart', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                         SizedBox(height: 16),
-                        Container(
+                        SizedBox(
                           height: 200,
                           child: _entries.isEmpty
                               ? Center(child: Text('No data to display', style: TextStyle(color: Colors.grey)))

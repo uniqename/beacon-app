@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../constants/brand_colors.dart';
 
 class CommunityChatScreen extends StatelessWidget {
   const CommunityChatScreen({super.key});

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
+import '../../services/app_config_service.dart';
 import '../../services/auth_service.dart';
 import '../../services/emergency_service.dart';
 import 'emergency_locations_screen.dart';
@@ -99,11 +100,15 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final cfg = context.watch<AppConfigService>().config;
+    final emergencyNumber = cfg.emergencyNumbers.entries.first.value;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
-      backgroundColor: Colors.red[50],
+      backgroundColor: isDark ? Colors.red[950] : Colors.red[50],
       appBar: AppBar(
         title: const Text('Emergency Support'),
-        backgroundColor: Colors.red[600],
+        backgroundColor: Colors.red[700],
+        foregroundColor: Colors.white,
         actions: [
           IconButton(
             icon: const Icon(Icons.location_on),
@@ -121,7 +126,7 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: Colors.red[100],
+                  color: isDark ? Colors.red[900] : Colors.red[100],
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(color: Colors.red[300]!),
                 ),
@@ -129,7 +134,7 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
                   children: [
                     Icon(
                       Icons.warning_amber_rounded,
-                      color: Colors.red[800],
+                      color: isDark ? Colors.red[300] : Colors.red[800],
                       size: 48,
                     ),
                     const SizedBox(height: 12),
@@ -137,14 +142,14 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
                       'You Are Not Alone',
                       style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                         fontWeight: FontWeight.bold,
-                        color: Colors.red[800],
+                        color: isDark ? Colors.red[200] : Colors.red[800],
                       ),
                     ),
                     const SizedBox(height: 8),
                     Text(
                       'If you are in immediate danger, use the options below to get help quickly.',
                       textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.red[700]),
+                      style: TextStyle(color: isDark ? Colors.red[300] : Colors.red[700]),
                     ),
                   ],
                 ),
@@ -165,10 +170,10 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
               _EmergencyActionCard(
                 icon: Icons.phone,
                 title: 'Call Emergency Services',
-                subtitle: 'Police, Fire, Medical Emergency',
-                phoneNumber: '999', // Ghana emergency number
+                subtitle: cfg.emergencyNumbers.entries.first.key,
+                phoneNumber: emergencyNumber,
                 color: Colors.red,
-                onTap: () => _makeEmergencyCall('999'),
+                onTap: () => _makeEmergencyCall(emergencyNumber),
               ),
 
               const SizedBox(height: 12),
@@ -176,11 +181,11 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
               // Domestic violence hotline
               _EmergencyActionCard(
                 icon: Icons.support_agent,
-                title: 'DOVVSU Hotline',
-                subtitle: 'Domestic Violence & Victim Support Unit',
-                phoneNumber: '191',
+                title: cfg.dvHotlineLabel,
+                subtitle: cfg.dvAuthorityName,
+                phoneNumber: cfg.dvHotline,
                 color: Colors.orange,
-                onTap: () => _makeEmergencyCall('191'),
+                onTap: () => _makeEmergencyCall(cfg.dvHotline),
               ),
 
               const SizedBox(height: 12),
@@ -290,22 +295,22 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.blue[50],
+                  color: isDark ? Colors.blue[950] : Colors.blue[50],
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.blue[200]!),
+                  border: Border.all(color: isDark ? Colors.blue[800]! : Colors.blue[200]!),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
                       children: [
-                        Icon(Icons.lightbulb_outline, color: Colors.blue[600]),
+                        Icon(Icons.lightbulb_outline, color: isDark ? Colors.blue[300] : Colors.blue[600]),
                         const SizedBox(width: 8),
                         Text(
                           'Safety Tips',
                           style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
-                            color: Colors.blue[800],
+                            color: isDark ? Colors.blue[200] : Colors.blue[800],
                           ),
                         ),
                       ],

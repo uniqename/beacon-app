@@ -263,7 +263,7 @@ class _WellnessReportsScreenState extends State<WellnessReportsScreen> {
                     size: 12,
                     color: trend > 0 ? Colors.green : Colors.red),
                 Text(
-                  '${trend.abs().toStringAsFixed(1)}',
+                  trend.abs().toStringAsFixed(1),
                   style: TextStyle(fontSize: 10, color: trend > 0 ? Colors.green : Colors.red),
                 ),
               ],

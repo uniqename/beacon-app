@@ -6,6 +6,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import '../../models/beacon_division.dart';
 import '../../models/donation.dart';
+import '../../services/app_config_service.dart';
 import '../../services/donation_service.dart';
 import '../../services/auth_service.dart';
 
@@ -31,8 +32,8 @@ class _EnhancedDonationScreenState extends State<EnhancedDonationScreen> {
   final _phoneController = TextEditingController();
   
   String _selectedFrequency = 'one-time';
-  String _selectedCurrency = 'GHS'; // Default to Ghana Cedis
-  String _selectedPaymentMethod = 'paystack_card'; // Default to Paystack card for GHS
+  String _selectedCurrency = 'GHS';
+  String _selectedPaymentMethod = 'paystack_card';
   String _selectedMomoNetwork = 'MTN';
   bool _isAnonymous = false;
   bool _agreeToTerms = false;
@@ -70,6 +71,9 @@ class _EnhancedDonationScreenState extends State<EnhancedDonationScreen> {
   @override
   void initState() {
     super.initState();
+    final cfg = AppConfigService.instance.config;
+    _selectedCurrency = cfg.currencyCode;
+    _selectedPaymentMethod = cfg.primaryGateway == 'stripe' ? 'stripe_card' : 'paystack_card';
     if (widget.suggestedAmount != null) {
       _selectedAmount = widget.suggestedAmount;
       _amountController.text = widget.suggestedAmount.toString();

@@ -4,7 +4,7 @@ import '../../services/mood_tracking_service.dart';
 class DailyCheckinScreen extends StatefulWidget {
   final String userId;
 
-  const DailyCheckinScreen({Key? key, required this.userId}) : super(key: key);
+  const DailyCheckinScreen({super.key, required this.userId});
 
   @override
   State<DailyCheckinScreen> createState() => _DailyCheckinScreenState();

@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:provider/provider.dart';
+import '../../config/org_config.dart';
+import '../../services/app_config_service.dart';
 
 // ── Colours ──────────────────────────────────────────────────────────────────
 const _kBg       = Color(0xFF0A0E1A);
@@ -35,7 +38,9 @@ class _Agent {
   });
 }
 
-const _agents = [
+/// Builds the agent list for the active [OrgConfig].
+/// Called fresh each time so switching countries updates prompts immediately.
+List<_Agent> _buildAgents(OrgConfig cfg) => [
   _Agent(
     id: 'notebook',
     name: 'NoteBeacon',
@@ -43,7 +48,7 @@ const _agents = [
     description: 'Paste any text — court documents, letters, policies — and get plain-language summaries, key points, and questions answered.',
     icon: Icons.auto_stories_rounded,
     accent: _kAccent,
-    systemPrompt: '''You are NoteBeacon, an expert AI document analyst for Beacon of New Beginnings.
+    systemPrompt: '''You are NoteBeacon, an expert AI document analyst for ${cfg.orgName}.
 Your job: help survivors understand complex documents in plain, compassionate language.
 
 When given a document or text:
@@ -62,7 +67,7 @@ Always be trauma-informed and supportive.''',
     description: 'Build a step-by-step personalised safety plan. Get advice on escape planning, code words, digital safety, children\'s safety, and emergency contacts.',
     icon: Icons.shield_rounded,
     accent: _kAccent,
-    systemPrompt: '''You are SafetyGuide, an expert AI safety planner for Beacon of New Beginnings in Ghana.
+    systemPrompt: '''You are SafetyGuide, an expert AI safety planner for ${cfg.orgName}.
 You help survivors of domestic violence create personalised, practical safety plans.
 
 You can help with:
@@ -71,33 +76,33 @@ You can help with:
 - Digital safety (phone privacy, app hiding, social media)
 - Children's safety (school contacts, what to tell children)
 - Financial safety (hidden savings, important documents)
-- Emergency contacts in Ghana (999, 0800800800, local shelters)
+- Emergency contacts: ${cfg.emergencyNumbers.entries.map((e) => '${e.key}: ${e.value}').join(', ')}
 
 Be conversational. Ask ONE question at a time to gather details, then provide tailored advice.
 Never judge, always validate. Prioritise immediate safety over long-term plans.
-Cultural context: users are in Ghana. Reference Ghanaian services, police DOVVSU units, shelters.''',
+${cfg.culturalContext}''',
   ),
   _Agent(
     id: 'legal',
     name: 'LegalNav',
     tagline: 'Legal Information AI',
-    description: 'Understand your legal rights in Ghana — domestic violence laws, protection orders, DVVSU process, custody, divorce, and what to expect in court.',
+    description: 'Understand your legal rights — domestic violence laws, protection orders, custody, divorce, and what to expect in court.',
     icon: Icons.gavel_rounded,
     accent: _kPurple,
-    systemPrompt: '''You are LegalNav, an AI legal information assistant for Beacon of New Beginnings in Ghana.
-You provide information about Ghanaian law relevant to domestic violence survivors.
+    systemPrompt: '''You are LegalNav, an AI legal information assistant for ${cfg.orgName}.
+You provide information about law relevant to domestic violence survivors in ${cfg.countryName}.
 
 Key areas you can explain:
-- Ghana Domestic Violence Act 2007 (Act 732) — key protections
-- How to get a Protection Order (Domestic Violence Court process)
-- DOVVSU (Domestic Violence and Victim Support Unit) — what they do, how to report
-- Divorce and separation process in Ghana
+- ${cfg.domesticViolenceLaw} — key protections
+- How to get a Protection Order (court process in ${cfg.countryName})
+- ${cfg.dvAuthorityName} — what they do, how to report
+- Divorce and separation process
 - Custody rights for children
 - Criminal vs civil processes
 - What evidence is needed and how to preserve it
 - Rights during police interaction
 
-IMPORTANT: Always clarify you provide information, not legal advice. Encourage users to also speak with a qualified Ghanaian lawyer or legal aid organisation.
+IMPORTANT: Always clarify you provide information, not legal advice. Encourage users to also speak with a qualified lawyer or ${cfg.legalAidName}.
 Be patient, clear, and non-judgmental. Use simple language.''',
   ),
   _Agent(
@@ -107,21 +112,22 @@ Be patient, clear, and non-judgmental. Use simple language.''',
     description: 'Your personal empowerment coach. Get help planning your next steps — housing, education, employment, rebuilding finances, and setting goals.',
     icon: Icons.explore_rounded,
     accent: _kGold,
-    systemPrompt: '''You are PathFinder, an empowerment and life planning AI for Beacon of New Beginnings.
-You help survivors plan and take practical steps toward rebuilding their lives.
+    systemPrompt: '''You are PathFinder, an empowerment and life planning AI for ${cfg.orgName}.
+You help survivors plan and take practical steps toward rebuilding their lives in ${cfg.countryName}.
 
 Areas you assist with:
 - Housing: finding safe housing, understanding rental rights, transitional housing
-- Education: returning to school, scholarships, adult literacy programmes in Ghana
+- Education: returning to school, scholarships, adult literacy programmes
 - Employment: job searching strategies, CV building, skills assessment, interview prep
-- Financial recovery: budgeting, micro-loans, saving strategies in Ghana
+- Financial recovery: budgeting, saving strategies, financial assistance programmes
 - Goal setting: breaking big goals into small achievable steps
 - Self-care and rebuilding confidence
-- Connecting to Beacon services and partner organisations
+- Connecting to ${cfg.orgName} services and partner organisations
 
 Be encouraging, practical, and action-oriented. Ask questions to understand the person's situation.
 Celebrate small wins. Offer specific, realistic steps (not generic advice).
-Always acknowledge that leaving/healing is a process, not a single event.''',
+Always acknowledge that leaving/healing is a process, not a single event.
+${cfg.culturalContext}''',
   ),
 ];
 
@@ -159,18 +165,23 @@ class AiAgentsHubScreen extends StatelessWidget {
           child: Container(height: 1, color: _kBorder),
         ),
       ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildHeroHeader(),
-          Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
-              itemCount: _agents.length,
-              itemBuilder: (_, i) => _AgentCard(agent: _agents[i]),
-            ),
-          ),
-        ],
+      body: Consumer<AppConfigService>(
+        builder: (context, appConfig, _) {
+          final agents = _buildAgents(appConfig.config);
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildHeroHeader(),
+              Expanded(
+                child: ListView.builder(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
+                  itemCount: agents.length,
+                  itemBuilder: (_, i) => _AgentCard(agent: agents[i]),
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
@@ -405,7 +416,8 @@ class __AgentChatScreenState extends State<_AgentChatScreen> {
       case 'safety':
         return 'Hello, and welcome. I\'m **SafetyGuide**.\n\nI\'m here to help you build a personalised safety plan, step by step. Everything you share here stays private.\n\nTo start: **where are you right now — do you feel safe at this moment?**';
       case 'legal':
-        return 'Hello. I\'m **LegalNav**, your legal information guide.\n\nI can explain Ghanaian domestic violence laws, protection orders, the DOVVSU process, custody rights, and more — in plain language.\n\nWhat would you like to understand today?';
+        final cfg = AppConfigService.instance.config;
+        return 'Hello. I\'m **LegalNav**, your legal information guide.\n\nI can explain domestic violence laws in ${cfg.countryName}, protection orders, the ${cfg.dvAuthorityName} process, custody rights, and more — in plain language.\n\nWhat would you like to understand today?';
       case 'manus':
         return 'Hi! I\'m **PathFinder**, your empowerment coach.\n\nI\'m here to help you plan your next steps and map your path forward. Whether it\'s finding housing, a job, education, or just figuring out where to start — I\'ve got you.\n\n**What area of your life would you like to work on first?**';
       default:
@@ -466,6 +478,7 @@ class __AgentChatScreenState extends State<_AgentChatScreen> {
   }
 
   String _notebookReply(String q, String original) {
+    final cfg = AppConfigService.instance.config;
     if (q.length > 100) {
       // User pasted a long document — summarise it simply
       final wordCount = original.split(' ').length;
@@ -490,7 +503,7 @@ class __AgentChatScreenState extends State<_AgentChatScreen> {
           '- **Restraining/Protection Order** — someone is legally ordered to stay away\n'
           '- **Affidavit** — a sworn written statement of facts\n'
           '- **Petition** — a formal request to the court\n\n'
-          '**Important:** Bring the original document to court. Arrive 30 minutes early. If you do not understand the document, take it to a lawyer or DOVVSU before the hearing date.\n\n'
+          '**Important:** Bring the original document to court. Arrive 30 minutes early. If you do not understand the document, take it to a lawyer or ${cfg.dvAuthorityName} before the hearing date.\n\n'
           'What specific part of the document confuses you?';
     }
     if (q.contains('lease') || q.contains('rent') || q.contains('tenancy')) {
@@ -517,7 +530,7 @@ class __AgentChatScreenState extends State<_AgentChatScreen> {
           '- You can request a copy of any statement you made\n'
           '- You can have a lawyer present when making a statement\n'
           '- You do not have to sign anything you do not agree with\n\n'
-          'Contact DOVVSU (0800800800) for police-related DV matters. What part of the report do you need explained?';
+          'Contact ${cfg.dvAuthorityName} (${cfg.dvHotline}) for police-related DV matters. What part of the report do you need explained?';
     }
     return 'I\'m here to help you understand any document in plain language.\n\n'
         '**To get started, you can:**\n'
@@ -529,6 +542,7 @@ class __AgentChatScreenState extends State<_AgentChatScreen> {
   }
 
   String _safetyReply(String q) {
+    final cfg = AppConfigService.instance.config;
     if (q.contains('yes') || q.contains('safe') || q.contains('okay') || q.contains('ok')) {
       return '**I\'m glad you\'re safe right now.**\n\n'
           'Let\'s use this time to build your safety plan. A good plan covers:\n\n'
@@ -548,13 +562,13 @@ class __AgentChatScreenState extends State<_AgentChatScreen> {
           '- If you have children, where will you take them?\n\n'
           '🚗 **Transport:**\n'
           '- Do you have access to a car or motorbike?\n'
-          '- Do you have saved trotro/taxi money?\n'
+          '- Do you have saved transport money?\n'
           '- Which trusted person can come pick you up?\n\n'
           '📍 **Destination:**\n'
           '- A trusted family member\'s home\n'
           '- A friend in a different area\n'
-          '- Beacon of New Beginnings: 0800800800\n'
-          '- Ghana Police Emergency: 999\n\n'
+          '- ${cfg.orgName}: ${cfg.dvHotline}\n'
+          '- Emergency: ${cfg.emergencyNumbers.entries.first.value}\n\n'
           '**Practice the route in your mind.** What is your biggest challenge with leaving?';
     }
     if (q.contains('code') || q.contains('word') || q.contains('signal')) {
@@ -575,7 +589,7 @@ class __AgentChatScreenState extends State<_AgentChatScreen> {
       return '**Emergency Go-Bag Checklist**\n\n'
           'Pack these in a bag you can grab in under 2 minutes. Store it somewhere accessible — at a trusted person\'s home is safer.\n\n'
           '📄 **Documents (copies are fine):**\n'
-          '- Ghana Card / passport\n'
+          '- National ID / passport\n'
           '- Children\'s birth certificates\n'
           '- Marriage certificate (if applicable)\n'
           '- Bank account details\n'
@@ -612,17 +626,17 @@ class __AgentChatScreenState extends State<_AgentChatScreen> {
           '**What to tell children:**\n'
           '- Practice a code word with them too — "call Auntie if Mummy says [word]"\n'
           '- Tell them it is NEVER their fault\n'
-          '- Teach them to call 999 in an emergency\n'
+          '- Teach them the emergency number (${cfg.emergencyNumbers.entries.first.value}) for calling for help\n'
           '- Identify a neighbour they can run to\n\n'
           '**Legal protection:**\n'
           '- You can request an Emergency Protection Order from a Family Court\n'
-          '- DOVVSU can assist with child custody safety measures\n\n'
+          '- ${cfg.dvAuthorityName} can assist with child custody safety measures\n\n'
           'How many children do you have, and what are their ages? I can give more specific advice.';
     }
     return '**SafetyGuide is here for you.**\n\n'
         'I can help you build a personalised safety plan covering:\n\n'
         '- 🚪 Escape routes and planning\n'
-        '- 📞 Emergency contacts (Ghana: 999, DV Hotline: 0800800800)\n'
+        '- 📞 Emergency contacts (Emergency: ${cfg.emergencyNumbers.entries.first.value}, ${cfg.dvHotlineLabel}: ${cfg.dvHotline})\n'
         '- 💬 Setting up a code word with someone you trust\n'
         '- 🎒 What to pack in an emergency go-bag\n'
         '- 📱 Digital safety and phone privacy\n'
@@ -632,12 +646,13 @@ class __AgentChatScreenState extends State<_AgentChatScreen> {
   }
 
   String _legalReply(String q) {
+    final cfg = AppConfigService.instance.config;
     if (q.contains('protection order') || q.contains('restraining')) {
-      return '**Protection Orders in Ghana**\n\n'
+      return '**Protection Orders in ${cfg.countryName}**\n\n'
           'A Protection Order (also called a Domestic Violence Order) legally requires the abuser to stay away from you.\n\n'
           '**How to get one:**\n'
-          '1. Go to the **Domestic Violence Court** (in Accra: located at the Law Courts Complex)\n'
-          '2. OR go to **DOVVSU** first — they can assist with the application\n'
+          '1. Go to your **Family or Domestic Violence Court**\n'
+          '2. OR contact **${cfg.dvAuthorityName}** first — they can assist with the application\n'
           '3. Fill out an application form (free)\n'
           '4. A judge can grant an **Emergency Protection Order the same day** if you are in immediate danger\n'
           '5. A full Protection Order hearing is usually within 14 days\n\n'
@@ -649,26 +664,26 @@ class __AgentChatScreenState extends State<_AgentChatScreen> {
           'Do you want to know more about what evidence to bring, or what happens at the hearing?';
     }
     if (q.contains('dovvsu') || q.contains('police') || q.contains('report')) {
-      return '**DOVVSU — Domestic Violence & Victim Support Unit**\n\n'
-          'DOVVSU is a specialised Ghana Police unit for domestic violence cases.\n\n'
+      return '**${cfg.dvAuthorityName} — Domestic Violence Authority**\n\n'
+          '${cfg.dvAuthorityName} is a specialised authority for domestic violence cases.\n\n'
           '**What they do:**\n'
           '- Receive and investigate DV complaints\n'
           '- Arrest perpetrators when evidence supports it\n'
           '- Refer victims to shelters, counselling, and legal aid\n'
           '- Assist with Protection Orders\n\n'
           '**How to report:**\n'
-          '- Walk into any DOVVSU office (every regional police headquarters)\n'
-          '- Call the DV hotline: **0800800800** (free, 24/7)\n'
-          '- Call Ghana Emergency: **999**\n\n'
+          '- Walk into your local police station or ${cfg.dvAuthorityName} office\n'
+          '- Call the ${cfg.dvHotlineLabel}: **${cfg.dvHotline}** (free, 24/7)\n'
+          '- Call Emergency: **${cfg.emergencyNumbers.entries.first.value}**\n\n'
           '**When you go:**\n'
           '- Bring any evidence (photos, medical reports, messages)\n'
           '- You can bring a support person with you\n'
           '- If you have injuries, request to see a doctor first\n'
           '- Your report is confidential\n\n'
-          '**Important:** You have the right to report even without visible injuries. Emotional and psychological abuse is also covered under the DV Act 2007.';
+          '**Important:** You have the right to report even without visible injuries. Emotional and psychological abuse is also covered under the ${cfg.domesticViolenceLaw}.';
     }
     if (q.contains('act') || q.contains('law') || q.contains('dv act') || q.contains('domestic violence act')) {
-      return '**Ghana Domestic Violence Act 2007 (Act 732) — Key Points**\n\n'
+      return '**${cfg.domesticViolenceLaw} — Key Points**\n\n'
           '**What is covered:**\n'
           '- Physical abuse (hitting, pushing, burning)\n'
           '- Sexual abuse within marriage or relationship\n'
@@ -678,33 +693,28 @@ class __AgentChatScreenState extends State<_AgentChatScreen> {
           '**Key protections:**\n'
           '- The abuser can be arrested WITHOUT a warrant\n'
           '- The court can grant emergency protection orders same-day\n'
-          '- Marital rape is a crime under this Act\n'
+          '- Marital rape is a crime under this law\n'
           '- You can report without having visible injuries\n\n'
           '**Penalties:**\n'
-          '- Up to 2 years imprisonment for first offence\n'
+          '- Criminal penalties including fines and/or imprisonment\n'
           '- Higher sentences for repeat offenders or serious harm\n\n'
-          '**What the Act does NOT require:**\n'
+          '**What the law does NOT require:**\n'
           '- You do not need to be married to the abuser\n'
           '- Covers partners, ex-partners, family members\n\n'
-          'Would you like information about a specific aspect of the Act?';
+          'Would you like information about a specific aspect of the law?';
     }
     if (q.contains('divorce') || q.contains('separate') || q.contains('marriage')) {
-      return '**Divorce and Separation in Ghana**\n\n'
-          '**Types of marriage recognised:**\n'
-          '- Ordinance (registered) marriage\n'
-          '- Customary marriage\n'
-          '- Islamic marriage\n\n'
-          '**For a divorce (Ordinance marriage):**\n'
-          '1. File a Petition at the High Court\n'
+      return '**Divorce and Separation in ${cfg.countryName}**\n\n'
+          '**For a divorce:**\n'
+          '1. File a Petition at the appropriate court\n'
           '2. Grounds include: unreasonable behaviour, desertion, adultery\n'
           '3. Process takes 3–12 months depending on if contested\n\n'
           '**Protect yourself before filing:**\n'
           '- Open a personal bank account\n'
           '- Gather copies of financial documents\n'
           '- Document any assets\n'
-          '- Consult a lawyer (Legal Aid Commission offers free help)\n\n'
-          '**Legal Aid Commission Ghana:** 030-266-7748\n'
-          '**FIDA Ghana (women\'s legal aid):** 030-222-0397\n\n'
+          '- Consult a lawyer (${cfg.legalAidName} offers free or low-cost help)\n\n'
+          '**${cfg.legalAidName}** — search for local offices or ask your case manager\n\n'
           'Safety note: Only proceed with divorce when you have a safety plan in place. Are you currently safe?';
     }
     if (q.contains('custody') || q.contains('children') || q.contains('child')) {
@@ -716,42 +726,43 @@ class __AgentChatScreenState extends State<_AgentChatScreen> {
           '- Courts often grant joint legal custody but sole physical custody to one parent\n\n'
           '**If there is a DV history:**\n'
           '- Courts CAN take DV into account\n'
-          '- Police reports, medical records, and DOVVSU records are important evidence\n'
+          '- Police reports, medical records, and ${cfg.dvAuthorityName} records are important evidence\n'
           '- You can request supervised visitation if you fear for the child\'s safety\n\n'
           '**Emergency steps:**\n'
-          '- If the abuser takes the child, call DOVVSU immediately: 0800800800\n'
+          '- If the abuser takes the child, call ${cfg.dvAuthorityName} immediately: ${cfg.dvHotline}\n'
           '- A lawyer can apply for an Emergency Interim Order within hours\n\n'
-          '**Free legal help:** Legal Aid Commission — 030-266-7748\n\n'
+          '**Free legal help:** ${cfg.legalAidName}\n\n'
           'How old are your children? This affects the custody process.';
     }
     return '**LegalNav — Your Legal Information Guide**\n\n'
-        'I can explain Ghanaian laws and processes in plain language. I cover:\n\n'
-        '- ⚖️ **Ghana DV Act 2007** — your rights and protections\n'
+        'I can explain ${cfg.countryName} laws and processes in plain language. I cover:\n\n'
+        '- ⚖️ **${cfg.domesticViolenceLaw}** — your rights and protections\n'
         '- 🛡️ **Protection Orders** — how to get one, what it does\n'
-        '- 👮 **DOVVSU** — how to report, what to expect\n'
+        '- 👮 **${cfg.dvAuthorityName}** — how to report, what to expect\n'
         '- 💍 **Divorce & separation** — the process and your rights\n'
         '- 👨‍👩‍👧 **Child custody** — what the courts consider\n'
-        '- 📋 **Legal Aid** — free legal help in Ghana\n\n'
-        '*Note: I provide information, not legal advice. For your specific case, consult a lawyer or call Legal Aid: **030-266-7748**.*\n\n'
+        '- 📋 **Legal Aid** — ${cfg.legalAidName}\n\n'
+        '*Note: I provide information, not legal advice. For your specific case, consult a lawyer or contact ${cfg.legalAidName}.*\n\n'
         '**What would you like to understand?**';
   }
 
   String _pathfinderReply(String q) {
+    final cfg = AppConfigService.instance.config;
     if (q.contains('job') || q.contains('work') || q.contains('employ') || q.contains('income')) {
       return '**Finding Work — Your Next Steps**\n\n'
           '**Start by assessing your skills:**\n'
           '- What did you do before? (even unpaid work counts)\n'
           '- What are you good at? (cooking, sewing, teaching, caring for others, admin)\n'
           '- What can you do from home?\n\n'
-          '**Quick income options in Ghana:**\n'
+          '**Quick income options:**\n'
           '- Food preparation / catering (small scale to start)\n'
           '- Hairdressing or dressmaking (if you have the skill)\n'
           '- Teaching or tutoring\n'
           '- Cleaning services\n'
-          '- Market trading / petty trading\n\n'
+          '- Market trading / small business\n\n'
           '**Free skills training:**\n'
-          '- NVTI (National Vocational Training Institute) — government skills training\n'
-          '- Beacon of New Beginnings job training programme (coming soon)\n\n'
+          '- Government vocational training institutes — skills training\n'
+          '- ${cfg.orgName} job training programme (coming soon)\n\n'
           '**Beacon jobs page:** Check the Jobs section of this app for current openings and volunteer roles.\n\n'
           'What skills do you already have? Let\'s build from there.';
     }
@@ -760,14 +771,14 @@ class __AgentChatScreenState extends State<_AgentChatScreen> {
           '**Immediate options:**\n'
           '- Trusted family member (outside the abuser\'s reach)\n'
           '- Trusted friend in a different area\n'
-          '- Emergency shelter (contact Beacon: 0800800800)\n\n'
+          '- Emergency shelter (contact ${cfg.orgName}: ${cfg.dvHotline})\n\n'
           '**Short-term options:**\n'
           '- Transitional housing programmes\n'
-          '- Church-based accommodation networks\n'
-          '- DOVVSU can refer you to shelters\n\n'
+          '- Church-based or community accommodation networks\n'
+          '- ${cfg.dvAuthorityName} can refer you to shelters\n\n'
           '**Longer-term planning:**\n'
-          '- Rent a room/chamber-and-hall with a trusted person\n'
-          '- Government low-income housing (SSNIT flats)\n'
+          '- Rent a room with a trusted person\n'
+          '- Government low-income housing assistance\n'
           '- Community-based housing schemes\n\n'
           '**Financial help for housing:**\n'
           '- Many landlords accept "advance" in monthly installments for vulnerable persons\n'
@@ -777,17 +788,17 @@ class __AgentChatScreenState extends State<_AgentChatScreen> {
     if (q.contains('school') || q.contains('educat') || q.contains('learn') || q.contains('study')) {
       return '**Education & Learning**\n\n'
           '**For yourself:**\n'
-          '- **Free adult literacy** — Ghana Education Service has programmes\n'
-          '- **NVTI** (National Vocational Training Institute) — low-cost skills training\n'
-          '- **Distance learning** — University of Ghana, KNUST offer distance programmes\n'
+          '- **Free adult literacy** — government education programmes are available\n'
+          '- **Vocational training institutes** — low-cost skills training\n'
+          '- **Distance learning** — many universities offer online or distance programmes\n'
           '- **Online learning** (free): Coursera, Khan Academy, YouTube tutorials\n\n'
           '**For your children:**\n'
           '- Public school is free (basic education)\n'
-          '- Capitation grant covers school fees at public schools\n'
-          '- School Feeding Programme provides meals\n'
-          '- BECE/WASSCE waiver programmes available for vulnerable children\n\n'
+          '- Government grants can cover school fees\n'
+          '- School meal programmes are often available\n'
+          '- Waiver programmes may be available for vulnerable children\n\n'
           '**Scholarships:**\n'
-          '- Ghana Scholarship Secretariat\n'
+          '- Government scholarship programmes\n'
           '- Mastercard Foundation Scholars Program\n'
           '- Various NGO scholarships for women\n\n'
           'What level of education are you or your children at?';
@@ -796,21 +807,21 @@ class __AgentChatScreenState extends State<_AgentChatScreen> {
       return '**Financial Empowerment — Starting Fresh**\n\n'
           '**Step 1: Open your own account**\n'
           '- A bank or mobile money account in YOUR name only\n'
-          '- Use MTN MoMo, Vodafone Cash, or AirtelTigo Money (easy to open)\n'
-          '- Keep the PIN private\n\n'
-          '**Step 2: Track every cedi**\n'
+          '- Mobile payment and digital accounts are easy to open\n'
+          '- Keep your PIN or password private\n\n'
+          '**Step 2: Track every ${cfg.currencyCode == 'GHS' ? 'cedi' : 'dollar'}**\n'
           '- Use the Budget tracker in this app\n'
           '- Even small amounts add up — document everything\n\n'
           '**Step 3: Build a small emergency fund**\n'
-          '- Even ₵50 saved separately is a start\n'
+          '- Even a small amount saved separately is a start\n'
           '- Keep cash hidden in a safe place only you know\n\n'
           '**Step 4: Increase income**\n'
           '- Identify ONE skill you can monetise immediately\n'
-          '- Start small — even ₵5 profit per day builds confidence\n\n'
-          '**Micro-loans available in Ghana:**\n'
-          '- Sinapi Aba Trust (women\'s micro-loans)\n'
-          '- Opportunity International Ghana\n'
-          '- Community-based susu groups\n\n'
+          '- Start small — even a small daily profit builds confidence\n\n'
+          '**Micro-loan options available:**\n'
+          '- Women\'s micro-loan programmes in your area\n'
+          '- Non-profit micro-finance organisations\n'
+          '- Community savings groups\n\n'
           'What is your current financial situation? I can help you make a specific plan.';
     }
     if (q.contains('goal') || q.contains('plan') || q.contains('step') || q.contains('start') || q.contains('begin')) {
@@ -820,10 +831,10 @@ class __AgentChatScreenState extends State<_AgentChatScreen> {
           '✓ Secure your documents (ID, certificates)\n'
           '✓ Open a personal mobile money account\n'
           '✓ Connect with ONE support person you trust\n'
-          '✓ Report to DOVVSU if you haven\'t (0800800800)\n\n'
+          '✓ Report to ${cfg.dvAuthorityName} if you haven\'t (${cfg.dvHotline})\n\n'
           '**Month 2 — Build**\n'
           '✓ Identify a source of income (even small)\n'
-          '✓ Start saving — even ₵20 per week\n'
+          '✓ Start saving — even a small amount per week\n'
           '✓ Enrol in one skills programme or course\n'
           '✓ Connect with a support group\n\n'
           '**Month 3 — Grow**\n'

@@ -44,7 +44,7 @@ class LocalDatabaseService {
 
     return await openDatabase(
       path,
-      version: 13,
+      version: 16,
       onCreate: (db, version) async {
         developer.log('🔨 [Database] Creating database v$version from scratch...');
         // Users table
@@ -615,11 +615,97 @@ class LocalDatabaseService {
           )
         ''');
 
+        // v14: Case management tables
+        await db.execute('''
+          CREATE TABLE IF NOT EXISTS client_intakes(
+            id TEXT PRIMARY KEY,
+            client_name TEXT NOT NULL,
+            client_phone TEXT,
+            client_id TEXT,
+            case_manager_id TEXT NOT NULL,
+            case_manager_name TEXT NOT NULL,
+            intake_date TEXT NOT NULL,
+            presenting_situation TEXT,
+            needs_identified TEXT,
+            emergency_support_desc TEXT,
+            emergency_support_amount REAL,
+            currency TEXT DEFAULT 'GHC',
+            status TEXT DEFAULT 'active',
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL
+          )
+        ''');
+
+        await db.execute('''
+          CREATE TABLE IF NOT EXISTS case_plans(
+            id TEXT PRIMARY KEY,
+            intake_id TEXT NOT NULL,
+            client_name TEXT NOT NULL,
+            client_id TEXT,
+            case_manager_id TEXT NOT NULL,
+            case_manager_name TEXT NOT NULL,
+            plan_status TEXT DEFAULT 'active',
+            next_review_date TEXT,
+            review_frequency TEXT DEFAULT 'quarterly',
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL,
+            FOREIGN KEY (intake_id) REFERENCES client_intakes (id)
+          )
+        ''');
+
+        await db.execute('''
+          CREATE TABLE IF NOT EXISTS case_programs(
+            id TEXT PRIMARY KEY,
+            case_plan_id TEXT NOT NULL,
+            program_number INTEGER DEFAULT 0,
+            program_name TEXT NOT NULL,
+            goal TEXT,
+            current_status_notes TEXT,
+            priority TEXT DEFAULT 'medium',
+            deadline_label TEXT,
+            deadline_date TEXT,
+            actions TEXT,
+            is_completed INTEGER DEFAULT 0,
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL,
+            FOREIGN KEY (case_plan_id) REFERENCES case_plans (id)
+          )
+        ''');
+
+        await db.execute('''
+          CREATE TABLE IF NOT EXISTS case_notes(
+            id TEXT PRIMARY KEY,
+            case_plan_id TEXT NOT NULL,
+            case_program_id TEXT,
+            note_text TEXT NOT NULL,
+            created_by TEXT NOT NULL,
+            created_at TEXT NOT NULL,
+            FOREIGN KEY (case_plan_id) REFERENCES case_plans (id)
+          )
+        ''');
+
+        // v15: Pending sync queue — stores records that failed to reach Supabase
+        await db.execute('''
+          CREATE TABLE IF NOT EXISTS pending_syncs(
+            id TEXT PRIMARY KEY,
+            table_name TEXT NOT NULL,
+            record_id TEXT NOT NULL,
+            operation TEXT NOT NULL,
+            data TEXT NOT NULL,
+            created_at TEXT NOT NULL,
+            retry_count INTEGER DEFAULT 0,
+            last_error TEXT
+          )
+        ''');
+
         // Initialize with Ghana emergency resources
         await _insertInitialResources(db);
 
         // Create demo accounts for Apple App Review
         await _insertDemoAccounts(db);
+
+        // Seed Abigail's program plan as the first template case
+        await _seedAbigailCase(db);
 
         developer.log('✅ [Database] All tables created successfully for v$version');
       },
@@ -627,7 +713,9 @@ class LocalDatabaseService {
         // Always re-seed demo/reviewer accounts so they survive app data clears
         // and are never missing regardless of which migration path ran.
         await _insertDemoAccounts(db);
-        developer.log('✅ [Database] Demo accounts refreshed on open');
+        // Seed Abigail's case plan on every open (uses IGNORE so live edits are preserved)
+        await _seedAbigailCase(db);
+        developer.log('✅ [Database] Demo accounts and seed case refreshed on open');
       },
       onUpgrade: (db, oldVersion, newVersion) async {
         developer.log('🔄 [Database] Upgrading from v$oldVersion to v$newVersion...');
@@ -1290,7 +1378,7 @@ class LocalDatabaseService {
               'admin_secret_validated': 1,
               'created_at': now,
               'last_updated': now,
-            }, conflictAlgorithm: ConflictAlgorithm.ignore);
+            }, conflictAlgorithm: ConflictAlgorithm.replace);
             developer.log('✅ [Database] v11 migration completed - Demo admin added');
           } catch (e) {
             developer.log('❌ [Database] Error migrating to v11: $e');
@@ -1437,6 +1525,114 @@ class LocalDatabaseService {
           }
         }
 
+        // Migrate to version 14 - Case management tables
+        if (oldVersion < 14) {
+          try {
+            await db.execute('''
+              CREATE TABLE IF NOT EXISTS client_intakes(
+                id TEXT PRIMARY KEY,
+                client_name TEXT NOT NULL,
+                client_phone TEXT,
+                client_id TEXT,
+                case_manager_id TEXT NOT NULL,
+                case_manager_name TEXT NOT NULL,
+                intake_date TEXT NOT NULL,
+                presenting_situation TEXT,
+                needs_identified TEXT,
+                emergency_support_desc TEXT,
+                emergency_support_amount REAL,
+                currency TEXT DEFAULT 'GHC',
+                status TEXT DEFAULT 'active',
+                created_at TEXT NOT NULL,
+                updated_at TEXT NOT NULL
+              )
+            ''');
+            await db.execute('''
+              CREATE TABLE IF NOT EXISTS case_plans(
+                id TEXT PRIMARY KEY,
+                intake_id TEXT NOT NULL,
+                client_name TEXT NOT NULL,
+                client_id TEXT,
+                case_manager_id TEXT NOT NULL,
+                case_manager_name TEXT NOT NULL,
+                plan_status TEXT DEFAULT 'active',
+                next_review_date TEXT,
+                review_frequency TEXT DEFAULT 'quarterly',
+                created_at TEXT NOT NULL,
+                updated_at TEXT NOT NULL,
+                FOREIGN KEY (intake_id) REFERENCES client_intakes (id)
+              )
+            ''');
+            await db.execute('''
+              CREATE TABLE IF NOT EXISTS case_programs(
+                id TEXT PRIMARY KEY,
+                case_plan_id TEXT NOT NULL,
+                program_number INTEGER DEFAULT 0,
+                program_name TEXT NOT NULL,
+                goal TEXT,
+                current_status_notes TEXT,
+                priority TEXT DEFAULT 'medium',
+                deadline_label TEXT,
+                deadline_date TEXT,
+                actions TEXT,
+                is_completed INTEGER DEFAULT 0,
+                created_at TEXT NOT NULL,
+                updated_at TEXT NOT NULL,
+                FOREIGN KEY (case_plan_id) REFERENCES case_plans (id)
+              )
+            ''');
+            await db.execute('''
+              CREATE TABLE IF NOT EXISTS case_notes(
+                id TEXT PRIMARY KEY,
+                case_plan_id TEXT NOT NULL,
+                case_program_id TEXT,
+                note_text TEXT NOT NULL,
+                created_by TEXT NOT NULL,
+                created_at TEXT NOT NULL,
+                FOREIGN KEY (case_plan_id) REFERENCES case_plans (id)
+              )
+            ''');
+            developer.log('✅ [Database] v14 migration completed - Case management tables added');
+          } catch (e) {
+            developer.log('❌ [Database] Error migrating to v14: $e');
+          }
+        }
+
+        // Migrate to version 15 - Supabase pending sync queue
+        if (oldVersion < 15) {
+          try {
+            await db.execute('''
+              CREATE TABLE IF NOT EXISTS pending_syncs(
+                id TEXT PRIMARY KEY,
+                table_name TEXT NOT NULL,
+                record_id TEXT NOT NULL,
+                operation TEXT NOT NULL,
+                data TEXT NOT NULL,
+                created_at TEXT NOT NULL,
+                retry_count INTEGER DEFAULT 0,
+                last_error TEXT
+              )
+            ''');
+            developer.log('✅ [Database] v15 migration completed - Pending sync queue added');
+          } catch (e) {
+            developer.log('❌ [Database] Error migrating to v15: $e');
+          }
+        }
+
+        if (oldVersion < 16) {
+          try {
+            // Add country_code to client_intakes and case_plans so plans can
+            // be filtered by the active org (Ghana vs US).
+            await db.execute(
+                'ALTER TABLE client_intakes ADD COLUMN country_code TEXT DEFAULT "GH"');
+            await db.execute(
+                'ALTER TABLE case_plans ADD COLUMN country_code TEXT DEFAULT "GH"');
+            developer.log('✅ [Database] v16 migration completed — country_code added');
+          } catch (e) {
+            developer.log('❌ [Database] Error migrating to v16: $e');
+          }
+        }
+
         developer.log('✅ [Database] Successfully upgraded to v$newVersion');
       },
     );
@@ -1561,16 +1757,284 @@ class LocalDatabaseService {
         'created_at': DateTime.now().toIso8601String(),
         'last_updated': DateTime.now().toIso8601String(),
       },
+      // Enam — Executive Director admin account
+      {
+        'id': 'admin_enam_egyir',
+        'email': 'enam.egyir@gmail.com',
+        'display_name': 'Enam Egyir',
+        'password_hash': hashPassword('BeaconAdmin2025!'),
+        'user_type': 'admin',
+        'is_anonymous': 0,
+        'approval_status': 'approved',
+        'is_available': 1,
+        'admin_secret_validated': 1,
+        'created_at': DateTime.now().toIso8601String(),
+        'last_updated': DateTime.now().toIso8601String(),
+      },
     ];
 
     for (var account in demoAccounts) {
       try {
-        await db.insert('users', account, conflictAlgorithm: ConflictAlgorithm.ignore);
-        developer.log('✅ [Database] Created demo account: ${account['email']}');
+        await db.insert('users', account, conflictAlgorithm: ConflictAlgorithm.replace);
+        developer.log('✅ [Database] Upserted demo account: ${account['email']}');
       } catch (e) {
-        developer.log('⚠️ [Database] Failed to create demo account ${account['email']}: $e');
+        developer.log('⚠️ [Database] Failed to upsert demo account ${account['email']}: $e');
       }
     }
+  }
+
+  // Seed Abigail Bubune Abubakar's program plan as the first demo case
+  static Future<void> _seedAbigailCase(Database db) async {
+    const intakeId = 'intake_abigail_2026';
+    const planId   = 'plan_abigail_2026';
+    const now      = '2026-04-17T09:00:00.000';
+
+    // ── 1. Client Intake ──────────────────────────────────────────────────────
+    await db.insert('client_intakes', {
+      'id': intakeId,
+      'client_name': 'Abigail Bubune Abubakar',
+      'client_phone': null,
+      'client_id': null,
+      'case_manager_id': 'admin_enam_egyir',
+      'case_manager_name': 'Enam Egyir',
+      'intake_date': '2026-04-01T00:00:00.000',
+      'presenting_situation':
+          'Abigail lost both parents at a young age and recently converted from Islam to Christianity. '
+          'Following her conversion, extended family members withdrew all financial and emotional support '
+          'and issued ultimatums demanding she renounce her faith or relocate north to live under '
+          'strict family supervision. She is currently living in university hostel accommodation '
+          'and pursuing her undergraduate degree. She has no immediate family safety net and faces '
+          'social isolation, financial vulnerability, and ongoing pressure from her extended family. '
+          'Emergency support of GHC 3,100 (tuition + hostel) was provided by BNB in January 2026.',
+      'needs_identified': '["Education","Housing","Psychosocial","Community","Economic","Legal","Safety"]',
+      'emergency_support_desc': 'Tuition GHC 1,900 + Hostel accommodation GHC 1,200 — paid January 2026',
+      'emergency_support_amount': 3100.0,
+      'currency': 'GHC',
+      'status': 'active',
+      'created_at': '2026-01-15T10:00:00.000',
+      'updated_at': now,
+    }, conflictAlgorithm: ConflictAlgorithm.ignore);
+
+    // ── 2. Case Plan ──────────────────────────────────────────────────────────
+    await db.insert('case_plans', {
+      'id': planId,
+      'intake_id': intakeId,
+      'client_name': 'Abigail Bubune Abubakar',
+      'client_id': null,
+      'case_manager_id': 'admin_enam_egyir',
+      'case_manager_name': 'Enam Egyir',
+      'plan_status': 'active',
+      'next_review_date': '2026-07-01T00:00:00.000',
+      'review_frequency': 'quarterly',
+      'created_at': '2026-04-01T00:00:00.000',
+      'updated_at': now,
+    }, conflictAlgorithm: ConflictAlgorithm.ignore);
+
+    // ── 3. Programs ───────────────────────────────────────────────────────────
+    final programs = [
+      {
+        'id': 'prog_abigail_1',
+        'case_plan_id': planId,
+        'program_number': 1,
+        'program_name': 'Case Management',
+        'goal': 'Maintain a complete, coordinated case file and serve as primary BNB point of contact for Abigail throughout her support journey.',
+        'current_status_notes': 'Active — regular check-ins established. Weekly touchpoints scheduled with client.',
+        'priority': 'ongoing',
+        'deadline_label': 'Ongoing',
+        'deadline_date': null,
+        'actions': jsonEncode([
+          {'text': 'Create and maintain complete case file with all supporting documents', 'completed': true, 'completedAt': '2026-04-01T10:00:00.000'},
+          {'text': 'Schedule monthly check-in meetings with Abigail', 'completed': true, 'completedAt': '2026-04-17T09:00:00.000'},
+          {'text': 'Coordinate communication between all program leads', 'completed': false, 'completedAt': null},
+          {'text': 'Document all interventions and outcomes in case management system', 'completed': false, 'completedAt': null},
+          {'text': 'Conduct first quarterly review — July 2026', 'completed': false, 'completedAt': null},
+        ]),
+        'is_completed': 0,
+        'created_at': '2026-04-01T00:00:00.000',
+        'updated_at': now,
+      },
+      {
+        'id': 'prog_abigail_2',
+        'case_plan_id': planId,
+        'program_number': 2,
+        'program_name': 'Education Support & Continuity',
+        'goal': 'Ensure Abigail completes her academic programme without financial interruption, with pastoral and chaplaincy support available on campus.',
+        'current_status_notes': 'Emergency tuition (GHC 1,900) and hostel (GHC 1,200) paid January 2026. Next semester payment due May 2026.',
+        'priority': 'high',
+        'deadline_label': 'May 2026',
+        'deadline_date': '2026-05-01T00:00:00.000',
+        'actions': jsonEncode([
+          {'text': 'Emergency tuition payment: GHC 1,900 (Jan 2026)', 'completed': true, 'completedAt': '2026-01-15T00:00:00.000'},
+          {'text': 'Emergency hostel payment: GHC 1,200 (Jan 2026)', 'completed': true, 'completedAt': '2026-01-15T00:00:00.000'},
+          {'text': 'Confirm next semester tuition cost and payment due date', 'completed': false, 'completedAt': null},
+          {'text': 'Arrange semester 2 tuition payment by May 2026', 'completed': false, 'completedAt': null},
+          {'text': 'Connect Abigail with campus chaplain or pastoral support team', 'completed': false, 'completedAt': null},
+          {'text': 'Explore merit scholarships or bursary applications', 'completed': false, 'completedAt': null},
+          {'text': 'Verify academic performance and attendance record', 'completed': false, 'completedAt': null},
+        ]),
+        'is_completed': 0,
+        'created_at': '2026-04-01T00:00:00.000',
+        'updated_at': now,
+      },
+      {
+        'id': 'prog_abigail_3',
+        'case_plan_id': planId,
+        'program_number': 3,
+        'program_name': 'Housing Stability & Safety Planning',
+        'goal': 'Ensure safe, stable housing during and after the BNB support period; prevent any forced return to an unsafe family environment.',
+        'current_status_notes': 'Currently in university hostel funded by BNB. Hostel contract assessed — secure through current academic year. Risk: family may escalate pressure if conversion becomes widely known.',
+        'priority': 'high',
+        'deadline_label': 'January 2027',
+        'deadline_date': '2027-01-01T00:00:00.000',
+        'actions': jsonEncode([
+          {'text': 'Hostel accommodation secured and funded through current semester', 'completed': true, 'completedAt': '2026-01-15T00:00:00.000'},
+          {'text': 'Assess hostel contract renewal timeline for next academic year', 'completed': false, 'completedAt': null},
+          {'text': 'Identify backup housing options (BNB safe house, partner shelter) if family escalates', 'completed': false, 'completedAt': null},
+          {'text': 'Create personal safety plan with Abigail for family contact scenarios', 'completed': false, 'completedAt': null},
+          {'text': 'Review housing plan at each quarterly review', 'completed': false, 'completedAt': null},
+          {'text': 'Explore long-term housing options post-graduation', 'completed': false, 'completedAt': null},
+        ]),
+        'is_completed': 0,
+        'created_at': '2026-04-01T00:00:00.000',
+        'updated_at': now,
+      },
+      {
+        'id': 'prog_abigail_4',
+        'case_plan_id': planId,
+        'program_number': 4,
+        'program_name': 'Psychosocial Support & Counselling',
+        'goal': 'Address grief, religious trauma, rejection, and social isolation through professional counselling and peer support.',
+        'current_status_notes': 'URGENT — formal counselling referral not yet completed. Abigail has experienced loss of both parents, religious persecution within family, and social isolation. Must act within 30 days of plan date (by 17 May 2026).',
+        'priority': 'urgent',
+        'deadline_label': 'Within 30 days',
+        'deadline_date': '2026-05-17T00:00:00.000',
+        'actions': jsonEncode([
+          {'text': 'Refer to trained counsellor specialising in grief and religious trauma', 'completed': false, 'completedAt': null},
+          {'text': 'Initial counselling session booked and attended', 'completed': false, 'completedAt': null},
+          {'text': 'Assess for depression, anxiety, or PTSD indicators', 'completed': false, 'completedAt': null},
+          {'text': 'Connect with Christian support community or church group on campus', 'completed': false, 'completedAt': null},
+          {'text': 'Establish bi-weekly emotional wellbeing check-ins', 'completed': false, 'completedAt': null},
+          {'text': 'Review counselling progress at quarterly review (July 2026)', 'completed': false, 'completedAt': null},
+        ]),
+        'is_completed': 0,
+        'created_at': '2026-04-01T00:00:00.000',
+        'updated_at': now,
+      },
+      {
+        'id': 'prog_abigail_5',
+        'case_plan_id': planId,
+        'program_number': 5,
+        'program_name': 'Community & Social Reintegration',
+        'goal': 'Rebuild a sense of community and belonging; establish a safe, supportive social network to replace the family network she has lost.',
+        'current_status_notes': 'Abigail is socially isolated following family estrangement. Priority is connecting her with a safe Christian community and campus social network.',
+        'priority': 'medium',
+        'deadline_label': 'April–July 2026',
+        'deadline_date': '2026-07-31T00:00:00.000',
+        'actions': jsonEncode([
+          {'text': 'Connect Abigail with a church or campus Christian fellowship she feels safe in', 'completed': false, 'completedAt': null},
+          {'text': 'Facilitate introduction to campus student support services', 'completed': false, 'completedAt': null},
+          {'text': 'Identify at least one peer mentor or trusted friend on campus', 'completed': false, 'completedAt': null},
+          {'text': 'Explore campus clubs or community service opportunities', 'completed': false, 'completedAt': null},
+          {'text': 'Review social support network at July quarterly review', 'completed': false, 'completedAt': null},
+        ]),
+        'is_completed': 0,
+        'created_at': '2026-04-01T00:00:00.000',
+        'updated_at': now,
+      },
+      {
+        'id': 'prog_abigail_6',
+        'case_plan_id': planId,
+        'program_number': 6,
+        'program_name': 'Skills Training & Economic Empowerment',
+        'goal': 'Equip Abigail with practical skills and begin laying the foundation for financial independence post-graduation.',
+        'current_status_notes': 'Currently focused on academic continuity. Skills and economic planning to begin Q2 2026 once Abigail is settled and emotionally stable.',
+        'priority': 'medium',
+        'deadline_label': 'April–September 2026',
+        'deadline_date': '2026-09-30T00:00:00.000',
+        'actions': jsonEncode([
+          {'text': 'Assess Abigail\'s interests, strengths, and career aspirations', 'completed': false, 'completedAt': null},
+          {'text': 'Identify relevant skills training programmes (digital, entrepreneurship, vocational)', 'completed': false, 'completedAt': null},
+          {'text': 'Enroll in at least one skills course by July 2026', 'completed': false, 'completedAt': null},
+          {'text': 'Connect with BNB economic empowerment partners', 'completed': false, 'completedAt': null},
+          {'text': 'Develop basic personal budget and financial literacy plan', 'completed': false, 'completedAt': null},
+          {'text': 'Review progress at September follow-up', 'completed': false, 'completedAt': null},
+        ]),
+        'is_completed': 0,
+        'created_at': '2026-04-01T00:00:00.000',
+        'updated_at': now,
+      },
+      {
+        'id': 'prog_abigail_7',
+        'case_plan_id': planId,
+        'program_number': 7,
+        'program_name': 'Legal Resource Navigation',
+        'goal': 'Ensure Abigail understands her legal rights and that a referral pathway is ready if family coercion or threats escalate.',
+        'current_status_notes': 'Currently monitoring. No immediate legal threat, but family has issued ultimatums that may constitute coercion. Legal aid referral pathway established as a precaution.',
+        'priority': 'monitor',
+        'deadline_label': 'Ongoing — monitor',
+        'deadline_date': null,
+        'actions': jsonEncode([
+          {'text': 'Brief Abigail on her right to religious freedom and freedom from coercion under Ghana law', 'completed': false, 'completedAt': null},
+          {'text': 'Identify legal aid partner (LAWA or equivalent) for referral if needed', 'completed': false, 'completedAt': null},
+          {'text': 'Document any threats or ultimatums from family in case file', 'completed': false, 'completedAt': null},
+          {'text': 'Establish clear escalation trigger — what actions by family would prompt legal referral', 'completed': false, 'completedAt': null},
+          {'text': 'Review legal situation at each quarterly check-in', 'completed': false, 'completedAt': null},
+        ]),
+        'is_completed': 0,
+        'created_at': '2026-04-01T00:00:00.000',
+        'updated_at': now,
+      },
+    ];
+
+    for (final prog in programs) {
+      await db.insert('case_programs', prog, conflictAlgorithm: ConflictAlgorithm.ignore);
+    }
+
+    // ── 4. Case Notes ─────────────────────────────────────────────────────────
+    final notes = [
+      {
+        'id': 'note_abigail_1',
+        'case_plan_id': planId,
+        'case_program_id': null,
+        'note_text':
+            'Intake completed April 2026. Abigail was referred to BNB by campus chaplain. '
+            'Emergency support of GHC 3,100 (tuition + hostel) was provided in January 2026 prior to formal intake. '
+            'Client is resilient and highly motivated — pursuing studies despite significant family and social challenges. '
+            'Confidentiality concerns raised: client does not want extended family to know she is receiving BNB support. '
+            'Protocols explained and agreed.',
+        'created_by': 'Enam Egyir',
+        'created_at': '2026-04-01T10:00:00.000',
+      },
+      {
+        'id': 'note_abigail_2',
+        'case_plan_id': planId,
+        'case_program_id': null,
+        'note_text':
+            'Case plan presented to Abigail on 17 April 2026. She is aware of all 7 programme areas and has consented to support. '
+            'Immediate priority flagged: psychosocial counselling referral must be completed within 30 days. '
+            'Client expressed both gratitude and anxiety — particularly around family finding out about BNB involvement. '
+            'Next steps confirmed: education payment (May), counselling referral (immediate), housing review (quarterly).',
+        'created_by': 'Enam Egyir',
+        'created_at': now,
+      },
+      {
+        'id': 'note_abigail_3',
+        'case_plan_id': planId,
+        'case_program_id': 'prog_abigail_4',
+        'note_text':
+            'URGENT: Psychosocial counselling referral is the most time-sensitive action in this plan. '
+            'Abigail has experienced compound losses — both parents, her entire family support network, and her former religious community. '
+            'She is displaying signs of grief and social anxiety. Referral to specialist counsellor must happen within 30 days of this plan date.',
+        'created_by': 'Enam Egyir',
+        'created_at': now,
+      },
+    ];
+
+    for (final note in notes) {
+      await db.insert('case_notes', note, conflictAlgorithm: ConflictAlgorithm.ignore);
+    }
+
+    developer.log('✅ [Database] Abigail case seed completed (or already present)');
   }
 
   // User management

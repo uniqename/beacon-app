@@ -1,6 +1,9 @@
 import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../config/org_config.dart';
 import '../../models/user.dart';
+import '../../services/app_config_service.dart';
 import '../../services/local_database_service.dart';
 import 'manage_divisions_screen.dart';
 import 'manage_services_screen.dart';
@@ -9,6 +12,7 @@ import 'user_management_screen.dart';
 import 'admin_inquiry_management_screen.dart';
 import 'admin_helper_approvals_screen.dart';
 import 'admin_content_management_screen.dart';
+import 'case_management_screen.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
   final AppUser user;
@@ -94,6 +98,40 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         backgroundColor: Color(0xFFF0562D),
         elevation: 0,
         actions: [
+          // Country switcher — admins can toggle between US and Ghana instantly
+          Consumer<AppConfigService>(
+            builder: (context, appConfig, _) {
+              final cfg = appConfig.config;
+              final isGhana = cfg.orgKey == 'gh';
+              return GestureDetector(
+                onTap: () => _showCountrySwitcher(context, appConfig),
+                child: Container(
+                  margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(isGhana ? '🇬🇭' : '🇺🇸',
+                          style: const TextStyle(fontSize: 16)),
+                      const SizedBox(width: 4),
+                      Text(cfg.countryCode,
+                          style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold)),
+                      const SizedBox(width: 2),
+                      const Icon(Icons.arrow_drop_down,
+                          color: Colors.white70, size: 16),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
           IconButton(
             icon: Icon(Icons.notifications, color: Colors.white),
             onPressed: () {
@@ -448,6 +486,18 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 MaterialPageRoute(builder: (context) => const AdminContentManagementScreen()),
               ),
             ),
+            _buildActionCard(
+              'Case Management',
+              'Intake clients and manage multi-program support plans',
+              Icons.folder_special,
+              Color(0xFFE65100),
+              () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => CaseManagementScreen(user: widget.user),
+                ),
+              ),
+            ),
           ],
         ),
       ],
@@ -563,6 +613,55 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           ),
         ),
       ],
+    );
+  }
+
+  void _showCountrySwitcher(BuildContext context, AppConfigService appConfig) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (ctx) => Padding(
+        padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 40, height: 4,
+                decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(2)),
+              ),
+            ),
+            const SizedBox(height: 16),
+            const Text('Switch Organisation',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 4),
+            Text('Your view, AI prompts, currency, and emergency numbers will update instantly.',
+                style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+            const SizedBox(height: 20),
+            for (final entry in allConfigs.entries)
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: Text(entry.key == 'gh' ? '🇬🇭' : '🇺🇸',
+                    style: const TextStyle(fontSize: 28)),
+                title: Text(entry.value.orgName,
+                    style: const TextStyle(fontWeight: FontWeight.w600)),
+                subtitle: Text('${entry.value.countryName} · ${entry.value.currencyCode}'),
+                trailing: appConfig.config.orgKey == entry.key
+                    ? const Icon(Icons.check_circle, color: Color(0xFFF0562D))
+                    : const Icon(Icons.radio_button_unchecked,
+                        color: Colors.grey),
+                onTap: () async {
+                  await appConfig.setConfig(entry.key);
+                  if (ctx.mounted) Navigator.pop(ctx);
+                },
+              ),
+          ],
+        ),
+      ),
     );
   }
 }

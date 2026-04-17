@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../config/org_config.dart';
+import '../../services/app_config_service.dart';
 import '../../services/auth_service.dart';
 import '../../services/account_deletion_service.dart';
 import 'feedback_screen.dart';
@@ -202,6 +204,19 @@ class ProfileScreen extends StatelessWidget {
                 );
               },
             ),
+            const Divider(),
+            Builder(builder: (ctx) {
+              final appConfig = Provider.of<AppConfigService>(ctx);
+              final cfg = appConfig.config;
+              final flag = cfg.orgKey == 'gh' ? '🇬🇭' : '🇺🇸';
+              return _buildSettingsItem(
+                ctx,
+                icon: Icons.public,
+                title: 'Region',
+                subtitle: '$flag ${cfg.orgName}',
+                onTap: () => _showRegionDialog(ctx, appConfig),
+              );
+            }),
             const Divider(),
             _buildSettingsItem(
               context,
@@ -718,6 +733,48 @@ class ProfileScreen extends StatelessWidget {
       trailing: const Icon(Icons.chevron_right),
       onTap: onTap,
       contentPadding: EdgeInsets.zero,
+    );
+  }
+
+  void _showRegionDialog(BuildContext context, AppConfigService appConfig) {
+    String selected = appConfig.config.orgKey;
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) => AlertDialog(
+          title: const Text('Select Region'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: allConfigs.entries.map((entry) {
+              final cfg = entry.value;
+              final flag = cfg.orgKey == 'gh' ? '🇬🇭' : '🇺🇸';
+              return RadioListTile<String>(
+                value: cfg.orgKey,
+                groupValue: selected,
+                title: Text('$flag ${cfg.orgName}'),
+                subtitle: Text(cfg.countryName),
+                onChanged: (val) {
+                  if (val != null) setDialogState(() => selected = val);
+                },
+                contentPadding: EdgeInsets.zero,
+              );
+            }).toList(),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                Navigator.pop(ctx);
+                await appConfig.setConfig(selected);
+              },
+              child: const Text('Save'),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

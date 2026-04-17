@@ -33,6 +33,9 @@ import '../wellness/progress_tracker_screen.dart';
 import '../wellness/daily_selfcare_screen.dart';
 import '../wellness/daily_journal_screen.dart';
 import '../wellness/wellness_reports_screen.dart';
+import 'my_support_plan_screen.dart';
+import 'survivor_intake_screen.dart';
+import '../../services/case_management_service.dart';
 
 final _beaconGeneralDivision = BeaconDivision(
   id: 'general',
@@ -443,6 +446,181 @@ class _HomeTabScreenState extends State<HomeTabScreen> {
               ),
 
               const SizedBox(height: 24),
+
+              // ── My Support Plan (shown only if case plan exists) ─────────
+              Consumer<AuthService>(
+                builder: (context, authService, _) {
+                  final user = authService.currentUser;
+                  if (user == null || user.userType != UserType.survivor) {
+                    return const SizedBox.shrink();
+                  }
+                  return FutureBuilder(
+                    future: CaseManagementService.getCasePlanOrAutoLink(
+                      user.id,
+                      phone: user.phoneNumber,
+                      email: user.email,
+                    ),
+                    builder: (context, snapshot) {
+                      // While loading, show nothing
+                      if (!snapshot.hasData && !snapshot.hasError) {
+                        return const SizedBox.shrink();
+                      }
+                      final plan = snapshot.data;
+
+                      // No plan yet — prompt survivor to create one
+                      if (plan == null) {
+                        return Column(
+                          children: [
+                            GestureDetector(
+                              onTap: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) =>
+                                      SurvivorIntakeScreen(user: user),
+                                ),
+                              ),
+                              child: Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.all(18),
+                                decoration: BoxDecoration(
+                                  gradient: const LinearGradient(
+                                    colors: [
+                                      Color(0xFFF0562D),
+                                      Color(0xFFFF7043)
+                                    ],
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                  ),
+                                  borderRadius: BorderRadius.circular(16),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: const Color(0xFFF0562D)
+                                          .withValues(alpha: 0.25),
+                                      blurRadius: 10,
+                                      offset: const Offset(0, 4),
+                                    ),
+                                  ],
+                                ),
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.all(12),
+                                      decoration: BoxDecoration(
+                                        color:
+                                            Colors.white.withValues(alpha: 0.2),
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: const Icon(Icons.auto_awesome,
+                                          color: Colors.white, size: 24),
+                                    ),
+                                    const SizedBox(width: 14),
+                                    const Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            'Create Your Support Plan',
+                                            style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 15,
+                                                color: Colors.white),
+                                          ),
+                                          SizedBox(height: 3),
+                                          Text(
+                                            'Let our AI build a personalised plan for you — takes 2 minutes.',
+                                            style: TextStyle(
+                                                fontSize: 12,
+                                                color: Colors.white70),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    const Icon(Icons.arrow_forward_ios,
+                                        color: Colors.white70, size: 16),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 24),
+                          ],
+                        );
+                      }
+
+                      // Plan exists — show the My Support Plan card
+                      return Column(
+                        children: [
+                          GestureDetector(
+                            onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) =>
+                                    MySupportPlanScreen(userId: user.id),
+                              ),
+                            ),
+                            child: Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(14),
+                                border: Border.all(
+                                    color: const Color(0xFFF0562D)
+                                        .withValues(alpha: 0.3)),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.grey[200]!,
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 3),
+                                  ),
+                                ],
+                              ),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(10),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFF0562D)
+                                          .withValues(alpha: 0.1),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Icon(Icons.folder_special,
+                                        color: Color(0xFFF0562D), size: 22),
+                                  ),
+                                  const SizedBox(width: 14),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        const Text(
+                                          'My Support Plan',
+                                          style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 15),
+                                        ),
+                                        Text(
+                                          'Managed by ${plan.caseManagerName}',
+                                          style: TextStyle(
+                                              fontSize: 12,
+                                              color: Colors.grey[600]),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  const Icon(Icons.chevron_right,
+                                      color: Color(0xFFF0562D)),
+                                ],
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+                        ],
+                      );
+                    },
+                  );
+                },
+              ),
 
               // ── Safety & Protection ──────────────────────────────────────
               _SectionHeader(title: 'Safety & Protection', icon: Icons.shield, color: Colors.teal),

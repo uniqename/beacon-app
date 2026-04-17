@@ -9,6 +9,7 @@ import 'package:sqflite/sqflite.dart' show ConflictAlgorithm;
 import '../models/user.dart';
 import '../constants/admin_config.dart';
 import 'local_database_service.dart';
+import 'case_management_service.dart';
 
 class AuthService {
   static final AuthService _instance = AuthService._internal();
@@ -190,6 +191,20 @@ class AuthService {
       await _saveAnonymousStatus(false);
       await _saveUserSession(userId, email, displayName);
 
+      // Auto-link to any existing case plan that matches by phone then by name
+      try {
+        bool linked = false;
+        if (phoneNumber != null && phoneNumber.isNotEmpty) {
+          linked = await CaseManagementService.tryAutoLinkByPhone(
+              userId, phoneNumber);
+        }
+        if (!linked) {
+          await CaseManagementService.tryAutoLinkByEmail(userId, email);
+        }
+      } catch (e) {
+        developer.log('⚠️ [Auth] Auto case-link failed (non-fatal): $e');
+      }
+
       developer.log('✅ [Auth] Registration successful for $email');
       return appUser;
     } catch (e) {
@@ -302,14 +317,65 @@ class AuthService {
       developer.log('🔐 [Auth] Found ${users.length} matching users');
 
       if (users.isEmpty) {
-        // Try without password hash to see if user exists
+        // Try without password hash to see if user exists locally
         final allUsers = await db.query('users', where: 'email = ?', whereArgs: [email]);
         if (allUsers.isNotEmpty) {
           developer.log('❌ [Auth] User exists but password doesn\'t match');
           developer.log('❌ [Auth] Stored hash: ${allUsers.first['password_hash']}');
-        } else {
-          developer.log('❌ [Auth] No user found with email: $email');
+          throw Exception('Invalid email or password');
         }
+
+        // Not found locally — try Supabase (account may have been created on another device)
+        developer.log('🔐 [Auth] Not found locally — checking Supabase for $email');
+        try {
+          final client = sb.Supabase.instance.client;
+          final response = await client
+              .from('users')
+              .select()
+              .eq('email', email)
+              .maybeSingle();
+
+          if (response != null && response['password_hash'] == passwordHash) {
+            developer.log('✅ [Auth] Found in Supabase — pulling down to local DB');
+            final remoteData = Map<String, dynamic>.from(response);
+            await db.insert('users', remoteData, conflictAlgorithm: ConflictAlgorithm.replace);
+            // Now retry local query so the rest of the flow is identical
+            final synced = await db.query('users',
+                where: 'email = ? AND password_hash = ?',
+                whereArgs: [email, passwordHash]);
+            if (synced.isNotEmpty) {
+              final appUser = AppUser.fromMap(synced.first);
+              await _updateLastLogin(appUser.id);
+              _currentUser = appUser;
+              _authStateController.add(_currentUser);
+              await _saveAnonymousStatus(appUser.isAnonymous);
+              await _saveUserSession(appUser.id, email, appUser.displayName ?? 'User');
+              developer.log('✅ [Auth] Supabase sign-in successful for $email');
+              try {
+                final phone = remoteData['phone'] as String? ?? '';
+                bool linked = false;
+                if (phone.isNotEmpty) {
+                  linked = await CaseManagementService.tryAutoLinkByPhone(
+                      appUser.id, phone);
+                }
+                if (!linked) {
+                  await CaseManagementService.tryAutoLinkByEmail(
+                      appUser.id, email);
+                }
+              } catch (e) {
+                developer.log('⚠️ [Auth] Auto case-link (Supabase path) failed (non-fatal): $e');
+              }
+              return appUser;
+            }
+          } else if (response != null) {
+            developer.log('❌ [Auth] Found in Supabase but password doesn\'t match');
+          } else {
+            developer.log('❌ [Auth] Not found in Supabase either');
+          }
+        } catch (e) {
+          developer.log('⚠️ [Auth] Supabase fallback failed: $e');
+        }
+
         throw Exception('Invalid email or password');
       }
 
@@ -326,6 +392,23 @@ class AuthService {
       _authStateController.add(_currentUser);
       await _saveAnonymousStatus(appUser.isAnonymous);
       await _saveUserSession(appUser.id, email, appUser.displayName ?? 'User');
+
+      // Auto-link to any existing case plan that matches by phone or name.
+      // Runs on every login so plans created by admin after registration are
+      // picked up without requiring the user to re-register.
+      try {
+        final phone = userData['phone'] as String? ?? '';
+        bool linked = false;
+        if (phone.isNotEmpty) {
+          linked = await CaseManagementService.tryAutoLinkByPhone(
+              appUser.id, phone);
+        }
+        if (!linked) {
+          await CaseManagementService.tryAutoLinkByEmail(appUser.id, email);
+        }
+      } catch (e) {
+        developer.log('⚠️ [Auth] Auto case-link on login failed (non-fatal): $e');
+      }
 
       developer.log('✅ [Auth] Sign in successful for $email as ${appUser.userType}');
       return appUser;

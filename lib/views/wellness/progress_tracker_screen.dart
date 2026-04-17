@@ -223,8 +223,9 @@ class _ProgressTrackerScreenState extends State<ProgressTrackerScreen>
               final isToday = dateStr == '${today.year}-${today.month.toString().padLeft(2,'0')}-${today.day.toString().padLeft(2,'0')}';
 
               Color bgColor;
-              if (activityCount == 0) bgColor = Colors.grey[100]!;
-              else if (activityCount == 1) bgColor = Colors.green[200]!;
+              if (activityCount == 0) {
+                bgColor = Colors.grey[100]!;
+              } else if (activityCount == 1) bgColor = Colors.green[200]!;
               else if (activityCount == 2) bgColor = Colors.green[400]!;
               else bgColor = const Color(0xFFF0562D);
 

@@ -1,7 +1,11 @@
+import 'dart:developer' as developer;
 import '../models/safety_plan.dart';
 import '../services/local_database_service.dart';
+import '../services/supabase_sync_service.dart';
 
 class SafetyPlanService {
+  final _sync = SupabaseSyncService();
+
   Future<SafetyPlan> createSafetyPlan(String userId) async {
     final now = DateTime.now();
     final plan = SafetyPlan(
@@ -26,6 +30,7 @@ class SafetyPlanService {
       'digital_safety': plan.digitalSafety?.toMap() ?? {},
     });
 
+    await _pushLatestSafetyPlanToCloud(userId);
     return plan;
   }
 
@@ -44,10 +49,12 @@ class SafetyPlanService {
       safePlaces: ((data['safe_places'] as List?) ?? [])
           .map((p) => SafePlace.fromMap(p as Map<String, dynamic>))
           .toList(),
-      escapePlan: data['escape_plan'] != null && (data['escape_plan'] as Map).isNotEmpty
+      escapePlan: data['escape_plan'] != null &&
+              (data['escape_plan'] as Map).isNotEmpty
           ? EscapePlan.fromMap(data['escape_plan'] as Map<String, dynamic>)
           : null,
-      essentialItems: ((data['essential_items'] as List?) ?? []).cast<String>(),
+      essentialItems:
+          ((data['essential_items'] as List?) ?? []).cast<String>(),
       dangerCodeWord: (data['code_words'] as Map?)?['danger'] as String?,
       helpCodeWord: (data['code_words'] as Map?)?['help'] as String?,
       children: ((data['children_safety'] as List?) ?? [])
@@ -59,9 +66,12 @@ class SafetyPlanService {
       hiddenSavings: ((data['financial_safety'] as List?) ?? [])
           .map((h) => HiddenSaving.fromMap(h as Map<String, dynamic>))
           .toList(),
-      digitalSafety: data['digital_safety'] != null && (data['digital_safety'] as Map).isNotEmpty
-          ? DigitalSafetyPlan.fromMap(data['digital_safety'] as Map<String, dynamic>)
-          : null,
+      digitalSafety:
+          data['digital_safety'] != null &&
+                  (data['digital_safety'] as Map).isNotEmpty
+              ? DigitalSafetyPlan.fromMap(
+                  data['digital_safety'] as Map<String, dynamic>)
+              : null,
     );
   }
 
@@ -80,16 +90,17 @@ class SafetyPlanService {
       'financial_safety': plan.hiddenSavings.map((h) => h.toMap()).toList(),
       'digital_safety': plan.digitalSafety?.toMap() ?? {},
     });
+
+    await _pushLatestSafetyPlanToCloud(plan.userId);
   }
 
   Future<void> deleteSafetyPlan(String planId) async {
-    // Safety plans are user-specific, so we'd need to delete by user_id
-    // For now, this is a placeholder - you may want to add a delete method to LocalDatabaseService
+    // Safety plans are user-specific — deletion handled via clearUserData
   }
 
   Future<double> calculateCompletionPercentage(SafetyPlan plan) async {
     int completed = 0;
-    int total = 10;
+    const int total = 10;
 
     if (plan.emergencyContacts.isNotEmpty) completed++;
     if (plan.safePlaces.isNotEmpty) completed++;
@@ -116,10 +127,36 @@ class SafetyPlanService {
       'Important phone numbers',
       'Clothing',
       'Toiletries',
-      'Children\'s items',
+      "Children's items",
       'Pet supplies',
       'Cash',
       'Important documents',
     ];
+  }
+
+  // ─── Private helpers ────────────────────────────────────────────────────────
+
+  /// Reads the latest safety plan row for [userId] from SQLite and pushes to Supabase.
+  Future<void> _pushLatestSafetyPlanToCloud(String userId) async {
+    try {
+      final db = await LocalDatabaseService.database;
+      final rows = await db.query(
+        'safety_plans',
+        where: 'user_id = ?',
+        whereArgs: [userId],
+        orderBy: 'updated_at DESC',
+        limit: 1,
+      );
+      if (rows.isEmpty) return;
+      final raw = Map<String, dynamic>.from(rows.first);
+      // localWrite is a no-op — data is already in SQLite
+      await _sync.upsert(
+        table: 'safety_plans',
+        data: raw,
+        localWrite: (_) async {},
+      );
+    } catch (e) {
+      developer.log('⚠️ [SafetyPlan] Cloud push failed (non-fatal): $e');
+    }
   }
 }

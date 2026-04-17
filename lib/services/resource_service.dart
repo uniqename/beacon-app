@@ -3,6 +3,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/resource.dart';
 import '../data/location_based_resources.dart';
+import '../services/app_config_service.dart';
 import 'local_database_service.dart';
 
 class ResourceService {
@@ -11,16 +12,23 @@ class ResourceService {
   ResourceService._internal();
 
   List<Resource>? _cachedResources;
+  String? _cachedOrgKey;
 
-  // Initialize resources if not cached
+  // Initialize resources if not cached, or if org has changed
   Future<void> _initializeResources() async {
-    if (_cachedResources == null) {
+    final orgKey = AppConfigService.instance.config.orgKey;
+    if (_cachedResources == null || _cachedOrgKey != orgKey) {
       try {
-        // Load real Ghana resources
-        _cachedResources = LocationBasedResources.getGhanaResources();
-        developer.log('Loaded ${_cachedResources!.length} Ghana resources');
+        if (orgKey == 'us') {
+          _cachedResources = LocationBasedResources.getUSAResources(null);
+          developer.log('Loaded ${_cachedResources!.length} US resources');
+        } else {
+          _cachedResources = LocationBasedResources.getGhanaResources();
+          developer.log('Loaded ${_cachedResources!.length} Ghana resources');
+        }
+        _cachedOrgKey = orgKey;
       } catch (e) {
-        developer.log('Error loading Ghana resources: $e');
+        developer.log('Error loading resources: $e');
         _cachedResources = [];
       }
     }

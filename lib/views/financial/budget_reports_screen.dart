@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../services/app_config_service.dart';
 import '../../services/budget_service.dart';
 
 class BudgetReportsScreen extends StatefulWidget {
@@ -12,6 +13,7 @@ class BudgetReportsScreen extends StatefulWidget {
 
 class _BudgetReportsScreenState extends State<BudgetReportsScreen> {
   final BudgetService _service = BudgetService();
+  String get _cs => AppConfigService.instance.config.currencySymbol;
   Map<String, double> _categoryExpenses = {};
   bool _isLoading = true;
 
@@ -52,7 +54,7 @@ class _BudgetReportsScreenState extends State<BudgetReportsScreen> {
                       children: [
                         Text('Spending by Category', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                         SizedBox(height: 8),
-                        Text('Total: GH₵ ${totalExpenses.toStringAsFixed(2)}', style: TextStyle(color: Colors.grey[600])),
+                        Text('Total: $_cs ${totalExpenses.toStringAsFixed(2)}', style: TextStyle(color: Colors.grey[600])),
                         SizedBox(height: 20),
                         if (_categoryExpenses.isEmpty)
                           Center(
@@ -137,7 +139,7 @@ class _BudgetReportsScreenState extends State<BudgetReportsScreen> {
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               Text(
-                'GH₵${entry.value.toStringAsFixed(0)}',
+                '$_cs${entry.value.toStringAsFixed(0)}',
                 style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 4),
@@ -188,7 +190,7 @@ class _BudgetReportsScreenState extends State<BudgetReportsScreen> {
                 ],
               ),
               Text(
-                'GH₵ ${amount.toStringAsFixed(2)}',
+                '$_cs ${amount.toStringAsFixed(2)}',
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
             ],

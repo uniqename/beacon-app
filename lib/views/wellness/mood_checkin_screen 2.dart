@@ -4,7 +4,7 @@ import '../../services/mood_tracking_service.dart';
 class MoodCheckinScreen extends StatefulWidget {
   final String userId;
 
-  const MoodCheckinScreen({Key? key, required this.userId}) : super(key: key);
+  const MoodCheckinScreen({super.key, required this.userId});
 
   @override
   State<MoodCheckinScreen> createState() => _MoodCheckinScreenState();
@@ -151,15 +151,15 @@ class _MoodCheckinScreenState extends State<MoodCheckinScreen> {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: _isSaving ? null : _saveMood,
-                child: _isSaving
-                    ? SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                    : Text('Save Mood Entry', style: TextStyle(fontSize: 16)),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.purple[600],
                   foregroundColor: Colors.white,
                   padding: EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                 ),
+                child: _isSaving
+                    ? SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                    : Text('Save Mood Entry', style: TextStyle(fontSize: 16)),
               ),
             ),
           ],

@@ -5,7 +5,7 @@ import '../../services/safety_plan_service.dart';
 class EssentialItemsScreen extends StatefulWidget {
   final String userId;
 
-  const EssentialItemsScreen({Key? key, required this.userId}) : super(key: key);
+  const EssentialItemsScreen({super.key, required this.userId});
 
   @override
   State<EssentialItemsScreen> createState() => _EssentialItemsScreenState();
@@ -29,9 +29,7 @@ class _EssentialItemsScreenState extends State<EssentialItemsScreen> {
 
     try {
       var plan = await _service.getSafetyPlan(widget.userId);
-      if (plan == null) {
-        plan = await _service.createSafetyPlan(widget.userId);
-      }
+      plan ??= await _service.createSafetyPlan(widget.userId);
 
       // Get default items from service
       final defaultItems = _service.getDefaultEssentialItems();

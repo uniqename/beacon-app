@@ -6,6 +6,7 @@ import '../models/group_participant.dart';
 import '../models/group_invitation.dart';
 import 'local_database_service.dart';
 import 'email_notification_service.dart';
+import 'supabase_sync_service.dart';
 
 /// Service for managing support groups including CRUD operations,
 /// membership management, invitations, and permissions
@@ -15,6 +16,7 @@ class SupportGroupService {
   SupportGroupService._internal();
 
   final _uuid = const Uuid();
+  final _sync = SupabaseSyncService();
 
   // ============================================================================
   // GROUP CRUD OPERATIONS
@@ -47,6 +49,11 @@ class SupportGroupService {
       };
 
       await db.insert('support_groups', groupData);
+      await _sync.upsert(
+        table: 'support_groups',
+        data: groupData,
+        localWrite: (_) async {},
+      );
 
       // Add facilitator as first participant — non-critical, don't fail group creation
       if (group.facilitatorId != null) {
@@ -215,6 +222,21 @@ class SupportGroupService {
         where: 'id = ?',
         whereArgs: [groupId],
       );
+
+      // Sync full updated row to Supabase
+      try {
+        final rows = await db.query('support_groups',
+            where: 'id = ?', whereArgs: [groupId], limit: 1);
+        if (rows.isNotEmpty) {
+          await _sync.upsert(
+            table: 'support_groups',
+            data: Map<String, dynamic>.from(rows.first),
+            localWrite: (_) async {},
+          );
+        }
+      } catch (e) {
+        developer.log('⚠️ [SupportGroupService] Cloud sync failed (non-fatal): $e');
+      }
 
       developer.log('✅ [SupportGroupService] Updated group: $groupId');
       return true;

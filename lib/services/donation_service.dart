@@ -10,6 +10,7 @@ import '../models/donation.dart';
 import '../models/payment_result.dart';
 import 'payment_service.dart';
 import 'local_database_service.dart';
+import 'supabase_sync_service.dart';
 
 /// Service for managing donations and receipts
 ///
@@ -22,6 +23,7 @@ class DonationService {
 
   final PaymentService _paymentService = PaymentService();
   final Uuid _uuid = const Uuid();
+  final _sync = SupabaseSyncService();
 
   /// Create a new donation record in pending state
   Future<Donation> createDonation({
@@ -62,12 +64,17 @@ class DonationService {
         metadata: metadata,
       );
 
-      // Save to database
+      // Save to local database and sync to Supabase
       final db = await LocalDatabaseService.database;
       await db.insert(
         'donations',
         donation.toMap(),
         conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+      await _sync.upsert(
+        table: 'donations',
+        data: donation.toMap(),
+        localWrite: (_) async {},
       );
 
       developer.log('✅ [Donation] Donation created: ${donation.id}');
@@ -214,6 +221,23 @@ class DonationService {
         where: 'id = ?',
         whereArgs: [donationId],
       );
+
+      // Sync updated row to Supabase
+      if (count > 0) {
+        try {
+          final rows = await db.query('donations',
+              where: 'id = ?', whereArgs: [donationId], limit: 1);
+          if (rows.isNotEmpty) {
+            await _sync.upsert(
+              table: 'donations',
+              data: Map<String, dynamic>.from(rows.first),
+              localWrite: (_) async {},
+            );
+          }
+        } catch (e) {
+          developer.log('⚠️ [Donation] Cloud status sync failed (non-fatal): $e');
+        }
+      }
 
       developer.log('✅ [Donation] Updated $count donation(s)');
       return count > 0;

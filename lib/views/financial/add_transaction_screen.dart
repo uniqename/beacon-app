@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../../services/app_config_service.dart';
 import '../../services/budget_service.dart';
 
 class AddTransactionScreen extends StatefulWidget {
@@ -14,6 +15,7 @@ class AddTransactionScreen extends StatefulWidget {
 class _AddTransactionScreenState extends State<AddTransactionScreen> {
   final _formKey = GlobalKey<FormState>();
   final BudgetService _service = BudgetService();
+  String get _cs => AppConfigService.instance.config.currencySymbol;
   final _amountController = TextEditingController();
   final _descriptionController = TextEditingController();
 
@@ -95,7 +97,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
             TextFormField(
               controller: _amountController,
               decoration: InputDecoration(
-                labelText: 'Amount (GH₵) *',
+                labelText: 'Amount ($_cs) *',
                 border: OutlineInputBorder(),
                 prefixIcon: Icon(Icons.money),
               ),

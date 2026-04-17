@@ -6,7 +6,7 @@ import '../../services/document_vault_service.dart';
 class DocumentVaultScreen extends StatefulWidget {
   final String userId;
 
-  const DocumentVaultScreen({Key? key, required this.userId}) : super(key: key);
+  const DocumentVaultScreen({super.key, required this.userId});
 
   @override
   State<DocumentVaultScreen> createState() => _DocumentVaultScreenState();

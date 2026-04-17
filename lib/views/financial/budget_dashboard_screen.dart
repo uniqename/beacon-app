@@ -3,6 +3,7 @@ import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../models/evidence_log.dart';
+import '../../services/app_config_service.dart';
 import '../../services/budget_service.dart';
 import 'add_transaction_screen.dart';
 
@@ -85,6 +86,7 @@ class BudgetDashboardScreen extends StatefulWidget {
 class _BudgetDashboardScreenState extends State<BudgetDashboardScreen>
     with TickerProviderStateMixin {
   final BudgetService _service = BudgetService();
+  String get _cs => AppConfigService.instance.config.currencySymbol;
 
   // ─ Transaction data ─
   List<BudgetTransaction> _transactions = [];
@@ -220,13 +222,15 @@ class _BudgetDashboardScreenState extends State<BudgetDashboardScreen>
   int get _healthScore {
     int score = 0;
     // Savings rate (max 25 pts)
-    if (_savingsRate >= 20) score += 25;
-    else if (_savingsRate >= 10) score += 15;
+    if (_savingsRate >= 20) {
+      score += 25;
+    } else if (_savingsRate >= 10) score += 15;
     else if (_savingsRate > 0) score += 8;
 
     // Emergency fund (max 25 pts)
-    if (_emergencyFundMonths >= 6) score += 25;
-    else if (_emergencyFundMonths >= 3) score += 15;
+    if (_emergencyFundMonths >= 6) {
+      score += 25;
+    } else if (_emergencyFundMonths >= 3) score += 15;
     else if (_emergencyFundMonths >= 1) score += 8;
 
     // Debt-to-income ratio (max 25 pts)
@@ -234,8 +238,9 @@ class _BudgetDashboardScreenState extends State<BudgetDashboardScreen>
       score += 25;
     } else {
       final dti = _totalIncome > 0 ? _totalDebt / _totalIncome : 1.0;
-      if (dti < 0.2) score += 20;
-      else if (dti < 0.5) score += 12;
+      if (dti < 0.2) {
+        score += 20;
+      } else if (dti < 0.5) score += 12;
       else if (dti < 1.0) score += 6;
     }
 
@@ -514,7 +519,7 @@ class _BudgetDashboardScreenState extends State<BudgetDashboardScreen>
           ),
           const SizedBox(height: 8),
           Text(
-            'GH₵ ${_balance.abs().toStringAsFixed(2)}',
+            '$_cs${_balance.abs().toStringAsFixed(2)}',
             style: const TextStyle(
                 color: Colors.white,
                 fontSize: 42,
@@ -525,7 +530,7 @@ class _BudgetDashboardScreenState extends State<BudgetDashboardScreen>
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              _heroStat('Net Worth', 'GH₵ ${_netWorth.toStringAsFixed(0)}',
+              _heroStat('Net Worth', '$_cs${_netWorth.toStringAsFixed(0)}',
                   _netWorth >= 0 ? Colors.white : _accentRed),
               Container(
                   width: 1,
@@ -626,7 +631,7 @@ class _BudgetDashboardScreenState extends State<BudgetDashboardScreen>
               Expanded(
                   child: _snapStat(
                       'Total Debt',
-                      'GH₵ ${_totalDebt.toStringAsFixed(0)}',
+                      '$_cs${_totalDebt.toStringAsFixed(0)}',
                       _totalDebt == 0 ? _accent : _accentRed,
                       Icons.credit_card_off)),
               const SizedBox(width: 10),
@@ -954,7 +959,7 @@ class _BudgetDashboardScreenState extends State<BudgetDashboardScreen>
     } else if (_totalIncome == 0) {
       return 'Start by logging your income and expenses. You can\'t manage what you don\'t measure. Even small amounts matter.';
     } else {
-      return 'Every journey begins with one step. Log daily transactions, set a savings goal — even GH₵ 50/month builds the habit of financial freedom.';
+      return 'Every journey begins with one step. Log daily transactions, set a savings goal — even ${_cs}50/month builds the habit of financial freedom.';
     }
   }
 
@@ -1010,7 +1015,7 @@ class _BudgetDashboardScreenState extends State<BudgetDashboardScreen>
                       fontWeight: FontWeight.bold,
                       letterSpacing: 1)),
               Text(
-                '${isPositive ? '+' : '-'}GH₵ ${_netWorth.abs().toStringAsFixed(2)}',
+                '${isPositive ? '+' : '-'}$_cs${_netWorth.abs().toStringAsFixed(2)}',
                 style: TextStyle(
                     color: isPositive ? _accent : _accentRed,
                     fontSize: 20,
@@ -1037,7 +1042,7 @@ class _BudgetDashboardScreenState extends State<BudgetDashboardScreen>
           ],
         ),
         const SizedBox(height: 6),
-        Text('GH₵ ${amount.toStringAsFixed(2)}',
+        Text('$_cs${amount.toStringAsFixed(2)}',
             style: TextStyle(
                 color: color,
                 fontSize: 17,
@@ -1094,7 +1099,7 @@ class _BudgetDashboardScreenState extends State<BudgetDashboardScreen>
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      'Based on your expenses: suggested FIRE number is GH₵ ${suggestedFire.toStringAsFixed(0)}',
+                      'Based on your expenses: suggested FIRE number is $_cs${suggestedFire.toStringAsFixed(0)}',
                       style: const TextStyle(
                           color: _accentGold, fontSize: 12),
                     ),
@@ -1105,8 +1110,8 @@ class _BudgetDashboardScreenState extends State<BudgetDashboardScreen>
           // Set freedom number
           Row(
             children: [
-              const Text('My FIRE Target:  GH₵ ',
-                  style: TextStyle(color: Colors.white60, fontSize: 14)),
+              Text('My FIRE Target:  $_cs ',
+                  style: const TextStyle(color: Colors.white60, fontSize: 14)),
               Expanded(
                 child: _inlineNumberField(
                   value: _freedomNumber,
@@ -1137,7 +1142,7 @@ class _BudgetDashboardScreenState extends State<BudgetDashboardScreen>
                           style: const TextStyle(
                               color: _accentGold, fontSize: 12)),
                       Text(
-                          'GH₵ ${(_freedomNumber - _netWorth).clamp(0, double.infinity).toStringAsFixed(0)} to go',
+                          '$_cs${(_freedomNumber - _netWorth).clamp(0, double.infinity).toStringAsFixed(0)} to go',
                           style: const TextStyle(
                               color: Colors.white38, fontSize: 11)),
                     ],
@@ -1212,8 +1217,8 @@ class _BudgetDashboardScreenState extends State<BudgetDashboardScreen>
           // Monthly expenses input
           Row(
             children: [
-              const Text('Monthly expenses:  GH₵ ',
-                  style: TextStyle(color: Colors.white60, fontSize: 13)),
+              Text('Monthly expenses:  $_cs ',
+                  style: const TextStyle(color: Colors.white60, fontSize: 13)),
               Expanded(
                 child: _inlineNumberField(
                   value: _monthlyExpensesTarget,
@@ -1296,7 +1301,7 @@ class _BudgetDashboardScreenState extends State<BudgetDashboardScreen>
               const Text('Cash Balance',
                   style:
                       TextStyle(color: Colors.white60, fontSize: 13)),
-              Text('GH₵ ${(_balance > 0 ? _balance : 0).toStringAsFixed(2)}',
+              Text('$_cs${(_balance > 0 ? _balance : 0).toStringAsFixed(2)}',
                   style: const TextStyle(
                       color: _accent,
                       fontWeight: FontWeight.bold,
@@ -1313,7 +1318,7 @@ class _BudgetDashboardScreenState extends State<BudgetDashboardScreen>
                       fontWeight: FontWeight.bold,
                       fontSize: 13,
                       letterSpacing: 0.5)),
-              Text('GH₵ ${_totalAssets.toStringAsFixed(2)}',
+              Text('$_cs${_totalAssets.toStringAsFixed(2)}',
                   style: const TextStyle(
                       color: _accentPurple,
                       fontWeight: FontWeight.bold,
@@ -1355,7 +1360,7 @@ class _BudgetDashboardScreenState extends State<BudgetDashboardScreen>
               ],
             ),
           ),
-          Text('GH₵ ${a.amount.toStringAsFixed(2)}',
+          Text('$_cs${a.amount.toStringAsFixed(2)}',
               style: TextStyle(
                   color: color,
                   fontWeight: FontWeight.bold,
@@ -1472,7 +1477,7 @@ class _BudgetDashboardScreenState extends State<BudgetDashboardScreen>
               const Text('Total Debt Remaining',
                   style:
                       TextStyle(color: Colors.white70, fontSize: 13)),
-              Text('GH₵ ${remaining.toStringAsFixed(2)}',
+              Text('$_cs${remaining.toStringAsFixed(2)}',
                   style: const TextStyle(
                       color: _accentRed,
                       fontSize: 22,
@@ -1498,7 +1503,7 @@ class _BudgetDashboardScreenState extends State<BudgetDashboardScreen>
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Paid off: GH₵ ${paidOff.toStringAsFixed(0)}',
+              Text('Paid off: $_cs${paidOff.toStringAsFixed(0)}',
                   style: const TextStyle(
                       color: _accent, fontSize: 11)),
               Text('${(progress * 100).toInt()}% cleared',
@@ -1674,12 +1679,12 @@ class _BudgetDashboardScreenState extends State<BudgetDashboardScreen>
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                  'Remaining: GH₵ ${d.remaining.toStringAsFixed(2)}',
+                  'Remaining: $_cs${d.remaining.toStringAsFixed(2)}',
                   style: const TextStyle(
                       color: _accentRed,
                       fontWeight: FontWeight.w600,
                       fontSize: 13)),
-              Text('Min: GH₵ ${d.minimumPayment.toStringAsFixed(0)}/mo',
+              Text('Min: $_cs${d.minimumPayment.toStringAsFixed(0)}/mo',
                   style: const TextStyle(
                       color: Colors.white38, fontSize: 11)),
               Text('${(progress * 100).toInt()}% paid',
@@ -1960,8 +1965,8 @@ class _BudgetDashboardScreenState extends State<BudgetDashboardScreen>
           const SizedBox(height: 14),
           Row(
             children: [
-              const Text('GH₵ ',
-                  style: TextStyle(
+              Text('$_cs ',
+                  style: const TextStyle(
                       color: Colors.white60, fontSize: 16)),
               Expanded(
                 child: TextField(
@@ -2060,11 +2065,11 @@ class _BudgetDashboardScreenState extends State<BudgetDashboardScreen>
             children: [
               Expanded(
                   child: _statPill('Saved',
-                      'GH₵ ${hiddenTotal.toStringAsFixed(2)}', _accent)),
+                      '$_cs${hiddenTotal.toStringAsFixed(2)}', _accent)),
               const SizedBox(width: 10),
               Expanded(
                   child: _statPill('Spent',
-                      'GH₵ ${hiddenExpenses.toStringAsFixed(2)}',
+                      '$_cs${hiddenExpenses.toStringAsFixed(2)}',
                       _accentRed)),
             ],
           ),
@@ -2182,7 +2187,7 @@ class _BudgetDashboardScreenState extends State<BudgetDashboardScreen>
           ),
           const SizedBox(width: 8),
           Text(
-            '${t.isIncome ? '+' : '-'}GH₵ ${t.amount.toStringAsFixed(2)}',
+            '${t.isIncome ? '+' : '-'}$_cs${t.amount.toStringAsFixed(2)}',
             style: TextStyle(
                 color: color,
                 fontWeight: FontWeight.bold,
@@ -2245,7 +2250,7 @@ class _BudgetDashboardScreenState extends State<BudgetDashboardScreen>
           ),
           const SizedBox(height: 10),
           Text(
-            'GH₵ ${amount.toStringAsFixed(2)}',
+            '$_cs${amount.toStringAsFixed(2)}',
             style: TextStyle(
                 color: color,
                 fontSize: 18,
@@ -2286,7 +2291,7 @@ class _BudgetDashboardScreenState extends State<BudgetDashboardScreen>
                         fontWeight: FontWeight.w600)),
               ),
               Text(
-                'GH₵ ${current.toStringAsFixed(0)} / ${goal.toStringAsFixed(0)}',
+                '$_cs${current.toStringAsFixed(0)} / ${goal.toStringAsFixed(0)}',
                 style: TextStyle(color: color, fontSize: 12),
               ),
             ],
@@ -2363,7 +2368,7 @@ class _BudgetDashboardScreenState extends State<BudgetDashboardScreen>
                                   color: Colors.white70,
                                   fontSize: 12))),
                       Text(
-                          'GH₵ ${e.value.toStringAsFixed(0)}',
+                          '$_cs${e.value.toStringAsFixed(0)}',
                           style: TextStyle(
                               color: color,
                               fontSize: 12,
@@ -2623,11 +2628,11 @@ class _BudgetDashboardScreenState extends State<BudgetDashboardScreen>
               _dialogField(nameCtrl, 'e.g. Savings Account, Land',
                   Colors.white),
               const SizedBox(height: 10),
-              _dialogField(amountCtrl, 'Current value (GH₵)',
+              _dialogField(amountCtrl, 'Current value ($_cs)',
                   _accentPurple, isNumber: true),
               const SizedBox(height: 10),
               DropdownButtonFormField<String>(
-                value: selectedType,
+                initialValue: selectedType,
                 dropdownColor: _cardBg,
                 style: const TextStyle(color: Colors.white),
                 decoration: InputDecoration(

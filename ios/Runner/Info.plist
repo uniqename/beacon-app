@@ -59,9 +59,7 @@
 	<string>Beacon of New Beginnings needs microphone access to participate in live audio support group rooms where you can speak with counselors and peers.</string>
 	<key>NSFaceIDUsageDescription</key>
 	<string>Beacon of New Beginnings uses Face ID to securely log you back into your account without typing your password, keeping your sensitive support data private.</string>
-	<key>NSUserTrackingUsageDescription</key>
-	<string>Beacon of New Beginnings uses analytics only to improve app stability and support features. No personal data or usage information is shared with advertisers or third parties.</string>
-	<key>UIBackgroundModes</key>
+<key>UIBackgroundModes</key>
 	<array>
 		<string>audio</string>
 		<string>fetch</string>

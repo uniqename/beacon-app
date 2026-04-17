@@ -3,6 +3,7 @@ import 'dart:developer' as developer;
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'local_database_service.dart';
+import 'supabase_sync_service.dart';
 
 class ChatService {
   static final ChatService _instance = ChatService._internal();
@@ -12,6 +13,7 @@ class ChatService {
   GenerativeModel? _model;
   final Map<String, Timer> _escalationTimers = {};
   final Duration _escalationTimeout = const Duration(minutes: 10);
+  final _sync = SupabaseSyncService();
 
   // Initialize Gemini AI
   void initialize() {
@@ -59,6 +61,8 @@ Always maintain confidentiality and remind users that their safety is the priori
   Future<String> startConversation(String userId) async {
     final conversationId = await LocalDatabaseService.createConversation(userId);
     _startEscalationTimer(conversationId);
+    // Sync new conversation to Supabase
+    _syncConversation(conversationId);
     return conversationId;
   }
 
@@ -75,6 +79,7 @@ Always maintain confidentiality and remind users that their safety is the priori
       userId,
       message,
     );
+    _syncLatestMessage(conversationId);
 
     // Check if conversation is escalated
     final conversation = await LocalDatabaseService.getConversation(conversationId);
@@ -87,6 +92,7 @@ Always maintain confidentiality and remind users that their safety is the priori
         'ai_assistant',
         autoResponse,
       );
+      _syncLatestMessage(conversationId);
 
       return {
         'success': true,
@@ -107,6 +113,7 @@ Always maintain confidentiality and remind users that their safety is the priori
         'ai_assistant',
         emergencyResponse,
       );
+      _syncLatestMessage(conversationId);
 
       return {
         'success': true,
@@ -155,6 +162,7 @@ Respond with empathy and support. Keep it brief (2-4 sentences).
         'ai_assistant',
         aiResponse,
       );
+      _syncLatestMessage(conversationId);
 
       // Update last response timestamp
       await LocalDatabaseService.updateConversationResponseTime(conversationId);
@@ -179,6 +187,7 @@ Respond with empathy and support. Keep it brief (2-4 sentences).
         'ai_assistant',
         fallbackResponse,
       );
+      _syncLatestMessage(conversationId);
 
       await LocalDatabaseService.updateConversationResponseTime(conversationId);
       _resetEscalationTimer(conversationId);
@@ -377,5 +386,46 @@ Log in to the Beacon Admin Dashboard to respond: https://beaconnewbeginnings.org
       timer.cancel();
     }
     _escalationTimers.clear();
+  }
+
+  // ─── Supabase sync helpers (fire-and-forget) ─────────────────────────────
+
+  void _syncConversation(String conversationId) {
+    Future(() async {
+      try {
+        final db = await LocalDatabaseService.database;
+        final rows = await db.query('conversations',
+            where: 'id = ?', whereArgs: [conversationId], limit: 1);
+        if (rows.isEmpty) return;
+        await _sync.upsert(
+          table: 'conversations',
+          data: Map<String, dynamic>.from(rows.first),
+          localWrite: (_) async {},
+        );
+      } catch (e) {
+        developer.log('⚠️ [Chat] Conversation sync failed (non-fatal): $e');
+      }
+    }).ignore();
+  }
+
+  void _syncLatestMessage(String conversationId) {
+    Future(() async {
+      try {
+        final db = await LocalDatabaseService.database;
+        final rows = await db.query('chat_messages',
+            where: 'conversation_id = ?',
+            whereArgs: [conversationId],
+            orderBy: 'timestamp DESC',
+            limit: 1);
+        if (rows.isEmpty) return;
+        await _sync.upsert(
+          table: 'chat_messages',
+          data: Map<String, dynamic>.from(rows.first),
+          localWrite: (_) async {},
+        );
+      } catch (e) {
+        developer.log('⚠️ [Chat] Message sync failed (non-fatal): $e');
+      }
+    }).ignore();
   }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../models/evidence_log.dart';
+import '../../services/app_config_service.dart';
 import '../../services/budget_service.dart';
 
 class HiddenSavingsScreen extends StatefulWidget {
@@ -13,6 +14,7 @@ class HiddenSavingsScreen extends StatefulWidget {
 
 class _HiddenSavingsScreenState extends State<HiddenSavingsScreen> {
   final BudgetService _service = BudgetService();
+  String get _cs => AppConfigService.instance.config.currencySymbol;
   List<BudgetTransaction> _hiddenTransactions = [];
   bool _isLoading = true;
 
@@ -67,7 +69,7 @@ class _HiddenSavingsScreenState extends State<HiddenSavingsScreen> {
                 ),
                 SizedBox(height: 12),
                 Text(
-                  'GH₵ ${totalSavings.toStringAsFixed(2)}',
+                  '$_cs ${totalSavings.toStringAsFixed(2)}',
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 42,
@@ -150,7 +152,7 @@ class _HiddenSavingsScreenState extends State<HiddenSavingsScreen> {
                                 ],
                               ),
                               trailing: Text(
-                                '${transaction.isIncome ? '+' : '-'}GH₵ ${transaction.amount.toStringAsFixed(2)}',
+                                '${transaction.isIncome ? '+' : '-'}$_cs ${transaction.amount.toStringAsFixed(2)}',
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 16,
@@ -177,7 +179,7 @@ class _HiddenSavingsScreenState extends State<HiddenSavingsScreen> {
                     SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        'Tip: Aim to save at least GH₵500 for emergencies',
+                        'Tip: Aim to save at least ${_cs}500 for emergencies',
                         style: TextStyle(fontSize: 13, color: Colors.grey[700]),
                       ),
                     ),

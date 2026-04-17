@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../constants/app_constants.dart';
+import '../../services/app_config_service.dart';
 import '../../services/location_service.dart';
 import '../../data/location_based_resources.dart';
 import '../../models/resource.dart';
@@ -302,7 +303,15 @@ class _ResourcesListScreenState extends State<ResourcesListScreen> {
     } else if (locationService.isInUSA) {
       allResources = LocationBasedResources.getUSAResources(locationService.currentState);
     } else {
-      allResources = LocationBasedResources.getInternationalResources();
+      // GPS unavailable or unknown country — fall back to org config selection
+      final orgKey = AppConfigService.instance.config.orgKey;
+      if (orgKey == 'us') {
+        allResources = LocationBasedResources.getUSAResources(null);
+      } else if (orgKey == 'gh') {
+        allResources = LocationBasedResources.getGhanaResources();
+      } else {
+        allResources = LocationBasedResources.getInternationalResources();
+      }
     }
 
     // Filter by category

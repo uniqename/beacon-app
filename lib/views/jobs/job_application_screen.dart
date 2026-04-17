@@ -326,7 +326,7 @@ class _JobApplicationScreenState extends State<JobApplicationScreen> {
         const SizedBox(height: 16),
         Row(
           children: [
-            Switch(value: _hasTransport, onChanged: (v) => setState(() => _hasTransport = v), activeColor: _accentLight),
+            Switch(value: _hasTransport, onChanged: (v) => setState(() => _hasTransport = v), activeThumbColor: _accentLight),
             const SizedBox(width: 8),
             const Text('I have my own transportation', style: TextStyle(color: Colors.white70)),
           ],
