@@ -64,3 +64,4 @@ macos/Flutter/GeneratedPluginRegistrant.swift
 android/key.properties
 android/app/*.jks
 android/app/*.keystore
+releases/
