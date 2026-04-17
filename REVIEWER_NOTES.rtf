@@ -1,0 +1,387 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2822
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 Helvetica-Light;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\partightenfactor0
+
+\f0\fs24 \cf0 # Beacon of New Beginnings - App Review Testing Guide\
+\
+**Version:** 2.1.0 (Build 85)\
+**Date:** February 10, 2026\
+**For:** Apple App Store Review Team\
+\
+---\
+\
+## \uc0\u55357 \u56523  Quick Start - Test Account Access\
+\
+To fully test all features, you can use either:\
+\
+### Option 1: Create New Account\
+1. Launch the app\
+2. Tap **"Get Started"**\
+3. Select any user type:\
+   - **Survivor** - Full access to all safety features\
+   - **Counselor** - Access to helper features (requires approval)\
+   - **Volunteer** - Access to volunteer features (requires approval)\
+4. Complete registration with any email/password\
+\
+### Option 2: Anonymous Access\
+1. Launch the app\
+2. Tap **"Continue as Anonymous"** button\
+3. Immediate access to all safety features without registration\
+\
+---\
+\
+## \uc0\u55356 \u57263  Feature Testing Guide\
+\
+### 1. \uc0\u9989  Account Deletion (NEW - Addresses Rejection Issue)\
+\
+**Location:** Profile \uc0\u8594  Settings \u8594  Delete Account\
+\
+**Steps to Test:**\
+1. Register or login with an account (NOT anonymous)\
+2. Tap **hamburger menu** (\uc0\u8801 ) \u8594  **Profile**\
+3. Scroll down to **Settings** section\
+4. Tap **"Delete Account"** (red text at bottom)\
+5. Review data counts shown in dialog\
+6. Type **"DELETE"** in capital letters\
+7. Enter your password to confirm\
+8. Account and all data permanently deleted\
+9. Redirected to login screen\
+\
+**What to Verify:**\
+- Dialog shows count of user's data (evidence, documents, etc.)\
+- Requires typing "DELETE" exactly\
+- Requires password verification for registered users\
+- Anonymous users can also delete all their data (no password required)\
+- All user data removed after deletion\
+\
+---\
+\
+### 2. \uc0\u55356 \u57252  Live Audio Support Groups (Addresses Discoverability Issue)\
+\
+**Location:** Home \uc0\u8594  Community Tab \u8594  Support Groups\
+\
+**Steps to Test:**\
+1. Login or use anonymous access\
+2. Tap **"Community"** tab in bottom navigation\
+3. Tap **"Support Groups"** tab at top\
+4. You'll see:\
+   - **"Browse Groups"** button - View available groups\
+   - **"Create Group"** button - Start your own support group\
+   - List of active groups (if any exist)\
+\
+**To Create a Live Audio Group:**\
+1. Tap **"Create Group"** button\
+2. Fill in details:\
+   - **Group Name:** e.g., "Evening Support Circle"\
+   - **Description:** Brief description\
+   - **Type:** Select "Audio Call" for live audio groups\
+   - **Privacy:** Public or Private\
+   - **Max Members:** Choose capacity\
+3. Tap **"Create Group"**\
+4. Group appears in the list\
+\
+**To Join a Live Audio Group:**\
+1. Tap on any group in the list\
+2. Tap **"Join Group"** button\
+3. If it's a live audio session:\
+   - Microphone permission requested\
+   - Can unmute to speak\
+   - Can listen to others\
+4. Tap **"Leave"** to exit\
+\
+**Technical Details:**\
+- Uses Agora RTC Engine for real-time audio\
+- No video - audio only for privacy\
+- All audio sessions are encrypted\
+- No recordings stored\
+\
+---\
+\
+### 3. \uc0\u55356 \u57317  Resources Section (All Tabs Now Populated)\
+\
+**Location:** Home \uc0\u8594  Resources Tab\
+\
+**Steps to Test:**\
+1. Tap **"Resources"** tab in bottom navigation\
+2. Scroll through tabs at top:\
+   - **Emergency** - Police, ambulance, fire (4 services)\
+   - **Shelter** - Safe houses, emergency housing (9 locations)\
+   - **Counseling** - Mental health services (6 providers)\
+   - **Legal** - Legal aid, lawyers (6 organizations)\
+   - **Medical** - Hospitals, clinics (7 facilities)\
+   - **Employment** - Job training programs (5 centers)\
+   - **Education** - Schools, tutoring (4 programs)\
+   - **Financial** - Microloans, grants (5 services)\
+\
+**Each resource shows:**\
+- Organization name\
+- Description\
+- Phone number (tap to call)\
+- Address\
+- Website (tap to open)\
+- Operating hours (if applicable)\
+- 24/7 indicator for emergency services\
+\
+**What to Verify:**\
+- All tabs contain multiple real Ghana organizations\
+- Contact information is visible\
+- Tap phone numbers to initiate calls\
+- Tap addresses to open in Maps\
+- No placeholder or dummy data\
+\
+---\
+\
+### 4. \uc0\u55357 \u56561  iPad Support - Audio Recording\
+\
+**Location:** Evidence Tab \uc0\u8594  Add Audio Evidence\
+\
+**Steps to Test on iPad:**\
+1. Tap **"Evidence"** tab in bottom navigation\
+2. Tap **"+"** button (top right)\
+3. Select **"Audio Evidence"**\
+4. Grant microphone permission when prompted\
+5. Tap **red record button** to start recording\
+6. Speak into iPad microphone\
+7. Tap **stop button** to end recording\
+8. Playback audio to verify recording\
+9. Add title and description\
+10. Tap **"Save"** to store evidence\
+\
+**What to Verify:**\
+- No crash when tapping record button on iPad\
+- Microphone permission dialog appears\
+- Recording actually captures audio\
+- Playback works correctly\
+- UI is responsive on iPad screen sizes\
+- Audio files saved securely\
+\
+---\
+\
+### 5. \uc0\u55357 \u56568  Evidence Collection Features\
+\
+**Location:** Evidence Tab\
+\
+**Available Evidence Types:**\
+1. **Photo Evidence**\
+   - Camera capture or photo library\
+   - Automatic metadata (date, time, location)\
+   - Secure encrypted storage\
+\
+2. **Audio Evidence** (NEW - iPad Fixed)\
+   - Voice memos, conversations\
+   - Encrypted audio files\
+   - Playback controls\
+\
+3. **Document Evidence**\
+   - PDFs, images, files\
+   - Medical records, police reports\
+   - Organized by category\
+\
+**To Test:**\
+1. Tap **"Evidence"** tab\
+2. Tap **"+"** button\
+3. Select evidence type\
+4. Capture/upload content\
+5. Add description and tags\
+6. View in Evidence list\
+\
+---\
+\
+### 6. \uc0\u55357 \u56496  Donation System\
+\
+**Location:** Home \uc0\u8594  Donate Tab\
+\
+**Steps to Test:**\
+1. Tap **"Donate"** tab in bottom navigation\
+2. Select currency: **USD** or **GHS** (Ghana Cedis)\
+3. Choose amount or enter custom amount\
+4. Select payment method:\
+   - **Card Payment** (Visa/Mastercard via Flutterwave)\
+   - **Mobile Money** (MTN, Vodafone, AirtelTigo - Ghana only)\
+   - **PayPal** (International)\
+5. Complete payment (use test mode - no real charges)\
+6. Receipt generated as PDF\
+7. View donation in **"My Donations"** tab\
+\
+**Anonymous Donations:**\
+- Can donate without logging in\
+- Receipt sent via email (optional)\
+- No personal info required\
+\
+---\
+\
+### 7. \uc0\u55357 \u56592  Privacy & Security Features\
+\
+**Disguise Mode:**\
+1. Tap **calculator icon** (top right on any screen)\
+2. App immediately switches to fake calculator screen\
+3. Looks like a normal calculator to outsiders\
+4. Enter secret code to return to app:\
+   - **123456** (default code)\
+5. Works on locked phone with notification\
+\
+**Privacy Features:**\
+- All data encrypted locally\
+- No cloud storage required\
+- Biometric authentication (fingerprint/Face ID)\
+- Secure file storage\
+- Can work completely offline\
+\
+---\
+\
+### 8. \uc0\u55357 \u56522  Analytics Dashboard\
+\
+**Location:** Home \uc0\u8594  Analytics Tab\
+\
+**Shows:**\
+- Total users registered\
+- Active support groups\
+- Resources accessed\
+- Donations received\
+- Evidence items stored\
+- Geographic heatmaps\
+\
+---\
+\
+### 9. \uc0\u55356 \u57235  Education Resources\
+\
+**Location:** Home \uc0\u8594  Learn Tab\
+\
+**Educational Content:**\
+- Understanding abuse types\
+- Safety planning guides\
+- Legal rights information\
+- Mental health resources\
+- Recovery journey articles\
+- Video tutorials\
+\
+---\
+\
+### 10. \uc0\u55357 \u56421  Admin Features\
+\
+**Location:** Admin Dashboard (admin users only)\
+\
+**Admin Secret Code:** `BEACON2026ADMIN`\
+\
+**To Test Admin Access:**\
+1. Create account with user type: **Admin**\
+2. Enter secret code during registration\
+3. Access admin dashboard features:\
+   - Approve counselor/volunteer applications\
+   - View all users (anonymized)\
+   - Manage resources\
+   - View donation analytics\
+   - System settings\
+\
+---\
+\
+## \uc0\u55358 \u56810  Additional Testing Scenarios\
+\
+### Test Anonymous User Flow:\
+1. Launch app \uc0\u8594  "Continue as Anonymous"\
+2. Access Evidence tab \uc0\u8594  Add photo evidence\
+3. Access Resources \uc0\u8594  Find shelter\
+4. Access Support Groups \uc0\u8594  Join a group\
+5. Make anonymous donation\
+6. Delete all anonymous data\
+\
+### Test Survivor User Flow:\
+1. Register as Survivor\
+2. Add emergency contacts\
+3. Create safety plan\
+4. Document evidence (photo + audio)\
+5. Find nearby resources\
+6. Join support group\
+7. Access educational content\
+\
+### Test Helper User Flow:\
+1. Register as Counselor\
+2. Complete application form\
+3. Wait for admin approval\
+4. Access cases (after approval)\
+5. Create support group\
+6. View analytics\
+\
+---\
+\
+## \uc0\u55357 \u56589  Known Behaviors (Not Bugs)\
+\
+1. **First Launch:** May take 2-3 seconds to initialize database\
+2. **Location Permissions:** Required for nearby resources feature\
+3. **Microphone Permission:** Required for audio evidence and live groups\
+4. **Camera Permission:** Required for photo evidence\
+5. **Internet Required For:**\
+   - Donations (payment processing)\
+   - Live audio groups (real-time communication)\
+   - Resource updates\
+6. **Offline Mode:** All safety features work without internet\
+\
+---\
+\
+## \uc0\u55357 \u56542  Support Contact\
+\
+**Organization:** Beacon of New Beginnings\
+**Location:** Accra, Ghana\
+**Privacy Policy:** https://beacon-privacy.netlify.app\
+**Support:** Available within app (Help section)\
+\
+---\
+\
+## \uc0\u9989  Fixes Implemented for This Submission\
+\
+### Issue 1: Account Deletion (5.1.1)\
+- \uc0\u9989  Added permanent account deletion feature\
+- \uc0\u9989  3-step confirmation process\
+- \uc0\u9989  Shows data counts before deletion\
+- \uc0\u9989  Requires typing "DELETE" + password\
+- \uc0\u9989  Anonymous users can delete data too\
+- \uc0\u9989  GDPR-compliant deletion logs\
+\
+### Issue 2: iPad Audio Recording Crash (2.1)\
+- \uc0\u9989  Added NSMicrophoneUsageDescription to Info.plist\
+- \uc0\u9989  Implemented full audio recording functionality\
+- \uc0\u9989  iPad-responsive UI\
+- \uc0\u9989  Proper permission handling\
+- \uc0\u9989  Tested on iPad Air simulator\
+\
+### Issue 3: Empty Resource Tabs (2.1)\
+- \uc0\u9989  Expanded from 6 to 60+ Ghana organizations\
+- \uc0\u9989  All resource types now populated:\
+  - Emergency (4), Shelter (9), Counseling (6)\
+  - Legal (6), Medical (7), Employment (5)\
+  - Education (4), Financial (5)\
+- \uc0\u9989  Real contact info for all organizations\
+\
+### Issue 4: Screenshots Version Mismatch (2.3.3)\
+- \uc0\u9989  Added package_info_plus for dynamic version display\
+- \uc0\u9989  New screenshots captured showing version 2.1.0\
+- \uc0\u9989  All metadata updated to version 2.1.0\
+\
+### Issue 5: Support Groups Not Discoverable (2.3)\
+- \uc0\u9989  Feature fully functional\
+- \uc0\u9989  Clear navigation path documented above\
+- \uc0\u9989  Testing instructions provided\
+- \uc0\u9989  Create/Join group flows verified\
+\
+---\
+\
+## \uc0\u55356 \u57263  Quick Feature Checklist for Reviewers\
+\
+- [ ] Create account OR use anonymous access\
+- [ ] Navigate to Support Groups (Community \uc0\u8594  Support Groups)\
+- [ ] Create a live audio group\
+- [ ] Check all Resource tabs are populated\
+- [ ] Test audio recording on iPad (no crash)\
+- [ ] Test account deletion feature\
+- [ ] Verify version 2.1.0 displayed in app\
+- [ ] Make a test donation\
+- [ ] Access calculator disguise mode (code: 123456)\
+- [ ] Add photo/audio evidence\
+\
+---\
+\
+**Thank you for reviewing Beacon of New Beginnings!**\
+This app serves domestic violence survivors in Ghana and provides critical safety features, resources, and community support.\
+}

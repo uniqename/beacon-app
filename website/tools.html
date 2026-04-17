@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Document Tools — Beacon of New Beginnings</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <style>
+    /* ── Tool page layout ──────────────────────────────────────────────── */
+    .tools-page { min-height: 100vh; background: #f8fafc; padding-top: 100px; padding-bottom: 60px; }
+    .tools-container { max-width: 860px; margin: 0 auto; padding: 0 24px; }
+
+    .tools-header { margin-bottom: 32px; }
+    .tools-header .badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+      color: #9ca3af; margin-bottom: 10px;
+    }
+    .tools-header h1 { font-size: 28px; font-weight: 700; color: #111827; margin: 0 0 6px; }
+    .tools-header p  { font-size: 14px; color: #6b7280; margin: 0; }
+
+    /* ── Tool card ─────────────────────────────────────────────────────── */
+    .tool-card {
+      background: white; border-radius: 20px; border: 1px solid #e5e7eb;
+      box-shadow: 0 1px 4px rgba(0,0,0,.06); overflow: hidden; margin-bottom: 24px;
+    }
+    .tool-card-header {
+      display: flex; align-items: center; gap: 14px;
+      padding: 20px 24px; border-bottom: 1px solid #f3f4f6;
+    }
+    .tool-icon {
+      width: 42px; height: 42px; border-radius: 12px;
+      background: #1e3a5f; display: flex; align-items: center; justify-content: center;
+      font-size: 20px; flex-shrink: 0;
+    }
+    .tool-card-header h2 { font-size: 16px; font-weight: 700; color: #111827; margin: 0 0 2px; }
+    .tool-card-header p  { font-size: 13px; color: #6b7280; margin: 0; }
+    .tool-body { padding: 24px; }
+
+    /* ── Steps ─────────────────────────────────────────────────────────── */
+    .step-row {
+      display: flex; align-items: center; gap: 8px; margin-bottom: 18px;
+    }
+    .step-pill {
+      font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;
+      color: #f97316; background: #fff7ed; border: 1px solid #fed7aa;
+      padding: 3px 10px; border-radius: 99px;
+    }
+    .step-label { font-size: 13px; font-weight: 600; color: #374151; }
+
+    /* ── Upload zone ───────────────────────────────────────────────────── */
+    .upload-zone {
+      border: 2px dashed #d1d5db; border-radius: 14px; padding: 36px 24px;
+      text-align: center; cursor: pointer; transition: border-color .2s, background .2s;
+    }
+    .upload-zone:hover { border-color: #f97316; background: #fff7ed; }
+    .upload-zone.dragover { border-color: #f97316; background: #fff7ed; }
+    .upload-zone .upload-icon { font-size: 36px; margin-bottom: 10px; }
+    .upload-zone p { font-size: 14px; font-weight: 600; color: #374151; margin: 0 0 6px; }
+    .upload-zone span { font-size: 12px; color: #9ca3af; }
+    .type-pills { display: flex; gap: 6px; justify-content: center; margin-top: 10px; flex-wrap: wrap; }
+    .type-pill {
+      font-size: 11px; font-weight: 600; color: #6b7280;
+      background: #f3f4f6; border-radius: 99px; padding: 3px 10px;
+    }
+
+    /* ── Letterhead picker ─────────────────────────────────────────────── */
+    .lh-row { display: flex; gap: 8px; flex-wrap: wrap; }
+    .lh-btn {
+      display: flex; align-items: center; gap: 6px;
+      padding: 7px 14px; border-radius: 99px; font-size: 12px; font-weight: 600;
+      border: 1.5px solid #e5e7eb; background: white; color: #4b5563;
+      cursor: pointer; transition: all .15s;
+    }
+    .lh-btn:hover { border-color: #9ca3af; }
+    .lh-btn.active { background: #111827; color: white; border-color: #111827; }
+    .lh-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+    /* ── Letterhead preview bar ────────────────────────────────────────── */
+    #lh-preview { display: none; border-radius: 12px 12px 0 0; padding: 12px 18px 10px; }
+
+    /* ── Action bar ────────────────────────────────────────────────────── */
+    .action-bar {
+      display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 10px;
+    }
+    .action-bar .spacer { flex: 1; }
+    .btn-tool {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 7px 14px; border-radius: 10px; font-size: 12px; font-weight: 700;
+      cursor: pointer; border: none; transition: all .15s; font-family: inherit;
+    }
+    .btn-primary   { background: #111827; color: white; }
+    .btn-primary:hover { background: #1e3a5f; }
+    .btn-outline   { background: white; color: #374151; border: 1.5px solid #e5e7eb; }
+    .btn-outline:hover { background: #f9fafb; }
+    .btn-sig       { background: #1e3a5f; color: white; }
+    .btn-sig:hover { background: #f97316; }
+    .btn-sig.placing { background: #f97316; }
+    .btn-remove    { background: white; color: #6b7280; border: 1.5px solid #e5e7eb; font-size: 11px; }
+
+    /* ── Document viewer ───────────────────────────────────────────────── */
+    #doc-viewer-wrap { position: relative; }
+    #doc-viewer {
+      position: relative; background: white; border: 2px solid #e5e7eb;
+      border-radius: 0 0 12px 12px; overflow: auto; max-height: 480px;
+      transition: border-color .15s;
+    }
+    #doc-viewer.no-lh { border-radius: 12px; }
+    #doc-viewer.placing { border-color: #f97316; cursor: crosshair; }
+    #doc-viewer img.doc-page { width: 100%; display: block; }
+    #doc-viewer .word-content {
+      padding: 40px; font-family: Georgia, serif; font-size: 13px;
+      line-height: 1.8; color: #111; min-height: 400px;
+    }
+    #doc-viewer .word-content[contenteditable="true"] {
+      outline: none; box-shadow: inset 0 0 0 2px #f97316;
+    }
+
+    /* ── Draggable signature overlay ───────────────────────────────────── */
+    #sig-overlay {
+      position: absolute; border: 2px solid #f97316; border-radius: 4px;
+      cursor: grab; display: none; box-sizing: border-box;
+    }
+    #sig-overlay img { width: 100%; height: 100%; object-fit: contain; display: block; pointer-events: none; }
+    #sig-overlay .resize-handle {
+      position: absolute; bottom: -5px; right: -5px;
+      width: 12px; height: 12px; background: #f97316; border-radius: 2px; cursor: se-resize;
+    }
+    #sig-overlay .remove-sig {
+      position: absolute; top: -10px; right: -10px;
+      width: 20px; height: 20px; background: #ef4444; border-radius: 50%;
+      color: white; font-size: 11px; display: flex; align-items: center; justify-content: center;
+      cursor: pointer; border: none; line-height: 1;
+    }
+
+    /* ── Signature modal ───────────────────────────────────────────────── */
+    #sig-modal {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,.55);
+      z-index: 9999; align-items: center; justify-content: center;
+    }
+    #sig-modal.open { display: flex; }
+    #sig-inner {
+      background: white; border-radius: 20px; padding: 28px; width: 92%; max-width: 480px;
+      box-shadow: 0 24px 64px rgba(0,0,0,.2);
+    }
+    #sig-inner h3 { font-size: 17px; font-weight: 700; color: #111827; margin: 0 0 14px; }
+    #sig-canvas {
+      display: block; width: 100%; border: 1px solid #e5e7eb; border-radius: 10px;
+      background: #fafafa; cursor: crosshair; touch-action: none;
+    }
+    #sig-hint { font-size: 11px; color: #9ca3af; font-style: italic; margin: 6px 0 14px; }
+    .sig-btns { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; }
+    .sig-btns button {
+      padding: 8px 18px; border-radius: 8px; font-size: 13px; font-weight: 700;
+      cursor: pointer; font-family: inherit; border: none;
+    }
+    #sig-clear  { background: white; border: 1.5px solid #e5e7eb !important; color: #6b7280; }
+    #sig-cancel { background: white; border: 1.5px solid #e5e7eb !important; color: #6b7280; }
+    #sig-apply  { background: #1e3a5f; color: white; }
+
+    /* ── Hints ─────────────────────────────────────────────────────────── */
+    .hint { font-size: 11px; color: #9ca3af; text-align: center; margin-top: 6px; }
+    .hint.warn { color: #f97316; }
+
+    /* ── Toast ─────────────────────────────────────────────────────────── */
+    #toast {
+      position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%);
+      background: #111827; color: white; padding: 10px 20px; border-radius: 10px;
+      font-size: 13px; font-family: Inter, sans-serif; font-weight: 500;
+      opacity: 0; pointer-events: none; transition: opacity .3s; z-index: 10000;
+    }
+    #toast.show { opacity: 1; }
+
+    /* ── Edit mode badge ───────────────────────────────────────────────── */
+    .edit-badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: 11px; font-weight: 700; padding: 4px 10px;
+      border-radius: 99px; border: 1.5px solid #fed7aa;
+      background: #fff7ed; color: #f97316; cursor: pointer;
+    }
+    .edit-badge.active { background: #f97316; color: white; border-color: #f97316; }
+
+    /* ── Page nav ──────────────────────────────────────────────────────── */
+    .page-nav {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 13px; font-weight: 600; color: #374151;
+    }
+    .page-nav button {
+      width: 28px; height: 28px; border-radius: 8px; border: 1.5px solid #e5e7eb;
+      background: white; cursor: pointer; font-size: 14px; display: flex;
+      align-items: center; justify-content: center; transition: background .15s;
+    }
+    .page-nav button:hover:not(:disabled) { background: #f3f4f6; }
+    .page-nav button:disabled { opacity: 0.3; cursor: default; }
+
+    /* Print media ─────────────────────────────────────────────────────── */
+    @media print {
+      .tools-page > *:not(#print-frame) { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation (reuse site nav) -->
+  <nav class="navbar">
+    <div class="container">
+      <div class="nav-brand">
+        <span class="brand-name">Beacon of New Beginnings</span>
+      </div>
+      <div class="nav-menu" id="nav-menu">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="index.html#services" class="nav-link">Services</a>
+        <a href="index.html#get-help" class="nav-link">Get Help</a>
+        <a href="index.html#contact" class="nav-link">Contact</a>
+        <a href="index.html#donate" class="nav-link btn-donate">Donate</a>
+      </div>
+      <div class="nav-toggle" id="nav-toggle"><span></span><span></span><span></span></div>
+    </div>
+  </nav>
+
+  <div class="tools-page">
+    <div class="tools-container">
+
+      <div class="tools-header">
+        <div class="badge">🔒 Internal · Staff & Volunteers Only</div>
+        <h1>Document Tools</h1>
+        <p>Upload, letterhead, sign, edit, then Save · Print · Send.</p>
+      </div>
+
+      <!-- ── Upload & Edit Tool ──────────────────────────────────────── -->
+      <div class="tool-card">
+        <div class="tool-card-header">
+          <div class="tool-icon">📄</div>
+          <div>
+            <h2>Document Uploader &amp; Editor</h2>
+            <p>Add Beacon letterhead · draw a signature · edit text · export as PDF</p>
+          </div>
+        </div>
+        <div class="tool-body">
+
+          <!-- Step 1: Upload -->
+          <div id="upload-section">
+            <div class="step-row">
+              <span class="step-pill">Step 1</span>
+              <span class="step-label">Upload your document</span>
+            </div>
+            <div class="upload-zone" id="upload-zone">
+              <div class="upload-icon">📂</div>
+              <p>Click to browse or drag &amp; drop</p>
+              <span>PDF · Word (.docx) · Image (PNG / JPG)</span>
+              <div class="type-pills">
+                <span class="type-pill">PDF</span>
+                <span class="type-pill">Word</span>
+                <span class="type-pill">Image</span>
+              </div>
+            </div>
+            <input type="file" id="file-input" accept=".pdf,.doc,.docx,image/*" style="display:none" />
+          </div>
+
+          <!-- Step 2+: Editor (hidden until doc loaded) -->
+          <div id="editor-section" style="display:none">
+
+            <!-- Toolbar row -->
+            <div class="action-bar" style="margin-bottom:10px">
+              <span id="file-label" style="font-size:13px;color:#6b7280;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
+              <div class="page-nav" id="page-nav" style="display:none">
+                <button id="prev-page" disabled>‹</button>
+                <span id="page-label">1 / 1</span>
+                <button id="next-page" disabled>›</button>
+              </div>
+              <button class="btn-tool btn-outline" id="change-btn" style="font-size:11px">Change</button>
+            </div>
+
+            <!-- Letterhead picker -->
+            <div style="margin-bottom:14px">
+              <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#9ca3af;margin-bottom:8px">Letterhead</div>
+              <div class="lh-row">
+                <button class="lh-btn active" data-lh="none">None</button>
+                <button class="lh-btn" data-lh="beacon">
+                  <span class="lh-dot" style="background:#f97316"></span>Beacon
+                </button>
+              </div>
+            </div>
+
+            <!-- Action bar -->
+            <div class="action-bar">
+              <button class="btn-tool btn-sig" id="sig-trigger">✍ Place Signature</button>
+              <button class="btn-tool btn-remove" id="remove-sig-btn" style="display:none">✕ Remove Sig</button>
+              <span id="edit-badge" class="edit-badge" style="display:none">✏ Edit Text</span>
+              <div class="spacer"></div>
+              <button class="btn-tool btn-primary" id="save-btn">⬇ Save</button>
+              <button class="btn-tool btn-outline" id="print-btn">🖨 Print</button>
+              <button class="btn-tool btn-outline" id="send-btn">✉ Send</button>
+            </div>
+
+            <!-- Placing hint -->
+            <div id="placing-hint" style="display:none;margin-bottom:8px;padding:10px 16px;background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;font-size:13px;font-weight:600;color:#f97316;text-align:center">
+              ✦ Click anywhere on the document to place your signature
+            </div>
+
+            <!-- Letterhead preview bar (above viewer) -->
+            <div id="lh-preview">
+              <div id="lh-org"  style="font-family:Georgia,serif;font-weight:700;letter-spacing:3px;font-size:13px;"></div>
+              <div id="lh-tag"  style="font-size:9px;font-weight:700;letter-spacing:2px;margin-top:3px;"></div>
+            </div>
+
+            <!-- Document viewer -->
+            <div id="doc-viewer-wrap">
+              <div id="doc-viewer" class="no-lh">
+                <div id="word-content" class="word-content" style="display:none"></div>
+                <img id="page-img" class="doc-page" style="display:none" alt="Document page" />
+                <!-- Signature overlay -->
+                <div id="sig-overlay">
+                  <img id="sig-img" alt="Signature" />
+                  <div class="resize-handle" id="resize-handle"></div>
+                  <button class="remove-sig" id="remove-overlay-btn" title="Remove signature">✕</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Hints -->
+            <div class="hint" id="sig-hint" style="display:none">Drag to move · corner handle to resize · ✕ to remove</div>
+            <div class="hint warn" id="edit-hint" style="display:none">Editing — click any text to change it. Changes carry through to Save and Print.</div>
+            <div class="hint" id="lh-hint" style="display:none">Letterhead will appear on Save and Print output.</div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── Signature Modal ───────────────────────────────────────────── -->
+  <div id="sig-modal">
+    <div id="sig-inner">
+      <h3>Draw Your Signature</h3>
+      <canvas id="sig-canvas" width="440" height="140"></canvas>
+      <p id="sig-hint-text">Draw with mouse or finger. Tap Apply when done.</p>
+      <div class="sig-btns">
+        <button id="sig-clear">Clear</button>
+        <button id="sig-cancel">Cancel</button>
+        <button id="sig-apply">Apply Signature</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast"></div>
+
+  <!-- pdf-lib for PDF generation -->
+  <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+  <!-- mammoth for Word → HTML -->
+  <script src="https://unpkg.com/mammoth@1.6.0/mammoth.browser.min.js"></script>
+
+  <script>
+  (function () {
+    'use strict';
+
+    // ── pdfjs worker ──────────────────────────────────────────────────────
+    if (typeof pdfjsLib !== 'undefined') {
+      pdfjsLib.GlobalWorkerOptions.workerSrc =
+        'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    }
+
+    // ── Beacon letterhead config ──────────────────────────────────────────
+    const BEACON_LH = {
+      org:     'BEACON OF NEW BEGINNINGS',
+      tagline: 'Supporting Survivors in Ghana',
+      contact: 'info@beaconnewbeginnings.org  ·  beaconnewbeginnings.org',
+      primary: '#1e3a5f',
+      accent:  '#f97316',
+      bg:      '#fff7ed',
+      line:    '#f97316',
+    };
+
+    // ── State ─────────────────────────────────────────────────────────────
+    let docType     = null;   // 'pdf' | 'image' | 'word'
+    let docFile     = null;
+    let docPages    = [];     // [{dataUrl, w, h}]
+    let currentPage = 0;
+    let wordHtml    = null;
+    let sigDataUrl  = null;
+    let letterhead  = 'none'; // 'none' | 'beacon'
+    let editMode    = false;
+    let placing     = false;
+    let sigBounds   = null;   // {x,y,w,h} relative to #doc-viewer
+    let dragging    = false;
+    let resizing    = false;
+    let dragStart   = null;
+    let resizeStart = null;
+
+    // ── Elements ──────────────────────────────────────────────────────────
+    const $ = id => document.getElementById(id);
+    const uploadSection = $('upload-section');
+    const editorSection = $('editor-section');
+    const uploadZone    = $('upload-zone');
+    const fileInput     = $('file-input');
+    const fileLabel     = $('file-label');
+    const pageNav       = $('page-nav');
+    const prevBtn       = $('prev-page');
+    const nextBtn       = $('next-page');
+    const pageLabel     = $('page-label');
+    const changeBtn     = $('change-btn');
+    const lhPreview     = $('lh-preview');
+    const lhOrg         = $('lh-org');
+    const lhTag         = $('lh-tag');
+    const docViewer     = $('doc-viewer');
+    const wordContent   = $('word-content');
+    const pageImg       = $('page-img');
+    const sigOverlay    = $('sig-overlay');
+    const sigImgEl      = $('sig-img');
+    const sigTrigger    = $('sig-trigger');
+    const removeSigBtn  = $('remove-sig-btn');
+    const editBadge     = $('edit-badge');
+    const saveBtn       = $('save-btn');
+    const printBtn      = $('print-btn');
+    const sendBtn       = $('send-btn');
+    const placingHint   = $('placing-hint');
+    const sigHint       = $('sig-hint');
+    const editHint      = $('edit-hint');
+    const lhHint        = $('lh-hint');
+
+    // ── Toast ─────────────────────────────────────────────────────────────
+    function toast(msg) {
+      const t = $('toast');
+      t.textContent = msg; t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2400);
+    }
+
+    // ── Upload zone ───────────────────────────────────────────────────────
+    uploadZone.addEventListener('click', () => fileInput.click());
+    uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('dragover'); });
+    uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
+    uploadZone.addEventListener('drop', e => {
+      e.preventDefault(); uploadZone.classList.remove('dragover');
+      if (e.dataTransfer.files[0]) loadFile(e.dataTransfer.files[0]);
+    });
+    fileInput.addEventListener('change', e => { if (e.target.files[0]) loadFile(e.target.files[0]); });
+
+    async function loadFile(file) {
+      docFile = file; docPages = []; currentPage = 0; wordHtml = null;
+      sigDataUrl = null; sigBounds = null; letterhead = 'none'; editMode = false;
+      sigOverlay.style.display = 'none';
+      resetLetterheadUI();
+      fileLabel.textContent = file.name;
+      editorSection.style.display = 'block';
+      uploadSection.style.display = 'none';
+      toast('Loading…');
+
+      if (file.type === 'application/pdf' || file.name.endsWith('.pdf')) {
+        docType = 'pdf'; await loadPDF(file);
+      } else if (file.name.match(/\.(docx?|doc)$/i)) {
+        docType = 'word'; await loadWord(file);
+      } else {
+        docType = 'image'; await loadImage(file);
+      }
+      showPage();
+      toast('Ready');
+    }
+
+    async function loadPDF(file) {
+      const ab = await file.arrayBuffer();
+      const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(ab) }).promise;
+      for (let i = 1; i <= pdf.numPages; i++) {
+        const page = await pdf.getPage(i);
+        const vp1 = page.getViewport({ scale: 1 });
+        const vp   = page.getViewport({ scale: 2 });
+        const c = document.createElement('canvas');
+        c.width = vp.width; c.height = vp.height;
+        await page.render({ canvas: c, viewport: vp }).promise;
+        docPages.push({ dataUrl: c.toDataURL('image/png'), w: vp1.width, h: vp1.height });
+      }
+    }
+
+    async function loadWord(file) {
+      const ab = await file.arrayBuffer();
+      const result = await mammoth.convertToHtml({ arrayBuffer: ab });
+      wordHtml = result.value;
+      docPages = [{ dataUrl: 'word', w: 0, h: 0 }];
+    }
+
+    function loadImage(file) {
+      return new Promise(res => {
+        const reader = new FileReader();
+        reader.onload = ev => {
+          const img = new Image();
+          img.onload = () => {
+            docPages = [{ dataUrl: ev.target.result, w: img.naturalWidth, h: img.naturalHeight }];
+            res();
+          };
+          img.src = ev.target.result;
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function showPage() {
+      const total = docPages.length;
+      pageNav.style.display = total > 1 ? 'flex' : 'none';
+      prevBtn.disabled = currentPage === 0;
+      nextBtn.disabled = currentPage === total - 1;
+      pageLabel.textContent = `${currentPage + 1} / ${total}`;
+
+      if (docType === 'word') {
+        wordContent.style.display = 'block';
+        pageImg.style.display = 'none';
+        wordContent.innerHTML = wordHtml;
+        wordContent.contentEditable = editMode ? 'true' : 'false';
+        editBadge.style.display = 'inline-flex';
+      } else {
+        wordContent.style.display = 'none';
+        pageImg.style.display = 'block';
+        pageImg.src = docPages[currentPage].dataUrl;
+        editBadge.style.display = 'none';
+      }
+    }
+
+    prevBtn.addEventListener('click', () => { if (currentPage > 0) { currentPage--; showPage(); } });
+    nextBtn.addEventListener('click', () => { if (currentPage < docPages.length - 1) { currentPage++; showPage(); } });
+
+    // ── Change doc ────────────────────────────────────────────────────────
+    changeBtn.addEventListener('click', () => {
+      editorSection.style.display = 'none';
+      uploadSection.style.display = 'block';
+      fileInput.value = '';
+    });
+
+    // ── Letterhead ────────────────────────────────────────────────────────
+    document.querySelectorAll('.lh-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.lh-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        letterhead = btn.dataset.lh;
+        updateLetterheadUI();
+      });
+    });
+
+    function updateLetterheadUI() {
+      if (letterhead === 'beacon') {
+        lhPreview.style.display = 'block';
+        lhPreview.style.background = BEACON_LH.bg;
+        lhPreview.style.borderBottom = `2px solid ${BEACON_LH.line}`;
+        lhPreview.style.borderRadius = '12px 12px 0 0';
+        lhOrg.textContent = BEACON_LH.org;
+        lhOrg.style.color = BEACON_LH.primary;
+        lhTag.textContent = BEACON_LH.tagline;
+        lhTag.style.color = BEACON_LH.accent;
+        docViewer.classList.remove('no-lh');
+        docViewer.style.borderRadius = '0 0 12px 12px';
+        lhHint.style.display = 'block';
+      } else {
+        resetLetterheadUI();
+      }
+    }
+
+    function resetLetterheadUI() {
+      lhPreview.style.display = 'none';
+      docViewer.classList.add('no-lh');
+      docViewer.style.borderRadius = '';
+      lhHint.style.display = 'none';
+      document.querySelectorAll('.lh-btn').forEach(b => b.classList.toggle('active', b.dataset.lh === 'none'));
+      letterhead = 'none';
+    }
+
+    // ── Edit mode ─────────────────────────────────────────────────────────
+    editBadge.addEventListener('click', () => {
+      editMode = !editMode;
+      editBadge.classList.toggle('active', editMode);
+      editBadge.textContent = editMode ? '✏ Editing' : '✏ Edit Text';
+      wordContent.contentEditable = editMode ? 'true' : 'false';
+      editHint.style.display = editMode ? 'block' : 'none';
+    });
+
+    // ── Signature modal ───────────────────────────────────────────────────
+    const sigModal  = $('sig-modal');
+    const sigCanvas = $('sig-canvas');
+    const sigCtx    = sigCanvas.getContext('2d');
+    let sigDrawing  = false;
+    let sigLast     = null;
+
+    function sigPos(e) {
+      const r = sigCanvas.getBoundingClientRect();
+      const sx = sigCanvas.width  / r.width;
+      const sy = sigCanvas.height / r.height;
+      const src = e.touches ? e.touches[0] : e;
+      return { x: (src.clientX - r.left) * sx, y: (src.clientY - r.top) * sy };
+    }
+    sigCanvas.addEventListener('mousedown',  e => { sigDrawing = true; sigLast = sigPos(e); sigCtx.beginPath(); });
+    sigCanvas.addEventListener('mousemove',  e => {
+      if (!sigDrawing || !sigLast) return;
+      const p = sigPos(e);
+      sigCtx.beginPath(); sigCtx.moveTo(sigLast.x, sigLast.y);
+      sigCtx.lineTo(p.x, p.y); sigCtx.strokeStyle = '#1a1a1a'; sigCtx.lineWidth = 2.2;
+      sigCtx.lineCap = 'round'; sigCtx.lineJoin = 'round'; sigCtx.stroke();
+      sigLast = p;
+    });
+    sigCanvas.addEventListener('mouseup',    () => { sigDrawing = false; sigLast = null; });
+    sigCanvas.addEventListener('mouseleave', () => { sigDrawing = false; sigLast = null; });
+    sigCanvas.addEventListener('touchstart', e => { e.preventDefault(); sigDrawing = true; sigLast = sigPos(e); }, { passive: false });
+    sigCanvas.addEventListener('touchmove',  e => {
+      e.preventDefault();
+      if (!sigDrawing || !sigLast) return;
+      const p = sigPos(e);
+      sigCtx.beginPath(); sigCtx.moveTo(sigLast.x, sigLast.y);
+      sigCtx.lineTo(p.x, p.y); sigCtx.strokeStyle = '#1a1a1a'; sigCtx.lineWidth = 2.2;
+      sigCtx.lineCap = 'round'; sigCtx.lineJoin = 'round'; sigCtx.stroke();
+      sigLast = p;
+    }, { passive: false });
+    sigCanvas.addEventListener('touchend', () => { sigDrawing = false; sigLast = null; });
+
+    $('sig-clear').addEventListener('click', () => sigCtx.clearRect(0, 0, sigCanvas.width, sigCanvas.height));
+    $('sig-cancel').addEventListener('click', () => { sigModal.classList.remove('open'); });
+    $('sig-apply').addEventListener('click', () => {
+      sigDataUrl = sigCanvas.toDataURL('image/png');
+      sigModal.classList.remove('open');
+      activatePlacing();
+    });
+
+    sigTrigger.addEventListener('click', () => {
+      if (sigDataUrl) { activatePlacing(); return; }
+      sigCtx.clearRect(0, 0, sigCanvas.width, sigCanvas.height);
+      sigModal.classList.add('open');
+    });
+
+    function activatePlacing() {
+      placing = true;
+      docViewer.classList.add('placing');
+      sigTrigger.textContent = '✦ Click to place…';
+      sigTrigger.classList.add('placing');
+      placingHint.style.display = 'block';
+    }
+
+    function deactivatePlacing() {
+      placing = false;
+      docViewer.classList.remove('placing');
+      sigTrigger.textContent = sigBounds ? '✍ Move Signature' : '✍ Place Signature';
+      sigTrigger.classList.remove('placing');
+      placingHint.style.display = 'none';
+    }
+
+    // ── Signature placement ───────────────────────────────────────────────
+    const DEFAULT_W = 180, DEFAULT_H = 60;
+
+    docViewer.addEventListener('click', e => {
+      if (!placing) return;
+      const r = docViewer.getBoundingClientRect();
+      const x = e.clientX - r.left - DEFAULT_W / 2;
+      const y = e.clientY - r.top  + docViewer.scrollTop - DEFAULT_H / 2;
+      sigBounds = { x, y, w: DEFAULT_W, h: DEFAULT_H };
+      renderSigOverlay();
+      deactivatePlacing();
+    });
+
+    function renderSigOverlay() {
+      if (!sigBounds || !sigDataUrl) return;
+      sigOverlay.style.display = 'block';
+      sigOverlay.style.left   = sigBounds.x + 'px';
+      sigOverlay.style.top    = sigBounds.y + 'px';
+      sigOverlay.style.width  = sigBounds.w + 'px';
+      sigOverlay.style.height = sigBounds.h + 'px';
+      sigImgEl.src = sigDataUrl;
+      removeSigBtn.style.display = 'inline-flex';
+      sigHint.style.display = 'block';
+    }
+
+    // Drag sig
+    sigOverlay.addEventListener('mousedown', e => {
+      if (e.target === $('resize-handle') || e.target.classList.contains('remove-sig')) return;
+      e.stopPropagation();
+      dragging = true;
+      dragStart = { x: e.clientX - sigBounds.x, y: e.clientY - sigBounds.y };
+    });
+    $('resize-handle').addEventListener('mousedown', e => {
+      e.stopPropagation(); e.preventDefault();
+      resizing = true;
+      resizeStart = { x: e.clientX, y: e.clientY, w: sigBounds.w, h: sigBounds.h };
+    });
+    document.addEventListener('mousemove', e => {
+      if (dragging && sigBounds) {
+        sigBounds.x = e.clientX - dragStart.x;
+        sigBounds.y = e.clientY - dragStart.y;
+        renderSigOverlay();
+      } else if (resizing && sigBounds) {
+        sigBounds.w = Math.max(40, resizeStart.w + e.clientX - resizeStart.x);
+        sigBounds.h = Math.max(16, resizeStart.h + e.clientY - resizeStart.y);
+        renderSigOverlay();
+      }
+    });
+    document.addEventListener('mouseup', () => { dragging = false; resizing = false; });
+
+    function clearSig() {
+      sigBounds = null; sigDataUrl = null;
+      sigOverlay.style.display = 'none';
+      removeSigBtn.style.display = 'none';
+      sigHint.style.display = 'none';
+      sigTrigger.textContent = '✍ Place Signature';
+    }
+    removeSigBtn.addEventListener('click', clearSig);
+    $('remove-overlay-btn').addEventListener('click', e => { e.stopPropagation(); clearSig(); });
+
+    // ── Compose letterhead onto image dataUrl ─────────────────────────────
+    function loadImgAsync(src) {
+      return new Promise((res, rej) => {
+        const img = new Image(); img.onload = () => res(img); img.onerror = rej; img.src = src;
+      });
+    }
+
+    async function composeWithLetterhead(dataUrl) {
+      const img   = await loadImgAsync(dataUrl);
+      const W     = img.width;
+      const HDR   = Math.round(W * 0.12);
+      const FTR   = Math.round(W * 0.04);
+      const PAD   = Math.round(W * 0.06);
+      const H     = img.height + HDR + FTR;
+      const c     = document.createElement('canvas');
+      c.width = W; c.height = H;
+      const ctx   = c.getContext('2d');
+      ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, W, H);
+      ctx.fillStyle = BEACON_LH.bg; ctx.fillRect(0, 0, W, HDR);
+      ctx.fillStyle = BEACON_LH.primary;
+      ctx.font = `bold ${Math.round(W * 0.022)}px Georgia, serif`;
+      ctx.fillText(BEACON_LH.org, PAD, Math.round(HDR * 0.38));
+      ctx.fillStyle = BEACON_LH.accent;
+      ctx.font = `${Math.round(W * 0.013)}px Arial, sans-serif`;
+      ctx.fillText(BEACON_LH.tagline, PAD, Math.round(HDR * 0.60));
+      ctx.strokeStyle = BEACON_LH.line; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(PAD, Math.round(HDR * 0.78)); ctx.lineTo(W - PAD, Math.round(HDR * 0.78)); ctx.stroke();
+      ctx.drawImage(img, 0, HDR);
+      ctx.fillStyle = '#a8a29e';
+      ctx.font = `${Math.round(W * 0.011)}px Arial, sans-serif`;
+      ctx.fillText(BEACON_LH.contact, PAD, H - Math.round(FTR * 0.35));
+      return { canvas: c, headerH: HDR };
+    }
+
+    // ── Word HTML → canvas ────────────────────────────────────────────────
+    async function renderWordToCanvas(html, w = 794, h = 1123) {
+      const c = document.createElement('canvas');
+      c.width = w; c.height = h;
+      const ctx = c.getContext('2d');
+      ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, w, h);
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}">
+        <foreignObject x="0" y="0" width="${w}" height="${h}">
+          <div xmlns="http://www.w3.org/1999/xhtml" style="width:${w-80}px;padding:40px;font-family:Georgia,serif;font-size:12px;line-height:1.7;color:#111;background:#fff;">
+            ${html}
+          </div>
+        </foreignObject>
+      </svg>`;
+      return new Promise(res => {
+        const blob = new Blob([svg], { type: 'image/svg+xml;charset=utf-8' });
+        const url  = URL.createObjectURL(blob);
+        const img  = new Image();
+        img.onload = () => { ctx.drawImage(img, 0, 0); URL.revokeObjectURL(url); res(c); };
+        img.onerror = () => res(c);
+        img.src = url;
+      });
+    }
+
+    // ── Save (export to PDF) ──────────────────────────────────────────────
+    saveBtn.addEventListener('click', async () => {
+      if (!docFile) return;
+      if (!sigBounds && letterhead === 'none' && docType !== 'word') {
+        toast('Select a letterhead or place a signature first'); return;
+      }
+      toast('Preparing…');
+
+      try {
+        const { PDFDocument } = PDFLib;
+        const viewRect  = docViewer.getBoundingClientRect();
+        const displayW  = viewRect.width;
+        const displayH  = viewRect.height;
+
+        // Get base page image
+        let pageDataUrl;
+        if (docType === 'word') {
+          const html = wordContent.innerHTML;
+          pageDataUrl = (await renderWordToCanvas(html)).toDataURL('image/png');
+        } else {
+          pageDataUrl = docPages[currentPage].dataUrl;
+        }
+
+        // Apply letterhead
+        let composed = null;
+        let headerH  = 0;
+        if (letterhead === 'beacon') {
+          const res = await composeWithLetterhead(pageDataUrl);
+          composed = res.canvas;
+          headerH  = res.headerH;
+          pageDataUrl = composed.toDataURL('image/png');
+        }
+
+        // Apply signature
+        if (sigBounds && sigDataUrl) {
+          const base = await loadImgAsync(pageDataUrl);
+          const W = base.width, H = base.height;
+          const c = document.createElement('canvas');
+          c.width = W; c.height = H;
+          const ctx = c.getContext('2d');
+          ctx.drawImage(base, 0, 0);
+          const docAreaH = H - headerH;
+          const sigImg = await loadImgAsync(sigDataUrl);
+          ctx.drawImage(sigImg,
+            sigBounds.x * (W / displayW),
+            headerH + sigBounds.y * (docAreaH / displayH),
+            sigBounds.w * (W / displayW),
+            sigBounds.h * (docAreaH / displayH)
+          );
+          pageDataUrl = c.toDataURL('image/png');
+        }
+
+        // Create PDF
+        const pdfDoc = await PDFDocument.create();
+        const imgBytes = await (await fetch(pageDataUrl)).arrayBuffer();
+        const embeddedImg = await pdfDoc.embedPng(imgBytes);
+        const { width: iW, height: iH } = embeddedImg;
+        const page = pdfDoc.addPage([iW, iH]);
+        page.drawImage(embeddedImg, { x: 0, y: 0, width: iW, height: iH });
+
+        const bytes = await pdfDoc.save();
+        const blob  = new Blob([new Uint8Array(bytes)], { type: 'application/pdf' });
+        const a = document.createElement('a');
+        const prefix = letterhead === 'beacon' ? 'beacon_' : '';
+        a.download = `${prefix}${docFile.name.replace(/\.[^.]+$/, '')}.pdf`;
+        a.href = URL.createObjectURL(blob);
+        a.click();
+        toast('Downloaded!');
+      } catch (err) {
+        console.error(err);
+        toast('Export failed — see console');
+      }
+    });
+
+    // ── Print ─────────────────────────────────────────────────────────────
+    printBtn.addEventListener('click', () => {
+      const lhHtml = letterhead === 'beacon'
+        ? `<div style="background:${BEACON_LH.bg};border-bottom:2px solid ${BEACON_LH.line};padding:18px 48px 14px;margin-bottom:24px;">
+             <div style="font-family:Georgia,serif;font-size:18px;color:${BEACON_LH.primary};font-weight:700;letter-spacing:4px;">${BEACON_LH.org}</div>
+             <div style="font-size:10px;color:${BEACON_LH.accent};letter-spacing:3px;font-weight:700;margin-top:5px;">${BEACON_LH.tagline}</div>
+           </div>`
+        : '';
+      let body;
+      if (docType === 'word') {
+        body = lhHtml + wordContent.innerHTML;
+      } else if (docPages[currentPage]) {
+        body = lhHtml + `<img src="${docPages[currentPage].dataUrl}" style="width:100%;display:block;" />`;
+      } else return;
+      const win = window.open('', '_blank');
+      if (!win) { toast('Allow pop-ups to print'); return; }
+      win.document.open();
+      win.document.write(`<!DOCTYPE html><html><head><title>Print</title>
+        <style>body{margin:0;padding:40px;font-family:Georgia,serif;}
+        @media print{body{padding:0;}@page{margin:.75in 1in;}}</style>
+        </head><body>${body}</body></html>`);
+      win.document.close();
+      win.focus();
+      setTimeout(() => win.print(), 400);
+    });
+
+    // ── Send ──────────────────────────────────────────────────────────────
+    sendBtn.addEventListener('click', () => {
+      const name    = docFile ? docFile.name : 'document';
+      const subject = encodeURIComponent(`Document: ${name}`);
+      const body    = encodeURIComponent(
+        `Hi,\n\nPlease find the attached document: ${name}.\n\nTo attach it, first download it using the Save button, then attach the file to this email.\n\nBeacon of New Beginnings`
+      );
+      window.location.href = `mailto:?subject=${subject}&body=${body}`;
+    });
+
+  })();
+  </script>
+
+  <script src="js/script.js"></script>
+</body>
+</html>

@@ -1,0 +1,66 @@
+build/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# API keys and secrets
+lib/constants/admin_config.dart
+
+# Flutter/Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+
+# iOS
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/App.framework
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+ios/ServiceDefinitions.json
+ios/Runner/GeneratedPluginRegistrant.*
+
+# Android
+android/.gradle
+android/captures/
+android/local.properties
+android/.idea
+android/gradle/
+android/gradlew
+android/gradlew.bat
+android/app/debug
+android/app/profile
+android/app/release
+*.jks
+key.properties
+
+# macOS
+macos/Flutter/GeneratedPluginRegistrant.swift
+
+# VS Code
+.vscode/
+
+# IntelliJ
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.buildlog/
+.history
+.svn/
+android/key.properties
+android/app/*.jks
+android/app/*.keystore
