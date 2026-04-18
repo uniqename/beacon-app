@@ -10,6 +10,7 @@ import '../admin/case_management_screen.dart';
 import '../admin/case_plan_screen.dart';
 import '../../models/case_plan.dart';
 import '../../services/case_management_service.dart';
+import 'crisis_protocol_screen.dart';
 
 class HelperDashboardScreen extends StatefulWidget {
   const HelperDashboardScreen({super.key});
@@ -525,6 +526,18 @@ class _HelperDashboardScreenState extends State<HelperDashboardScreen> {
                   ),
                 ).then((_) => _loadDashboard());
               },
+            ),
+            _buildActionCard(
+              'Crisis Protocol',
+              'Risk assessment & response guide',
+              Icons.crisis_alert,
+              Colors.red[700]!,
+              () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const CrisisProtocolScreen(),
+                ),
+              ),
             ),
           ],
         ),

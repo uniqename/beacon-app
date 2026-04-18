@@ -75,7 +75,6 @@ import 'views/volunteer/volunteer_shifts_screen.dart';
 import 'views/community/peer_mentorship_screen.dart';
 import 'views/admin/case_management_screen.dart';
 import 'views/admin/client_intake_screen.dart';
-import 'views/admin/case_plan_screen.dart';
 import 'views/home/my_support_plan_screen.dart';
 
 void main() async {

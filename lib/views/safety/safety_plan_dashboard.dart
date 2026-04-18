@@ -7,6 +7,7 @@ import 'safe_places_screen.dart';
 import 'escape_plan_screen.dart';
 import 'essential_items_screen.dart';
 import 'code_words_screen.dart';
+import 'crisis_coping_screen.dart';
 
 class SafetyPlanDashboard extends StatefulWidget {
   final String userId;
@@ -128,6 +129,15 @@ class _SafetyPlanDashboardState extends State<SafetyPlanDashboard> {
             _plan!.dangerCodeWord != null ? 1 : 0,
             () => Navigator.push(context, MaterialPageRoute(
               builder: (context) => CodeWordsScreen(userId: widget.userId),
+            )),
+          ),
+          _buildSectionCard(
+            'Crisis Coping Plan',
+            Icons.favorite,
+            Colors.red[700]!,
+            1,
+            () => Navigator.push(context, MaterialPageRoute(
+              builder: (context) => const CrisisCoopingScreen(),
             )),
           ),
         ],
