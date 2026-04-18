@@ -3,6 +3,7 @@ import 'package:sqflite/sqflite.dart';
 import 'package:uuid/uuid.dart';
 import '../models/client_intake.dart';
 import '../models/case_plan.dart';
+import '../models/case_referral.dart';
 import 'app_config_service.dart';
 import 'local_database_service.dart';
 import 'supabase_sync_service.dart';
@@ -531,14 +532,115 @@ class CaseManagementService {
       final urgentResult = await db.rawQuery(
         "SELECT COUNT(*) as count FROM case_programs WHERE priority = 'urgent' AND is_completed = 0",
       );
+      final inboundResult = await db.rawQuery(
+        "SELECT COUNT(*) as count FROM case_referrals WHERE direction = 'inbound'",
+      );
+      final outboundResult = await db.rawQuery(
+        "SELECT COUNT(*) as count FROM case_referrals WHERE direction = 'outbound'",
+      );
       return {
         'totalCasePlans': totalResult.first['count'] as int? ?? 0,
         'activeCasePlans': activeResult.first['count'] as int? ?? 0,
         'urgentPrograms': urgentResult.first['count'] as int? ?? 0,
+        'inboundReferrals': inboundResult.first['count'] as int? ?? 0,
+        'outboundReferrals': outboundResult.first['count'] as int? ?? 0,
       };
     } catch (e) {
       developer.log('❌ [CaseManagement] Error getting stats: $e');
-      return {'totalCasePlans': 0, 'activeCasePlans': 0, 'urgentPrograms': 0};
+      return {
+        'totalCasePlans': 0,
+        'activeCasePlans': 0,
+        'urgentPrograms': 0,
+        'inboundReferrals': 0,
+        'outboundReferrals': 0,
+      };
+    }
+  }
+
+  // ─── Referrals ─────────────────────────────────────────────────────────────
+
+  static Future<String> createReferral(CaseReferral referral) async {
+    try {
+      final data = referral.toMap()
+        ..['country_code'] = AppConfigService.instance.config.countryCode;
+      await _sync.upsert(
+        table: 'case_referrals',
+        data: data,
+        localWrite: (data) async {
+          final db = await LocalDatabaseService.database;
+          await db.insert('case_referrals', data,
+              conflictAlgorithm: ConflictAlgorithm.replace);
+        },
+      );
+      developer.log('✅ [CaseManagement] Referral created: ${referral.id}');
+      return referral.id;
+    } catch (e) {
+      developer.log('❌ [CaseManagement] Error creating referral: $e');
+      rethrow;
+    }
+  }
+
+  static Future<List<CaseReferral>> getReferralsForPlan(
+      String casePlanId) async {
+    try {
+      final db = await LocalDatabaseService.database;
+      final rows = await db.query(
+        'case_referrals',
+        where: 'case_plan_id = ?',
+        whereArgs: [casePlanId],
+        orderBy: 'referral_date DESC',
+      );
+      return rows.map((r) => CaseReferral.fromMap(r)).toList();
+    } catch (e) {
+      developer.log('❌ [CaseManagement] Error getting referrals: $e');
+      return [];
+    }
+  }
+
+  static Future<List<CaseReferral>> getReferralsForIntake(
+      String intakeId) async {
+    try {
+      final db = await LocalDatabaseService.database;
+      final rows = await db.query(
+        'case_referrals',
+        where: 'intake_id = ?',
+        whereArgs: [intakeId],
+        orderBy: 'referral_date DESC',
+      );
+      return rows.map((r) => CaseReferral.fromMap(r)).toList();
+    } catch (e) {
+      developer.log('❌ [CaseManagement] Error getting referrals: $e');
+      return [];
+    }
+  }
+
+  static Future<void> updateReferral(CaseReferral referral) async {
+    try {
+      final updated = referral.copyWith(updatedAt: DateTime.now());
+      await _sync.upsert(
+        table: 'case_referrals',
+        data: updated.toMap(),
+        localWrite: (data) async {
+          final db = await LocalDatabaseService.database;
+          await db.update('case_referrals', data,
+              where: 'id = ?', whereArgs: [referral.id]);
+        },
+      );
+    } catch (e) {
+      developer.log('❌ [CaseManagement] Error updating referral: $e');
+      rethrow;
+    }
+  }
+
+  static Future<void> deleteReferral(String referralId) async {
+    try {
+      final db = await LocalDatabaseService.database;
+      await db.delete('case_referrals',
+          where: 'id = ?', whereArgs: [referralId]);
+      developer.log('✅ [CaseManagement] Referral deleted: $referralId');
+    } catch (e) {
+      developer.log('❌ [CaseManagement] Error deleting referral: $e');
+      rethrow;
     }
   }
 

@@ -2,6 +2,7 @@ import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
 import '../../models/user.dart';
 import '../../models/case_plan.dart';
+import '../../models/case_referral.dart';
 import 'package:uuid/uuid.dart';
 import '../../services/ai_consent_service.dart';
 import '../../services/case_ai_service.dart';
@@ -28,6 +29,7 @@ class _CasePlanScreenState extends State<CasePlanScreen> {
   CasePlan? _plan;
   List<CaseProgram> _programs = [];
   List<CaseNote> _generalNotes = [];
+  List<CaseReferral> _referrals = [];
   bool _isLoading = true;
 
   @override
@@ -39,17 +41,19 @@ class _CasePlanScreenState extends State<CasePlanScreen> {
   Future<void> _load() async {
     setState(() => _isLoading = true);
     try {
-      final plan = await CaseManagementService.getCasePlan(widget.casePlanId);
-      final programs =
-          await CaseManagementService.getProgramsForPlan(widget.casePlanId);
-      final notes = await CaseManagementService.getNotesForPlan(
-          widget.casePlanId,
-          programId: null);
+      final results = await Future.wait([
+        CaseManagementService.getCasePlan(widget.casePlanId),
+        CaseManagementService.getProgramsForPlan(widget.casePlanId),
+        CaseManagementService.getNotesForPlan(widget.casePlanId,
+            programId: null),
+        CaseManagementService.getReferralsForPlan(widget.casePlanId),
+      ]);
       if (mounted) {
         setState(() {
-          _plan = plan;
-          _programs = programs;
-          _generalNotes = notes;
+          _plan = results[0] as CasePlan?;
+          _programs = results[1] as List<CaseProgram>;
+          _generalNotes = results[2] as List<CaseNote>;
+          _referrals = results[3] as List<CaseReferral>;
           _isLoading = false;
         });
       }
@@ -161,6 +165,8 @@ class _CasePlanScreenState extends State<CasePlanScreen> {
                         if (_plan!.isReviewOverdue || _plan!.isReviewDueSoon)
                           const SizedBox(height: 12),
                         _buildProgramsSection(),
+                        const SizedBox(height: 20),
+                        _buildReferralsSection(),
                         const SizedBox(height: 20),
                         _buildGeneralNotesSection(),
                         const SizedBox(height: 80),
@@ -531,6 +537,666 @@ class _CasePlanScreenState extends State<CasePlanScreen> {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  // ─── Referrals ───────────────────────────────────────────────────────────
+
+  Widget _buildReferralsSection() {
+    final inbound = _referrals.where((r) => r.isInbound).length;
+    final outbound = _referrals.where((r) => r.isOutbound).length;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            const Text(
+              'Referrals',
+              style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFFE65100)),
+            ),
+            const SizedBox(width: 8),
+            if (_referrals.isNotEmpty) ...[
+              _referralChip('↓ $inbound In', Colors.blue),
+              const SizedBox(width: 4),
+              _referralChip('↑ $outbound Out', Colors.teal),
+            ],
+            const Spacer(),
+            if (_isAdmin)
+              TextButton.icon(
+                onPressed: _showAddReferralSheet,
+                icon: const Icon(Icons.add, size: 16),
+                label: const Text('Log Referral'),
+                style: TextButton.styleFrom(
+                    foregroundColor: const Color(0xFFE65100)),
+              ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        if (_referrals.isEmpty)
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                    color: Colors.grey[200]!,
+                    blurRadius: 8,
+                    offset: const Offset(0, 3)),
+              ],
+            ),
+            child: Center(
+              child: Text(
+                _isAdmin
+                    ? 'No referrals logged yet\nTap "Log Referral" to record one'
+                    : 'No referrals recorded',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.grey[500], fontSize: 14),
+              ),
+            ),
+          )
+        else
+          ..._referrals.map((r) => _buildReferralCard(r)),
+      ],
+    );
+  }
+
+  Widget _referralChip(String label, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
+      ),
+      child: Text(label,
+          style: TextStyle(
+              fontSize: 11, fontWeight: FontWeight.bold, color: color)),
+    );
+  }
+
+  Widget _buildReferralCard(CaseReferral referral) {
+    final isIn = referral.isInbound;
+    final dirColor = isIn ? Colors.blue : Colors.teal;
+    final dirLabel = isIn ? 'INBOUND' : 'OUTBOUND';
+    final dirIcon = isIn ? Icons.arrow_downward : Icons.arrow_upward;
+
+    Color statusColor;
+    switch (referral.status) {
+      case 'active':
+        statusColor = Colors.blue;
+        break;
+      case 'completed':
+        statusColor = Colors.green;
+        break;
+      case 'declined':
+        statusColor = Colors.red;
+        break;
+      default:
+        statusColor = Colors.amber[700]!;
+    }
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+              color: Colors.grey[200]!,
+              blurRadius: 6,
+              offset: const Offset(0, 2)),
+        ],
+      ),
+      child: InkWell(
+        onTap: _isAdmin ? () => _showEditReferralSheet(referral) : null,
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(14),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: dirColor.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(dirIcon, size: 11, color: dirColor),
+                        const SizedBox(width: 4),
+                        Text(dirLabel,
+                            style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                                color: dirColor)),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      referral.partnerOrganization,
+                      style: const TextStyle(
+                          fontWeight: FontWeight.bold, fontSize: 14),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 8, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: statusColor.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(
+                      referral.status[0].toUpperCase() +
+                          referral.status.substring(1),
+                      style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                          color: statusColor),
+                    ),
+                  ),
+                ],
+              ),
+              if (referral.serviceType != null) ...[
+                const SizedBox(height: 6),
+                Text(referral.serviceType!,
+                    style:
+                        TextStyle(fontSize: 12, color: Colors.grey[600])),
+              ],
+              const SizedBox(height: 6),
+              Text(
+                referral.reason,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(fontSize: 13, color: Colors.grey[700]),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Icon(Icons.calendar_today,
+                      size: 11, color: Colors.grey[400]),
+                  const SizedBox(width: 4),
+                  Text(_fmt(referral.referralDate),
+                      style: TextStyle(
+                          fontSize: 11, color: Colors.grey[500])),
+                  const Spacer(),
+                  _urgencyBadge(referral.urgency),
+                  if (_isAdmin) ...[
+                    const SizedBox(width: 8),
+                    Icon(Icons.edit_outlined,
+                        size: 14, color: Colors.grey[400]),
+                  ],
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _urgencyBadge(String urgency) {
+    Color c;
+    switch (urgency) {
+      case 'urgent':
+        c = Colors.orange;
+        break;
+      case 'emergency':
+        c = Colors.red;
+        break;
+      default:
+        c = Colors.grey;
+    }
+    return Text(
+      urgency[0].toUpperCase() + urgency.substring(1),
+      style: TextStyle(
+          fontSize: 10,
+          fontWeight: FontWeight.w600,
+          color: c),
+    );
+  }
+
+  void _showAddReferralSheet() => _showReferralSheet(null);
+  void _showEditReferralSheet(CaseReferral referral) =>
+      _showReferralSheet(referral);
+
+  void _showReferralSheet(CaseReferral? existing) {
+    String direction = existing?.direction ?? 'outbound';
+    final partnerCtrl = TextEditingController(
+        text: existing?.partnerOrganization ?? '');
+    final contactNameCtrl =
+        TextEditingController(text: existing?.partnerContactName ?? '');
+    final contactPhoneCtrl =
+        TextEditingController(text: existing?.partnerContactPhone ?? '');
+    final reasonCtrl =
+        TextEditingController(text: existing?.reason ?? '');
+    String? serviceType = existing?.serviceType;
+    String urgency = existing?.urgency ?? 'routine';
+    String status = existing?.status ?? 'pending';
+    final outcomeCtrl =
+        TextEditingController(text: existing?.outcomeNotes ?? '');
+    DateTime referralDate = existing?.referralDate ?? DateTime.now();
+    bool saving = false;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setS) => Padding(
+          padding: EdgeInsets.only(
+            left: 20,
+            right: 20,
+            top: 20,
+            bottom: MediaQuery.of(ctx).viewInsets.bottom + 24,
+          ),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                        color: Colors.grey[300],
+                        borderRadius: BorderRadius.circular(2)),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Text(
+                      existing == null ? 'Log Referral' : 'Edit Referral',
+                      style: const TextStyle(
+                          fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                    const Spacer(),
+                    if (existing != null)
+                      IconButton(
+                        icon: const Icon(Icons.delete_outline,
+                            color: Colors.red),
+                        tooltip: 'Delete referral',
+                        onPressed: () async {
+                          Navigator.pop(ctx);
+                          await CaseManagementService.deleteReferral(
+                              existing.id);
+                          _load();
+                        },
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 14),
+
+                // Direction toggle
+                const Text('Direction',
+                    style: TextStyle(
+                        fontSize: 13, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 6),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _directionToggle(
+                        setS,
+                        label: '↓ Inbound (referred to us)',
+                        value: 'inbound',
+                        current: direction,
+                        color: Colors.blue,
+                        onTap: () => setS(() => direction = 'inbound'),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: _directionToggle(
+                        setS,
+                        label: '↑ Outbound (we referred out)',
+                        value: 'outbound',
+                        current: direction,
+                        color: Colors.teal,
+                        onTap: () => setS(() => direction = 'outbound'),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+
+                // Date
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  dense: true,
+                  leading:
+                      const Icon(Icons.calendar_today, size: 18),
+                  title: Text(
+                      'Date: ${_fmt(referralDate)}',
+                      style: const TextStyle(fontSize: 14)),
+                  onTap: () async {
+                    final picked = await showDatePicker(
+                      context: ctx,
+                      initialDate: referralDate,
+                      firstDate: DateTime(2020),
+                      lastDate: DateTime.now()
+                          .add(const Duration(days: 365)),
+                    );
+                    if (picked != null) setS(() => referralDate = picked);
+                  },
+                ),
+                const SizedBox(height: 10),
+
+                // Partner
+                Autocomplete<String>(
+                  initialValue:
+                      TextEditingValue(text: partnerCtrl.text),
+                  optionsBuilder: (v) => kKnownPartners
+                      .where((p) => p
+                          .toLowerCase()
+                          .contains(v.text.toLowerCase()))
+                      .toList(),
+                  onSelected: (v) => partnerCtrl.text = v,
+                  fieldViewBuilder: (ctx2, ctrl, focus, onSubmit) =>
+                      TextField(
+                    controller: ctrl,
+                    focusNode: focus,
+                    onChanged: (v) => partnerCtrl.text = v,
+                    decoration: const InputDecoration(
+                      labelText: 'Partner Organisation *',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 10),
+
+                TextField(
+                  controller: contactNameCtrl,
+                  decoration: const InputDecoration(
+                    labelText: 'Contact Name (optional)',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                TextField(
+                  controller: contactPhoneCtrl,
+                  decoration: const InputDecoration(
+                    labelText: 'Contact Phone (optional)',
+                    border: OutlineInputBorder(),
+                  ),
+                  keyboardType: TextInputType.phone,
+                ),
+                const SizedBox(height: 10),
+
+                // Service type dropdown
+                DropdownButtonFormField<String>(
+                  initialValue: serviceType,
+                  decoration: const InputDecoration(
+                    labelText: 'Service Type',
+                    border: OutlineInputBorder(),
+                  ),
+                  items: kServiceTypes
+                      .map((s) =>
+                          DropdownMenuItem(value: s, child: Text(s)))
+                      .toList(),
+                  onChanged: (v) => setS(() => serviceType = v),
+                ),
+                const SizedBox(height: 10),
+
+                TextField(
+                  controller: reasonCtrl,
+                  decoration: const InputDecoration(
+                    labelText: 'Reason for Referral *',
+                    border: OutlineInputBorder(),
+                    alignLabelWithHint: true,
+                  ),
+                  maxLines: 3,
+                ),
+                const SizedBox(height: 10),
+
+                // Urgency chips
+                const Text('Urgency',
+                    style: TextStyle(
+                        fontSize: 13, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 6),
+                Wrap(
+                  spacing: 8,
+                  children: ['routine', 'urgent', 'emergency']
+                      .map((u) => ChoiceChip(
+                            label: Text(u[0].toUpperCase() +
+                                u.substring(1)),
+                            selected: urgency == u,
+                            selectedColor: u == 'emergency'
+                                ? Colors.red[100]
+                                : u == 'urgent'
+                                    ? Colors.orange[100]
+                                    : Colors.grey[200],
+                            onSelected: (_) =>
+                                setS(() => urgency = u),
+                          ))
+                      .toList(),
+                ),
+                const SizedBox(height: 10),
+
+                // Status chips
+                const Text('Status',
+                    style: TextStyle(
+                        fontSize: 13, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 6),
+                Wrap(
+                  spacing: 8,
+                  children:
+                      ['pending', 'active', 'completed', 'declined']
+                          .map((s) => ChoiceChip(
+                                label: Text(s[0].toUpperCase() +
+                                    s.substring(1)),
+                                selected: status == s,
+                                selectedColor:
+                                    s == 'completed'
+                                        ? Colors.green[100]
+                                        : s == 'declined'
+                                            ? Colors.red[100]
+                                            : s == 'active'
+                                                ? Colors.blue[100]
+                                                : Colors.grey[200],
+                                onSelected: (_) =>
+                                    setS(() => status = s),
+                              ))
+                          .toList(),
+                ),
+                const SizedBox(height: 10),
+
+                TextField(
+                  controller: outcomeCtrl,
+                  decoration: const InputDecoration(
+                    labelText: 'Outcome / Notes (optional)',
+                    border: OutlineInputBorder(),
+                    alignLabelWithHint: true,
+                  ),
+                  maxLines: 2,
+                ),
+                const SizedBox(height: 16),
+
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFE65100),
+                      foregroundColor: Colors.white,
+                      padding:
+                          const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10)),
+                    ),
+                    onPressed: saving
+                        ? null
+                        : () async {
+                            final partner =
+                                partnerCtrl.text.trim();
+                            final reason = reasonCtrl.text.trim();
+                            if (partner.isEmpty || reason.isEmpty) {
+                              ScaffoldMessenger.of(ctx)
+                                  .showSnackBar(const SnackBar(
+                                content: Text(
+                                    'Partner organisation and reason are required'),
+                                backgroundColor: Colors.red,
+                              ));
+                              return;
+                            }
+                            setS(() => saving = true);
+                            try {
+                              final now = DateTime.now();
+                              if (existing == null) {
+                                await CaseManagementService
+                                    .createReferral(CaseReferral(
+                                  id: const Uuid().v4(),
+                                  intakeId: _plan!.intakeId,
+                                  casePlanId: widget.casePlanId,
+                                  direction: direction,
+                                  referralDate: referralDate,
+                                  partnerOrganization: partner,
+                                  partnerContactName: contactNameCtrl
+                                          .text
+                                          .trim()
+                                          .isEmpty
+                                      ? null
+                                      : contactNameCtrl.text.trim(),
+                                  partnerContactPhone:
+                                      contactPhoneCtrl.text
+                                              .trim()
+                                              .isEmpty
+                                          ? null
+                                          : contactPhoneCtrl.text
+                                              .trim(),
+                                  reason: reason,
+                                  serviceType: serviceType,
+                                  urgency: urgency,
+                                  status: status,
+                                  outcomeNotes:
+                                      outcomeCtrl.text.trim().isEmpty
+                                          ? null
+                                          : outcomeCtrl.text.trim(),
+                                  recordedBy: widget.adminUser
+                                          ?.name ??
+                                      'Admin',
+                                  createdAt: now,
+                                  updatedAt: now,
+                                ));
+                              } else {
+                                await CaseManagementService
+                                    .updateReferral(
+                                  existing.copyWith(
+                                    direction: direction,
+                                    referralDate: referralDate,
+                                    partnerOrganization: partner,
+                                    partnerContactName:
+                                        contactNameCtrl.text
+                                                .trim()
+                                                .isEmpty
+                                            ? null
+                                            : contactNameCtrl.text
+                                                .trim(),
+                                    partnerContactPhone:
+                                        contactPhoneCtrl.text
+                                                .trim()
+                                                .isEmpty
+                                            ? null
+                                            : contactPhoneCtrl.text
+                                                .trim(),
+                                    reason: reason,
+                                    serviceType: serviceType,
+                                    urgency: urgency,
+                                    status: status,
+                                    outcomeNotes: outcomeCtrl.text
+                                            .trim()
+                                            .isEmpty
+                                        ? null
+                                        : outcomeCtrl.text.trim(),
+                                    updatedAt: now,
+                                  ),
+                                );
+                              }
+                              if (ctx.mounted) Navigator.pop(ctx);
+                              _load();
+                            } catch (e) {
+                              setS(() => saving = false);
+                              if (ctx.mounted) {
+                                ScaffoldMessenger.of(ctx).showSnackBar(
+                                  SnackBar(
+                                      content: Text('Error: $e'),
+                                      backgroundColor: Colors.red),
+                                );
+                              }
+                            }
+                          },
+                    child: saving
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white))
+                        : Text(
+                            existing == null
+                                ? 'Save Referral'
+                                : 'Update Referral',
+                          ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _directionToggle(
+    StateSetter setS, {
+    required String label,
+    required String value,
+    required String current,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    final selected = current == value;
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        padding:
+            const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+        decoration: BoxDecoration(
+          color: selected
+              ? color.withValues(alpha: 0.12)
+              : Colors.grey[100],
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+              color: selected
+                  ? color
+                  : Colors.grey[300]!,
+              width: selected ? 1.5 : 1),
+        ),
+        child: Text(
+          label,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight:
+                selected ? FontWeight.bold : FontWeight.normal,
+            color: selected ? color : Colors.grey[600],
+          ),
         ),
       ),
     );

@@ -44,7 +44,7 @@ class LocalDatabaseService {
 
     return await openDatabase(
       path,
-      version: 16,
+      version: 17,
       onCreate: (db, version) async {
         developer.log('🔨 [Database] Creating database v$version from scratch...');
         // Users table
@@ -681,6 +681,33 @@ class LocalDatabaseService {
             created_by TEXT NOT NULL,
             created_at TEXT NOT NULL,
             FOREIGN KEY (case_plan_id) REFERENCES case_plans (id)
+          )
+        ''');
+
+        // v17: Referral tracking
+        await db.execute('''
+          CREATE TABLE IF NOT EXISTS case_referrals(
+            id TEXT PRIMARY KEY,
+            intake_id TEXT NOT NULL,
+            case_plan_id TEXT,
+            direction TEXT NOT NULL,
+            referral_date TEXT NOT NULL,
+            partner_organization TEXT NOT NULL,
+            partner_contact_name TEXT,
+            partner_contact_phone TEXT,
+            reason TEXT NOT NULL,
+            service_type TEXT,
+            urgency TEXT DEFAULT 'routine',
+            payment_category TEXT,
+            payment_amount REAL,
+            payment_notes TEXT,
+            status TEXT DEFAULT 'pending',
+            outcome_notes TEXT,
+            recorded_by TEXT NOT NULL,
+            country_code TEXT,
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL,
+            FOREIGN KEY (intake_id) REFERENCES client_intakes (id)
           )
         ''');
 
@@ -1630,6 +1657,39 @@ class LocalDatabaseService {
             developer.log('✅ [Database] v16 migration completed — country_code added');
           } catch (e) {
             developer.log('❌ [Database] Error migrating to v16: $e');
+          }
+        }
+
+        if (oldVersion < 17) {
+          try {
+            await db.execute('''
+              CREATE TABLE IF NOT EXISTS case_referrals(
+                id TEXT PRIMARY KEY,
+                intake_id TEXT NOT NULL,
+                case_plan_id TEXT,
+                direction TEXT NOT NULL,
+                referral_date TEXT NOT NULL,
+                partner_organization TEXT NOT NULL,
+                partner_contact_name TEXT,
+                partner_contact_phone TEXT,
+                reason TEXT NOT NULL,
+                service_type TEXT,
+                urgency TEXT DEFAULT 'routine',
+                payment_category TEXT,
+                payment_amount REAL,
+                payment_notes TEXT,
+                status TEXT DEFAULT 'pending',
+                outcome_notes TEXT,
+                recorded_by TEXT NOT NULL,
+                country_code TEXT,
+                created_at TEXT NOT NULL,
+                updated_at TEXT NOT NULL,
+                FOREIGN KEY (intake_id) REFERENCES client_intakes (id)
+              )
+            ''');
+            developer.log('✅ [Database] v17 migration completed — case_referrals table added');
+          } catch (e) {
+            developer.log('❌ [Database] Error migrating to v17: $e');
           }
         }
 
