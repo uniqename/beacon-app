@@ -38,8 +38,6 @@ class _EnhancedDonationScreenState extends State<EnhancedDonationScreen> {
   bool _isAnonymous = false;
   bool _agreeToTerms = false;
   int? _selectedAmount;
-  bool _isLoading = false;
-
   final Map<String, List<int>> _quickAmounts = {
     'GHS': [100, 200, 500, 1000, 2000, 5000],
     'USD': [25, 50, 100, 250, 500, 1000],
@@ -835,8 +833,6 @@ class _EnhancedDonationScreenState extends State<EnhancedDonationScreen> {
       }
     }
 
-    setState(() => _isLoading = true);
-
     try {
       final authService = Provider.of<AuthService>(context, listen: false);
       final donationService = DonationService();
@@ -893,15 +889,13 @@ class _EnhancedDonationScreenState extends State<EnhancedDonationScreen> {
         metadata: metadata,
       );
 
-      setState(() => _isLoading = false);
 
       // Process payment
       if (!mounted) return;
 
       // Paystack takes a separate path — opens browser then verify
       if (_selectedPaymentMethod == 'paystack_card') {
-        setState(() => _isLoading = true);
-        final result = await donationService.processPaystackPayment(
+          final result = await donationService.processPaystackPayment(
           amount: double.parse(_amountController.text),
           currency: _selectedCurrency,
           customerEmail: _isAnonymous
@@ -912,8 +906,7 @@ class _EnhancedDonationScreenState extends State<EnhancedDonationScreen> {
           description: 'Donation to Beacon of New Beginnings',
           transactionRef: 'DON-${donation.id}',
         );
-        setState(() => _isLoading = false);
-        if (!mounted) return;
+          if (!mounted) return;
 
         if (result.isPending) {
           _showPaystackPendingDialog(result.transactionId!, donationService);
@@ -925,36 +918,30 @@ class _EnhancedDonationScreenState extends State<EnhancedDonationScreen> {
 
       // Stripe handles card, Apple Pay, Google Pay for USD/EUR/GBP
       if (_selectedPaymentMethod == 'stripe_card') {
-        setState(() => _isLoading = true);
-        try {
+          try {
           await _processStripePayment(
             double.parse(_amountController.text),
             _selectedCurrency,
             donation.id,
           );
-          setState(() => _isLoading = false);
-          if (!mounted) return;
+              if (!mounted) return;
           _showSuccessDialog('stripe-${donation.id}');
         } on StripeException catch (e) {
-          setState(() => _isLoading = false);
-          if (!mounted) return;
+              if (!mounted) return;
           if (e.error.code != FailureCode.Canceled) {
             _showErrorDialog(e.error.localizedMessage ?? 'Payment failed. Please try again.');
           }
         } catch (e) {
-          setState(() => _isLoading = false);
-          if (!mounted) return;
+              if (!mounted) return;
           _showErrorDialog(e.toString());
         }
         return;
       }
 
-      setState(() => _isLoading = true);
       final result = await donationService.processDonationPayment(
         context: context,
         donation: donation,
       );
-      setState(() => _isLoading = false);
 
       if (!mounted) return;
 
@@ -964,7 +951,6 @@ class _EnhancedDonationScreenState extends State<EnhancedDonationScreen> {
         _showErrorDialog(result.message ?? 'Payment failed. Please try again.');
       }
     } catch (e) {
-      setState(() => _isLoading = false);
       if (mounted) {
         _showErrorDialog(e.toString());
       }
@@ -999,11 +985,9 @@ class _EnhancedDonationScreenState extends State<EnhancedDonationScreen> {
             ),
             onPressed: () async {
               Navigator.pop(dialogContext);
-              setState(() => _isLoading = true);
-              final verifyResult =
+                      final verifyResult =
                   await donationService.verifyPaystackPayment(reference);
-              setState(() => _isLoading = false);
-              if (!mounted) return;
+                      if (!mounted) return;
               if (verifyResult.success) {
                 _showSuccessDialog(verifyResult.transactionId ?? reference);
               } else {

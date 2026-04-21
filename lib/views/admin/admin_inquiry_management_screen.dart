@@ -11,8 +11,6 @@ class AdminInquiryManagementScreen extends StatefulWidget {
 }
 
 class _AdminInquiryManagementScreenState extends State<AdminInquiryManagementScreen> {
-  final ChatService _chatService = ChatService();
-
   List<Map<String, dynamic>> _allTickets = [];
   List<Map<String, dynamic>> _filteredTickets = [];
   bool _isLoading = true;

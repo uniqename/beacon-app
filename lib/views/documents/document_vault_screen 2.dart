@@ -51,7 +51,6 @@ class _DocumentVaultScreenState extends State<DocumentVaultScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final categories = _service.getDocumentCategories();
     final missingDocs = _service.getMissingDocuments(_documents);
 
     return Scaffold(

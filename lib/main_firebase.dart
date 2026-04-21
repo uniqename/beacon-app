@@ -15,9 +15,9 @@ void main() async {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
-    print('Firebase initialized successfully');
+    debugPrint('Firebase initialized successfully');
   } catch (e) {
-    print('Firebase initialization failed (continuing in demo mode): $e');
+    debugPrint('Firebase initialization failed (continuing in demo mode): $e');
   }
   
   runApp(const NGOSupportApp());

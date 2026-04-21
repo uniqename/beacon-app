@@ -52,8 +52,6 @@ class _AudioRoomScreenState extends State<AudioRoomScreen> with TickerProviderSt
   bool _hasRaisedHand = false;
   bool _audioUnavailable = false;
   final bool _screenShareGranted = false;
-  String? _errorMessage;
-
   // Screen sharing
   StreamSubscription? _screenShareSubscription;
   bool _isScreenSharing = false;
@@ -66,8 +64,6 @@ class _AudioRoomScreenState extends State<AudioRoomScreen> with TickerProviderSt
   // Current user info
   String? _currentUserId;
   ParticipantRole? _currentUserRole;
-  GroupParticipant? _currentParticipant;
-
   @override
   void initState() {
     super.initState();
@@ -218,7 +214,6 @@ class _AudioRoomScreenState extends State<AudioRoomScreen> with TickerProviderSt
     developer.log('AudioRoomScreen: $message');
     if (mounted) {
       setState(() {
-        _errorMessage = message;
         _isLoading = false;
         _audioUnavailable = true;
       });

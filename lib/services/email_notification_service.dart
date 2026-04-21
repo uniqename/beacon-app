@@ -389,46 +389,4 @@ This is an automated reminder. Please do not reply to this email.
     }
   }
 
-  /// Format email with HTML (for future SMTP implementation)
-  String _formatHtmlEmail({
-    required String recipientName,
-    required String title,
-    required String message,
-    bool isApproval = false,
-  }) {
-    final color = isApproval ? '#2E8B57' : '#d9534f';
-    final icon = isApproval ? '✅' : '❌';
-
-    return '''
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <style>
-    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-    .header { background: $color; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }
-    .content { background: #f9f9f9; padding: 30px; border: 1px solid #ddd; border-top: none; border-radius: 0 0 8px 8px; }
-    .button { display: inline-block; padding: 12px 24px; margin: 10px 5px; background: $color; color: white; text-decoration: none; border-radius: 5px; }
-    .footer { text-align: center; margin-top: 20px; font-size: 12px; color: #666; }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <div class="header">
-      <h1>$icon $title</h1>
-    </div>
-    <div class="content">
-      <p>Dear $recipientName,</p>
-      $message
-    </div>
-    <div class="footer">
-      <p>This is an automated notification from $appName</p>
-      <p>© 2024 Beacon of New Beginnings. All rights reserved.</p>
-    </div>
-  </div>
-</body>
-</html>
-''';
-  }
 }

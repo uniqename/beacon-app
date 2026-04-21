@@ -36,7 +36,6 @@ class _CreateEvidenceScreenState extends State<CreateEvidenceScreen> {
   final List<String> _photoUrls = [];
   final List<String> _audioUrls = [];
   bool _isRecording = false;
-  bool _isSaving = false;
 
   @override
   Widget build(BuildContext context) {
@@ -378,7 +377,6 @@ class _CreateEvidenceScreenState extends State<CreateEvidenceScreen> {
   Future<void> _saveEvidence() async {
     if (!_formKey.currentState!.validate()) return;
 
-    setState(() => _isSaving = true);
 
     try {
       await _service.createEvidence(
@@ -404,7 +402,6 @@ class _CreateEvidenceScreenState extends State<CreateEvidenceScreen> {
         );
       }
     } catch (e) {
-      setState(() => _isSaving = false);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error saving evidence: $e'), backgroundColor: Colors.red),

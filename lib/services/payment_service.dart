@@ -18,7 +18,6 @@ class PaymentService {
   // API Keys (loaded from .env)
   String? _flutterwavePublicKey;
   String? _flutterwaveSecretKey;
-  String? _flutterwaveEncryptionKey;
   String? _paypalClientId;
   String? _paypalSecret;
   bool _isInitialized = false;
@@ -36,7 +35,6 @@ class PaymentService {
       // Load API keys from .env
       _flutterwavePublicKey = dotenv.env['FLUTTERWAVE_PUBLIC_KEY'];
       _flutterwaveSecretKey = dotenv.env['FLUTTERWAVE_SECRET_KEY'];
-      _flutterwaveEncryptionKey = dotenv.env['FLUTTERWAVE_ENCRYPTION_KEY'];
       _paypalClientId = dotenv.env['PAYPAL_CLIENT_ID'];
       _paypalSecret = dotenv.env['PAYPAL_SECRET'];
 

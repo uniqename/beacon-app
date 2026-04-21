@@ -67,8 +67,6 @@ class _AudioRoomScreenState extends State<AudioRoomScreen> with TickerProviderSt
   // Current user info
   String? _currentUserId;
   ParticipantRole? _currentUserRole;
-  GroupParticipant? _currentParticipant;
-
   @override
   void initState() {
     super.initState();

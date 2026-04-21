@@ -9,8 +9,6 @@ class DisguiseSettingsScreen extends StatefulWidget {
 }
 
 class _DisguiseSettingsScreenState extends State<DisguiseSettingsScreen> {
-  bool _useCalculatorMode = true;
-  bool _usePhotoGalleryMode = false;
   bool _requireBiometric = false;
   bool _enableQuickExit = true;
   String _disguiseApp = 'Calculator';
@@ -24,8 +22,6 @@ class _DisguiseSettingsScreenState extends State<DisguiseSettingsScreen> {
   Future<void> _loadSettings() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
-      _useCalculatorMode = prefs.getBool('disguise_calculator') ?? true;
-      _usePhotoGalleryMode = prefs.getBool('disguise_gallery') ?? false;
       _requireBiometric = prefs.getBool('disguise_biometric') ?? false;
       _enableQuickExit = prefs.getBool('disguise_quick_exit') ?? true;
       _disguiseApp = prefs.getString('disguise_app') ?? 'Calculator';

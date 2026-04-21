@@ -31,17 +31,11 @@ class _DonationScreenState extends State<DonationScreen> {
   bool _isAnonymous = false;
   bool _agreeToTerms = false;
   int? _selectedAmount;
-  bool _isLoading = false;
-
   final Map<String, List<int>> _quickAmounts = {
     'USD': [25, 50, 100, 250, 500, 1000],
     'GHS': [100, 200, 500, 1000, 2000, 5000],
   };
 
-  final Map<String, List<String>> _paymentMethods = {
-    'USD': ['card', 'paypal', 'bank_transfer', 'apple_pay', 'google_pay'],
-    'GHS': ['card', 'momo', 'bank_transfer'],
-  };
 
   @override
   void initState() {
@@ -565,7 +559,6 @@ class _DonationScreenState extends State<DonationScreen> {
       return;
     }
 
-    setState(() => _isLoading = true);
 
     try {
       final authService = Provider.of<AuthService>(context, listen: false);
@@ -612,18 +605,15 @@ class _DonationScreenState extends State<DonationScreen> {
         isAnonymous: _isAnonymous,
       );
 
-      setState(() => _isLoading = false);
-
+  
       // Process payment
       if (!mounted) return;
 
-      setState(() => _isLoading = true);
-      final result = await donationService.processDonationPayment(
+        final result = await donationService.processDonationPayment(
         context: context,
         donation: donation,
       );
-      setState(() => _isLoading = false);
-
+  
       if (!mounted) return;
 
       if (result.success) {
@@ -632,8 +622,7 @@ class _DonationScreenState extends State<DonationScreen> {
         _showErrorDialog(result.message ?? 'Payment failed. Please try again.');
       }
     } catch (e) {
-      setState(() => _isLoading = false);
-      if (mounted) {
+        if (mounted) {
         _showErrorDialog(e.toString());
       }
     }

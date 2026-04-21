@@ -209,7 +209,7 @@ class ResourceService {
       await _initializeResources();
       List<Map<String, dynamic>> requests = [];
 
-      for (final requestString in requestsList) {
+      for (final _ in requestsList) {
         // In a real implementation, you'd parse this properly
         // For demo purposes, we'll create a simple request structure
         requests.add({
@@ -227,99 +227,7 @@ class ResourceService {
     }
   }
 
-  // Load sample resources for local storage
-  Future<void> _loadSampleResources() async {
-    try {
-      _cachedResources = [
-        Resource(
-          id: 'resource_1',
-          name: 'Beacon of New Beginnings Emergency Shelter',
-          description: 'Secure emergency accommodation for women and children escaping domestic violence',
-          type: ResourceType.shelter,
-          status: ResourceStatus.available,
-          address: 'Accra, Ghana',
-          phone: '+233-XXX-XXXX',
-          email: 'shelter@beaconnewbeginnings.org',
-          services: ['Emergency accommodation', 'Meals', 'Childcare', 'Security'],
-          operatingHours: {
-            'monday': '24 hours',
-            'tuesday': '24 hours',
-            'wednesday': '24 hours',
-            'thursday': '24 hours',
-            'friday': '24 hours',
-            'saturday': '24 hours',
-            'sunday': '24 hours',
-          },
-          requiresAppointment: false,
-          is24Hours: true,
-          latitude: 5.6037,
-          longitude: -0.1870,
-          capacity: 50,
-          currentOccupancy: 32,
-          eligibilityCriteria: ['Women and children', 'Domestic violence survivors'],
-          contactPerson: 'Sarah Mensah',
-          createdAt: DateTime.now(),
-        ),
-        Resource(
-          id: 'resource_2',
-          name: 'Legal Aid Ghana - Domestic Violence Unit',
-          description: 'Free legal support for domestic violence cases',
-          type: ResourceType.legal,
-          status: ResourceStatus.available,
-          address: 'Ring Road, Accra',
-          phone: '+233-XXX-XXXX',
-          email: 'legal@legalaidgh.org',
-          services: ['Legal consultation', 'Court representation', 'Restraining orders'],
-          operatingHours: {
-            'monday': '8:00 AM - 5:00 PM',
-            'tuesday': '8:00 AM - 5:00 PM',
-            'wednesday': '8:00 AM - 5:00 PM',
-            'thursday': '8:00 AM - 5:00 PM',
-            'friday': '8:00 AM - 5:00 PM',
-          },
-          requiresAppointment: true,
-          is24Hours: false,
-          latitude: 5.5502,
-          longitude: -0.2174,
-          eligibilityCriteria: ['Low income', 'Domestic violence cases'],
-          contactPerson: 'Kwame Asante',
-          createdAt: DateTime.now(),
-        ),
-        Resource(
-          id: 'resource_3',
-          name: 'Domestic Violence Hotline Ghana',
-          description: '24/7 crisis support and counseling for domestic violence survivors',
-          type: ResourceType.hotline,
-          status: ResourceStatus.available,
-          phone: '+233-XXX-XXXX',
-          services: ['Crisis counseling', 'Safety planning', 'Resource referrals'],
-          is24Hours: true,
-          contactPerson: 'Crisis Team',
-          createdAt: DateTime.now(),
-        ),
-        Resource(
-          id: 'resource_4',
-          name: 'Korle-Bu Teaching Hospital - Trauma Unit',
-          description: 'Emergency medical care and trauma treatment',
-          type: ResourceType.medical,
-          status: ResourceStatus.available,
-          address: 'Korle-Bu, Accra',
-          phone: '+233-XXX-XXXX',
-          services: ['Emergency care', 'Trauma treatment', 'Mental health support'],
-          is24Hours: true,
-          latitude: 5.5385,
-          longitude: -0.2317,
-          contactPerson: 'Emergency Department',
-          createdAt: DateTime.now(),
-        ),
-      ];
 
-      developer.log('Sample resources loaded successfully');
-    } catch (e) {
-      developer.log('Error loading sample resources: $e');
-      _cachedResources = [];
-    }
-  }
 
   // Private helper methods
   Future<void> _createResourceCase({

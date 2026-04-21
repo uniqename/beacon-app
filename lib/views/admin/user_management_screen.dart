@@ -17,7 +17,6 @@ class UserManagementScreen extends StatefulWidget {
 
 class _UserManagementScreenState extends State<UserManagementScreen> {
   List<AppUser> _users = [];
-  final Map<String, bool> _userAvailability = {}; // Track availability separately since it's final
   bool _isLoading = true;
   String _searchQuery = '';
   final _sync = SupabaseSyncService();

@@ -26,8 +26,6 @@ class _AddAudioEvidenceScreenState extends State<AddAudioEvidenceScreen> {
   final List<String> _recordings = [];
   final AudioRecorder _audioRecorder = AudioRecorder();
   String? _currentRecordingPath;
-  final bool _hasPermission = false;
-
   @override
   void dispose() {
     _timer?.cancel();

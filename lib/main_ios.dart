@@ -7,7 +7,7 @@ import 'views/auth/login_screen.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  print('Starting Beacon of New Beginnings in iOS Demo Mode');
+  debugPrint('Starting Beacon of New Beginnings in iOS Demo Mode');
   
   runApp(const NGOSupportApp());
 }
