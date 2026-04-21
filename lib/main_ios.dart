@@ -51,7 +51,7 @@ class AuthWrapperIOS extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<DemoAuthService>(
       builder: (context, authService, child) {
-        if (authService.isAuthenticated) {
+        if (authService.currentUser != null) {
           return const HomeScreen();
         }
         return const LoginScreen();

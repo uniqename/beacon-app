@@ -296,7 +296,7 @@ class _EvidenceDetailScreenState extends State<EvidenceDetailScreen> {
   }
 
   Future<void> _exportEvidence(EvidenceLog evidence) async {
-    final exported = await _service.exportToText(evidence);
+    await _service.exportToText(evidence);
     // TODO: Share or save the exported text
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
