@@ -2,6 +2,7 @@ import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import '../../services/chat_service.dart';
+import '../../services/ai_consent_service.dart';
 import 'dart:async';
 
 class AiChatScreen extends StatefulWidget {
@@ -49,6 +50,12 @@ class _AiChatScreenState extends State<AiChatScreen> {
   }
 
   Future<void> _initializeChat() async {
+    final consented = await AiConsentService.requestConsentIfNeeded(context);
+    if (!consented) {
+      if (mounted) Navigator.pop(context);
+      return;
+    }
+
     setState(() => _isLoading = true);
 
     try {

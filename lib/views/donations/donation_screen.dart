@@ -482,10 +482,35 @@ class _DonationScreenState extends State<DonationScreen> {
             ),
           ),
           SizedBox(height: 16),
+          Container(
+            padding: EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.blue[50],
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.blue[200]!),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(Icons.info_outline, color: Colors.blue[700], size: 18),
+                SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Beacon of New Beginnings is a registered non-profit organisation. '
+                    'This is a voluntary charitable donation. Donors receive no digital '
+                    'content, features, or services within the app in return. '
+                    'All app features remain free to all users.',
+                    style: TextStyle(fontSize: 12, color: Colors.blue[800]),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(height: 12),
           CheckboxListTile(
             title: Text('I agree to the terms and conditions'),
             subtitle: Text(
-              'By checking this box, you agree that your donation will be used to support ${widget.division.shortName} activities.',
+              'By checking this box, you agree that your donation will be used to support ${widget.division.shortName} charitable activities.',
             ),
             value: _agreeToTerms,
             activeColor: Color(0xFFF0562D),
