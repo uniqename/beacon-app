@@ -225,9 +225,13 @@ class _ProgressTrackerScreenState extends State<ProgressTrackerScreen>
               Color bgColor;
               if (activityCount == 0) {
                 bgColor = Colors.grey[100]!;
-              } else if (activityCount == 1) bgColor = Colors.green[200]!;
-              else if (activityCount == 2) bgColor = Colors.green[400]!;
-              else bgColor = const Color(0xFFF0562D);
+              } else if (activityCount == 1) {
+                bgColor = Colors.green[200]!;
+              } else if (activityCount == 2) {
+                bgColor = Colors.green[400]!;
+              } else {
+                bgColor = const Color(0xFFF0562D);
+              }
 
               return Container(
                 decoration: BoxDecoration(

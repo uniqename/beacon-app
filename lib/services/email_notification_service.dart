@@ -7,9 +7,9 @@ class EmailNotificationService {
   EmailNotificationService._internal();
 
   // App store links
-  static const String APP_STORE_URL = 'https://apps.apple.com/app/beacon-new-beginnings';
-  static const String PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=com.beaconnewbeginnings.app';
-  static const String APP_NAME = 'Beacon of New Beginnings';
+  static const String appStoreUrl = 'https://apps.apple.com/app/beacon-new-beginnings';
+  static const String playStoreUrl = 'https://play.google.com/store/apps/details?id=com.beaconnewbeginnings.app';
+  static const String appName = 'Beacon of New Beginnings';
 
   /// Send approval notification email to helper applicant
   Future<bool> sendApprovalEmail({
@@ -19,30 +19,30 @@ class EmailNotificationService {
     String? adminNotes,
   }) async {
     try {
-      final subject = Uri.encodeComponent('$APP_NAME - Application Approved! 🎉');
+      final subject = Uri.encodeComponent('$appName - Application Approved! 🎉');
 
       final body = Uri.encodeComponent('''
 Dear $recipientName,
 
 Congratulations! Your ${userType == 'counselor' ? 'counselor' : 'volunteer'} application has been approved by our admin team.
 
-You now have access to the full ${userType == 'counselor' ? 'counselor' : 'volunteer'} features in the $APP_NAME app.
+You now have access to the full ${userType == 'counselor' ? 'counselor' : 'volunteer'} features in the $appName app.
 
 ${adminNotes != null && adminNotes.isNotEmpty ? '\nAdmin Notes:\n$adminNotes\n' : ''}
 
 To get started:
-1. Open the $APP_NAME app on your device
+1. Open the $appName app on your device
 2. Log in with your registered email and password
 3. You'll now see your ${userType == 'counselor' ? 'counselor' : 'volunteer'} dashboard
 
 If you haven't installed the app yet, download it here:
-📱 iOS App Store: $APP_STORE_URL
-🤖 Google Play Store: $PLAY_STORE_URL
+📱 iOS App Store: $appStoreUrl
+🤖 Google Play Store: $playStoreUrl
 
 Thank you for joining our mission to support domestic violence survivors. Your commitment to helping others makes a real difference.
 
 Best regards,
-$APP_NAME Admin Team
+$appName Admin Team
 
 ---
 This is an automated notification. Please do not reply to this email.
@@ -72,12 +72,12 @@ This is an automated notification. Please do not reply to this email.
     required String reason,
   }) async {
     try {
-      final subject = Uri.encodeComponent('$APP_NAME - Application Update');
+      final subject = Uri.encodeComponent('$appName - Application Update');
 
       final body = Uri.encodeComponent('''
 Dear $recipientName,
 
-Thank you for your interest in becoming a ${userType == 'counselor' ? 'counselor' : 'volunteer'} with $APP_NAME.
+Thank you for your interest in becoming a ${userType == 'counselor' ? 'counselor' : 'volunteer'} with $appName.
 
 After careful review, we regret to inform you that we are unable to approve your application at this time.
 
@@ -91,7 +91,7 @@ If you believe this decision was made in error or if you have additional documen
 Thank you for your understanding.
 
 Best regards,
-$APP_NAME Admin Team
+$appName Admin Team
 
 ---
 This is an automated notification. Please do not reply to this email.
@@ -120,12 +120,12 @@ This is an automated notification. Please do not reply to this email.
     required String userType,
   }) async {
     try {
-      final subject = Uri.encodeComponent('$APP_NAME - Application Received');
+      final subject = Uri.encodeComponent('$appName - Application Received');
 
       final body = Uri.encodeComponent('''
 Dear $recipientName,
 
-Thank you for submitting your ${userType == 'counselor' ? 'counselor' : 'volunteer'} application to $APP_NAME.
+Thank you for submitting your ${userType == 'counselor' ? 'counselor' : 'volunteer'} application to $appName.
 
 Your application is currently under review by our admin team. We carefully review all applications to ensure the safety and quality of our support services.
 
@@ -143,7 +143,7 @@ If you have any questions, please contact us at admin@beaconnewbeginnings.org.
 Thank you for your patience and commitment to helping others.
 
 Best regards,
-$APP_NAME Admin Team
+$appName Admin Team
 
 ---
 This is an automated notification. Please do not reply to this email.
@@ -179,7 +179,7 @@ This is an automated notification. Please do not reply to this email.
       final body = Uri.encodeComponent('''
 Dear $recipientName,
 
-$inviterName has invited you to join their private support group on $APP_NAME!
+$inviterName has invited you to join their private support group on $appName!
 
 Group: $groupName
 $groupDescription
@@ -191,7 +191,7 @@ Support groups are safe spaces where you can:
 • Find strength through community support
 
 To accept this invitation:
-1. Open the $APP_NAME app on your device
+1. Open the $appName app on your device
 2. Go to the Community tab
 3. Tap on Invitations (you'll see a notification badge)
 4. Accept the invitation to join
@@ -199,13 +199,13 @@ To accept this invitation:
 This invitation will expire in 30 days.
 
 If you haven't installed the app yet:
-📱 iOS: $APP_STORE_URL
-🤖 Android: $PLAY_STORE_URL
+📱 iOS: $appStoreUrl
+🤖 Android: $playStoreUrl
 
 Remember: Everything shared in support groups is confidential. Our community guidelines ensure a safe and respectful environment for all participants.
 
 Best regards,
-$APP_NAME Team
+$appName Team
 
 ---
 This is an automated notification. Please do not reply to this email.
@@ -254,7 +254,7 @@ ACTION REQUIRED:
 Please review this report in the admin dashboard and take appropriate action.
 
 To review this report:
-1. Open the $APP_NAME app
+1. Open the $appName app
 2. Go to Admin Dashboard
 3. Navigate to Reports section
 4. Review report ID: $reportId
@@ -262,7 +262,7 @@ To review this report:
 Time-sensitive reports require immediate attention to ensure the safety of our community members.
 
 ---
-$APP_NAME Admin Team
+$appName Admin Team
 This is an automated notification.
 ''');
 
@@ -309,7 +309,7 @@ If you have any additional concerns or questions about this resolution, please c
 Thank you for helping us maintain a safe and supportive community.
 
 Best regards,
-$APP_NAME Moderation Team
+$appName Moderation Team
 
 ---
 This is an automated notification. Please do not reply to this email.
@@ -353,7 +353,7 @@ Host: $hostName
 Start Time: ${scheduledTime.toString().substring(0, 16)}
 
 To join the session:
-1. Open the $APP_NAME app
+1. Open the $appName app
 2. Go to the Community tab
 3. Tap on "$groupName"
 4. Join the audio room when it goes live
@@ -367,7 +367,7 @@ Tips for a great session:
 We look forward to seeing you there!
 
 Best regards,
-$APP_NAME Team
+$appName Team
 
 ---
 This is an automated reminder. Please do not reply to this email.
@@ -423,7 +423,7 @@ This is an automated reminder. Please do not reply to this email.
       $message
     </div>
     <div class="footer">
-      <p>This is an automated notification from $APP_NAME</p>
+      <p>This is an automated notification from $appName</p>
       <p>© 2024 Beacon of New Beginnings. All rights reserved.</p>
     </div>
   </div>

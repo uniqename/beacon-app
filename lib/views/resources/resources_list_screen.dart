@@ -56,8 +56,8 @@ class _ResourcesListScreenState extends State<ResourcesListScreen> {
           width: double.infinity,
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Theme.of(context).primaryColor.withOpacity(0.1),
-            border: Border(bottom: BorderSide(color: Theme.of(context).primaryColor.withOpacity(0.3))),
+            color: Theme.of(context).primaryColor.withValues(alpha:0.1),
+            border: Border(bottom: BorderSide(color: Theme.of(context).primaryColor.withValues(alpha:0.3))),
           ),
           child: Row(
             children: [
@@ -140,7 +140,7 @@ class _ResourcesListScreenState extends State<ResourcesListScreen> {
             _selectedCategory = selected ? value : null;
           });
         },
-        selectedColor: Theme.of(context).primaryColor.withOpacity(0.3),
+        selectedColor: Theme.of(context).primaryColor.withValues(alpha:0.3),
       ),
     );
   }

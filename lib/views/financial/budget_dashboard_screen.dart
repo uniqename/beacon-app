@@ -224,14 +224,20 @@ class _BudgetDashboardScreenState extends State<BudgetDashboardScreen>
     // Savings rate (max 25 pts)
     if (_savingsRate >= 20) {
       score += 25;
-    } else if (_savingsRate >= 10) score += 15;
-    else if (_savingsRate > 0) score += 8;
+    } else if (_savingsRate >= 10) {
+      score += 15;
+    } else if (_savingsRate > 0) {
+      score += 8;
+    }
 
     // Emergency fund (max 25 pts)
     if (_emergencyFundMonths >= 6) {
       score += 25;
-    } else if (_emergencyFundMonths >= 3) score += 15;
-    else if (_emergencyFundMonths >= 1) score += 8;
+    } else if (_emergencyFundMonths >= 3) {
+      score += 15;
+    } else if (_emergencyFundMonths >= 1) {
+      score += 8;
+    }
 
     // Debt-to-income ratio (max 25 pts)
     if (_totalDebt == 0) {
@@ -240,8 +246,11 @@ class _BudgetDashboardScreenState extends State<BudgetDashboardScreen>
       final dti = _totalIncome > 0 ? _totalDebt / _totalIncome : 1.0;
       if (dti < 0.2) {
         score += 20;
-      } else if (dti < 0.5) score += 12;
-      else if (dti < 1.0) score += 6;
+      } else if (dti < 0.5) {
+        score += 12;
+      } else if (dti < 1.0) {
+        score += 6;
+      }
     }
 
     // Positive net worth (max 25 pts)

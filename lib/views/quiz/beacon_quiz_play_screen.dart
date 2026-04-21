@@ -190,10 +190,10 @@ class _BeaconQuizPlayScreenState extends State<BeaconQuizPlayScreen>
       Icons.square,
     ];
 
-    return WillPopScope(
-      onWillPop: () async {
-        _confirmQuit();
-        return false;
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop) _confirmQuit();
       },
       child: Scaffold(
         backgroundColor: const Color(0xFF0D1B2A),

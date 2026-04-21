@@ -73,33 +73,31 @@ class _DisguiseSettingsScreenState extends State<DisguiseSettingsScreen> {
           Text('Disguise App Type', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
           SizedBox(height: 12),
           Card(
-            child: Column(
-              children: [
-                RadioListTile<String>(
-                  value: 'Calculator',
-                  groupValue: _disguiseApp,
-                  onChanged: (value) => _updateDisguiseApp(value!),
-                  title: Text('Calculator'),
-                  subtitle: Text('App appears as a working calculator'),
-                  secondary: Icon(Icons.calculate, color: Colors.blue),
-                ),
-                RadioListTile<String>(
-                  value: 'Gallery',
-                  groupValue: _disguiseApp,
-                  onChanged: (value) => _updateDisguiseApp(value!),
-                  title: Text('Photo Gallery'),
-                  subtitle: Text('App appears as a photo gallery'),
-                  secondary: Icon(Icons.photo_library, color: Colors.green),
-                ),
-                RadioListTile<String>(
-                  value: 'Notes',
-                  groupValue: _disguiseApp,
-                  onChanged: (value) => _updateDisguiseApp(value!),
-                  title: Text('Notes App'),
-                  subtitle: Text('App appears as a notes application'),
-                  secondary: Icon(Icons.note, color: Colors.orange),
-                ),
-              ],
+            child: RadioGroup<String>(
+              groupValue: _disguiseApp,
+              onChanged: (value) => _updateDisguiseApp(value!),
+              child: Column(
+                children: [
+                  RadioListTile<String>(
+                    value: 'Calculator',
+                    title: Text('Calculator'),
+                    subtitle: Text('App appears as a working calculator'),
+                    secondary: Icon(Icons.calculate, color: Colors.blue),
+                  ),
+                  RadioListTile<String>(
+                    value: 'Gallery',
+                    title: Text('Photo Gallery'),
+                    subtitle: Text('App appears as a photo gallery'),
+                    secondary: Icon(Icons.photo_library, color: Colors.green),
+                  ),
+                  RadioListTile<String>(
+                    value: 'Notes',
+                    title: Text('Notes App'),
+                    subtitle: Text('App appears as a notes application'),
+                    secondary: Icon(Icons.note, color: Colors.orange),
+                  ),
+                ],
+              ),
             ),
           ),
           SizedBox(height: 24),

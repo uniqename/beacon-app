@@ -743,22 +743,24 @@ class ProfileScreen extends StatelessWidget {
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setDialogState) => AlertDialog(
           title: const Text('Select Region'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: allConfigs.entries.map((entry) {
-              final cfg = entry.value;
-              final flag = cfg.orgKey == 'gh' ? '🇬🇭' : '🇺🇸';
-              return RadioListTile<String>(
-                value: cfg.orgKey,
-                groupValue: selected,
-                title: Text('$flag ${cfg.orgName}'),
-                subtitle: Text(cfg.countryName),
-                onChanged: (val) {
-                  if (val != null) setDialogState(() => selected = val);
-                },
-                contentPadding: EdgeInsets.zero,
-              );
-            }).toList(),
+          content: RadioGroup<String>(
+            groupValue: selected,
+            onChanged: (val) {
+              if (val != null) setDialogState(() => selected = val);
+            },
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: allConfigs.entries.map((entry) {
+                final cfg = entry.value;
+                final flag = cfg.orgKey == 'gh' ? '🇬🇭' : '🇺🇸';
+                return RadioListTile<String>(
+                  value: cfg.orgKey,
+                  title: Text('$flag ${cfg.orgName}'),
+                  subtitle: Text(cfg.countryName),
+                  contentPadding: EdgeInsets.zero,
+                );
+              }).toList(),
+            ),
           ),
           actions: [
             TextButton(

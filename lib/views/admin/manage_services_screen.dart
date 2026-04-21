@@ -228,7 +228,7 @@ class _ManageServicesScreenState extends State<ManageServicesScreen> {
                     Container(
                       padding: EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: divisionColor.withOpacity(0.1),
+                        color: divisionColor.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Icon(

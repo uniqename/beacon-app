@@ -185,26 +185,28 @@ class AccessibilitySettingsScreen extends StatelessWidget {
       color: isSelected
           ? const Color(AppConstants.primaryColorValue).withValues(alpha: 0.1)
           : null,
-      child: RadioListTile<double>(
-        value: multiplier,
+      child: RadioGroup<double>(
         groupValue: service.fontSizeMultiplier,
         onChanged: (value) {
           if (value != null) {
             service.setFontSize(value);
           }
         },
-        title: Text(
-          label,
-          style: TextStyle(
-            fontSize: 16 * multiplier,
-            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+        child: RadioListTile<double>(
+          value: multiplier,
+          title: Text(
+            label,
+            style: TextStyle(
+              fontSize: 16 * multiplier,
+              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+            ),
           ),
+          subtitle: Text(
+            description,
+            style: TextStyle(fontSize: 12 * multiplier),
+          ),
+          activeColor: const Color(AppConstants.primaryColorValue),
         ),
-        subtitle: Text(
-          description,
-          style: TextStyle(fontSize: 12 * multiplier),
-        ),
-        activeColor: const Color(AppConstants.primaryColorValue),
       ),
     );
   }

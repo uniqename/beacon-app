@@ -1170,14 +1170,15 @@ class _LiveRoomJoinSheetState extends State<_LiveRoomJoinSheet> {
               color: Colors.blue[50],
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Column(
+            child: RadioGroup<bool>(
+              groupValue: _joinAsListener,
+              onChanged: (value) => setState(() => _joinAsListener = value!),
+              child: Column(
               children: [
                 Row(
                   children: [
                     Radio<bool>(
                       value: true,
-                      groupValue: _joinAsListener,
-                      onChanged: (value) => setState(() => _joinAsListener = value!),
                     ),
                     Expanded(
                       child: Column(
@@ -1200,8 +1201,6 @@ class _LiveRoomJoinSheetState extends State<_LiveRoomJoinSheet> {
                   children: [
                     Radio<bool>(
                       value: false,
-                      groupValue: _joinAsListener,
-                      onChanged: (value) => setState(() => _joinAsListener = value!),
                     ),
                     Expanded(
                       child: Column(
@@ -1221,6 +1220,7 @@ class _LiveRoomJoinSheetState extends State<_LiveRoomJoinSheet> {
                   ],
                 ),
               ],
+            ),
             ),
           ),
           const SizedBox(height: 24),

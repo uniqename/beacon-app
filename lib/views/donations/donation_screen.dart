@@ -310,29 +310,29 @@ class _DonationScreenState extends State<DonationScreen> {
             ),
           ),
           SizedBox(height: 16),
-          RadioListTile<String>(
-            title: Text('One-time donation'),
-            subtitle: Text('Make a single donation'),
-            value: 'one-time',
+          RadioGroup<String>(
             groupValue: _selectedFrequency,
-            activeColor: primaryColor,
             onChanged: (value) {
               setState(() {
                 _selectedFrequency = value!;
               });
             },
-          ),
-          RadioListTile<String>(
-            title: Text('Monthly donation'),
-            subtitle: Text('Automatic monthly contributions'),
-            value: 'monthly',
-            groupValue: _selectedFrequency,
-            activeColor: primaryColor,
-            onChanged: (value) {
-              setState(() {
-                _selectedFrequency = value!;
-              });
-            },
+            child: Column(
+              children: [
+                RadioListTile<String>(
+                  title: Text('One-time donation'),
+                  subtitle: Text('Make a single donation'),
+                  value: 'one-time',
+                  activeColor: primaryColor,
+                ),
+                RadioListTile<String>(
+                  title: Text('Monthly donation'),
+                  subtitle: Text('Automatic monthly contributions'),
+                  value: 'monthly',
+                  activeColor: primaryColor,
+                ),
+              ],
+            ),
           ),
           if (_selectedFrequency == 'monthly')
             Container(

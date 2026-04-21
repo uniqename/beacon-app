@@ -7,6 +7,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
   // Running in demo mode without Firebase for production build
+  // ignore: avoid_print
   print('Running in demo mode without Firebase');
   
   runApp(const NGOSupportApp());
