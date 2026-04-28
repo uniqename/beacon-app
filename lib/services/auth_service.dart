@@ -337,7 +337,17 @@ class AuthService {
 
           if (response != null && response['password_hash'] == passwordHash) {
             developer.log('✅ [Auth] Found in Supabase — pulling down to local DB');
-            final remoteData = Map<String, dynamic>.from(response);
+            // Only keep columns that exist in the local SQLite schema
+            const localColumns = {
+              'id', 'email', 'phone', 'display_name', 'user_type', 'password_hash',
+              'encrypted_data', 'created_at', 'last_updated', 'is_anonymous',
+              'emergency_contact', 'emergency_contact_phone', 'support_needs',
+              'current_location', 'has_active_cases', 'specialization',
+              'qualifications', 'is_available', 'admin_secret_validated',
+              'approval_status', 'approval_notes', 'approved_by', 'approved_at',
+            };
+            final remoteData = Map<String, dynamic>.from(response)
+              ..removeWhere((k, _) => !localColumns.contains(k));
             await db.insert('users', remoteData, conflictAlgorithm: ConflictAlgorithm.replace);
             // Now retry local query so the rest of the flow is identical
             final synced = await db.query('users',
