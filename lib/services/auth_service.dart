@@ -328,7 +328,18 @@ class AuthService {
         // Not found locally — try Supabase (account may have been created on another device)
         developer.log('🔐 [Auth] Not found locally — checking Supabase for $email');
         try {
-          final client = sb.Supabase.instance.client;
+          final supabaseUrl = dotenv.env['SUPABASE_URL'] ?? '';
+          final supabaseAnonKey = dotenv.env['SUPABASE_ANON_KEY'] ?? '';
+          if (supabaseUrl.isEmpty || supabaseAnonKey.isEmpty) {
+            throw Exception('Supabase not configured');
+          }
+          sb.SupabaseClient client;
+          try {
+            client = sb.Supabase.instance.client;
+          } catch (_) {
+            await sb.Supabase.initialize(url: supabaseUrl, anonKey: supabaseAnonKey);
+            client = sb.Supabase.instance.client;
+          }
           final response = await client
               .from('users')
               .select()
