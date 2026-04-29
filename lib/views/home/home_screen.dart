@@ -496,7 +496,7 @@ class _HomeTabScreenState extends State<HomeTabScreen> {
               Consumer<AuthService>(
                 builder: (context, authService, _) {
                   final user = authService.currentUser;
-                  if (user == null || user.userType != UserType.survivor) {
+                  if (user == null) {
                     return const SizedBox.shrink();
                   }
                   return FutureBuilder(

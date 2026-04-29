@@ -123,7 +123,82 @@ class ProfileScreen extends StatelessWidget {
                     ),
                     
                     const SizedBox(height: 32),
-                    
+
+                    // Sign in banner for anonymous users
+                    if (isAnonymous) ...[
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFFF0562D), Color(0xFFFF7043)],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Have an account?',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            const Text(
+                              'Sign in to access your saved data and full features.',
+                              style: TextStyle(color: Colors.white70, fontSize: 13),
+                            ),
+                            const SizedBox(height: 12),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: ElevatedButton.icon(
+                                    onPressed: () async {
+                                      await authService.signOut();
+                                      if (context.mounted) {
+                                        Navigator.of(context).pushNamedAndRemoveUntil('/login', (r) => false);
+                                      }
+                                    },
+                                    icon: const Icon(Icons.login, size: 16),
+                                    label: const Text('Sign In'),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.white,
+                                      foregroundColor: const Color(0xFFF0562D),
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: OutlinedButton.icon(
+                                    onPressed: () async {
+                                      await authService.signOut();
+                                      if (context.mounted) {
+                                        Navigator.of(context).pushNamedAndRemoveUntil('/register', (r) => false);
+                                      }
+                                    },
+                                    icon: const Icon(Icons.person_add, size: 16),
+                                    label: const Text('Create Account'),
+                                    style: OutlinedButton.styleFrom(
+                                      foregroundColor: Colors.white,
+                                      side: const BorderSide(color: Colors.white70),
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                    ],
+
                     // Settings Section
                     _buildSettingsSection(context, isAnonymous, authService),
                     

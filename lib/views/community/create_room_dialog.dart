@@ -370,7 +370,7 @@ class _CreateRoomDialogState extends State<CreateRoomDialog> {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12),
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: Theme.of(context).colorScheme.surface,
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3)),
                         ),
@@ -378,6 +378,7 @@ class _CreateRoomDialogState extends State<CreateRoomDialog> {
                           child: DropdownButton<GroupType>(
                             value: _selectedType,
                             isExpanded: true,
+                            dropdownColor: Theme.of(context).colorScheme.surface,
                             icon: Icon(Icons.arrow_drop_down, color: BeaconColors.vibrantOrange),
                             onChanged: (GroupType? value) {
                               if (value != null) {
@@ -389,7 +390,10 @@ class _CreateRoomDialogState extends State<CreateRoomDialog> {
                             items: GroupType.values.map((type) {
                               return DropdownMenuItem(
                                 value: type,
-                                child: Text(_getTypeDisplayName(type)),
+                                child: Text(
+                                  _getTypeDisplayName(type),
+                                  style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                                ),
                               );
                             }).toList(),
                           ),
@@ -469,7 +473,7 @@ class _CreateRoomDialogState extends State<CreateRoomDialog> {
                           child: Container(
                             padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
-                              color: Colors.white,
+                              color: Theme.of(context).colorScheme.surface,
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(
                                 color: _scheduledTime == null
@@ -597,7 +601,7 @@ class _CreateRoomDialogState extends State<CreateRoomDialog> {
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Theme.of(context).colorScheme.surface,
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withValues(alpha: 0.05),
@@ -673,7 +677,7 @@ class _CreateRoomDialogState extends State<CreateRoomDialog> {
         decoration: BoxDecoration(
           color: isSelected
               ? BeaconColors.softSageGreen.withValues(alpha: 0.2)
-              : Colors.white,
+              : Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: isSelected
@@ -726,7 +730,7 @@ class _CreateRoomDialogState extends State<CreateRoomDialog> {
         decoration: BoxDecoration(
           color: isSelected
               ? BeaconColors.vibrantOrange.withValues(alpha: 0.1)
-              : Colors.white,
+              : Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: isSelected

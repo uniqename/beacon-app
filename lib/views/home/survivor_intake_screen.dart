@@ -259,6 +259,15 @@ class _SurvivorIntakeScreenState extends State<SurvivorIntakeScreen> {
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 13, color: Colors.grey[500]),
             ),
+            const SizedBox(height: 40),
+            TextButton.icon(
+              onPressed: () => Navigator.of(context).pop(),
+              icon: const Icon(Icons.arrow_back, size: 18),
+              label: const Text('Go Back to Home'),
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.grey[600],
+              ),
+            ),
           ],
         ),
       ),
