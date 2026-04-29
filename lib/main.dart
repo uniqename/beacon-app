@@ -268,7 +268,7 @@ class NGOSupportApp extends StatelessWidget {
                 useMaterial3: true,
               ),
             ),
-            themeMode: ThemeMode.light,
+            themeMode: ThemeMode.system,
             initialRoute: '/',
             routes: {
               '/': (context) => const AuthWrapper(),

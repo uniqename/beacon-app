@@ -22,9 +22,19 @@ class _UploadDocumentScreenState extends State<UploadDocumentScreen> {
   @override
   Widget build(BuildContext context) {
     final categories = _service.getDocumentCategories();
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    // Theme-aware colours
+    final cardBg     = isDark ? const Color(0xFF2D2829) : Colors.white;
+    final textPrimary   = isDark ? Colors.white          : Colors.grey[900]!;
+    final textSecondary = isDark ? Colors.white70        : Colors.grey[700]!;
+    final textBody      = isDark ? Colors.white60        : Colors.grey[600]!;
+    final borderSub  = isDark ? const Color(0xFF3D393A) : Colors.grey[300]!;
+    final fillColor  = isDark ? const Color(0xFF2D2829) : Colors.grey[50]!;
+    final labelStyle = TextStyle(color: isDark ? Colors.white70 : Colors.grey[700]);
+    final hintStyle  = TextStyle(color: isDark ? Colors.white38 : Colors.grey[400]);
 
     return Scaffold(
-      backgroundColor: Colors.white,
       appBar: AppBar(
         title: const Text('Upload Document',
             style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
@@ -41,13 +51,13 @@ class _UploadDocumentScreenState extends State<UploadDocumentScreen> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: cardBg,
                 borderRadius: BorderRadius.circular(12),
                 border: Border(
                   left: BorderSide(color: Colors.deepOrange[700]!, width: 4),
-                  top: BorderSide(color: Colors.deepOrange[200]!),
-                  right: BorderSide(color: Colors.deepOrange[200]!),
-                  bottom: BorderSide(color: Colors.deepOrange[200]!),
+                  top: BorderSide(color: isDark ? const Color(0xFF3D393A) : Colors.deepOrange[200]!),
+                  right: BorderSide(color: isDark ? const Color(0xFF3D393A) : Colors.deepOrange[200]!),
+                  bottom: BorderSide(color: isDark ? const Color(0xFF3D393A) : Colors.deepOrange[200]!),
                 ),
               ),
               child: Row(
@@ -59,8 +69,7 @@ class _UploadDocumentScreenState extends State<UploadDocumentScreen> {
                       color: Colors.deepOrange[700],
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.security,
-                        color: Colors.white, size: 20),
+                    child: const Icon(Icons.security, color: Colors.white, size: 20),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -72,17 +81,13 @@ class _UploadDocumentScreenState extends State<UploadDocumentScreen> {
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
-                            color: Colors.grey[900],
+                            color: textPrimary,
                           ),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           'Documents are encrypted with AES-256 before storage. Only you can access them.',
-                          style: TextStyle(
-                            color: Colors.grey[700],
-                            fontSize: 13,
-                            height: 1.4,
-                          ),
+                          style: TextStyle(color: textSecondary, fontSize: 13, height: 1.4),
                         ),
                       ],
                     ),
@@ -95,28 +100,24 @@ class _UploadDocumentScreenState extends State<UploadDocumentScreen> {
             // ── Document Title ────────────────────────────────────────────
             TextFormField(
               controller: _titleController,
-              style: TextStyle(color: Colors.grey[900], fontSize: 15),
+              style: TextStyle(color: textPrimary, fontSize: 15),
               decoration: InputDecoration(
                 labelText: 'Document Title *',
-                labelStyle: TextStyle(color: Colors.grey[700]),
+                labelStyle: labelStyle,
                 hintText: 'Give this document a descriptive name',
-                hintStyle: TextStyle(color: Colors.grey[400]),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
+                hintStyle: hintStyle,
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
-                  borderSide: BorderSide(color: Colors.grey[350]!),
+                  borderSide: BorderSide(color: borderSub),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
-                  borderSide:
-                      BorderSide(color: Colors.deepOrange[700]!, width: 2),
+                  borderSide: BorderSide(color: Colors.deepOrange[700]!, width: 2),
                 ),
                 filled: true,
-                fillColor: Colors.grey[50],
-                prefixIcon:
-                    Icon(Icons.title, color: Colors.deepOrange[700]),
+                fillColor: fillColor,
+                prefixIcon: Icon(Icons.title, color: Colors.deepOrange[700]),
               ),
               validator: (v) =>
                   v?.trim().isEmpty ?? true ? 'Title is required' : null,
@@ -126,28 +127,24 @@ class _UploadDocumentScreenState extends State<UploadDocumentScreen> {
             // ── Category dropdown ─────────────────────────────────────────
             DropdownButtonFormField<String>(
               initialValue: _selectedCategory,
-              dropdownColor: Colors.white,
-              style: TextStyle(color: Colors.grey[900], fontSize: 15),
+              dropdownColor: cardBg,
+              style: TextStyle(color: textPrimary, fontSize: 15),
               decoration: InputDecoration(
                 labelText: 'Category',
-                labelStyle: TextStyle(color: Colors.grey[700]),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
+                labelStyle: labelStyle,
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
-                  borderSide: BorderSide(color: Colors.grey[350]!),
+                  borderSide: BorderSide(color: borderSub),
                 ),
                 filled: true,
-                fillColor: Colors.grey[50],
-                prefixIcon:
-                    Icon(Icons.category, color: Colors.deepOrange[700]),
+                fillColor: fillColor,
+                prefixIcon: Icon(Icons.category, color: Colors.deepOrange[700]),
               ),
               items: categories
                   .map((cat) => DropdownMenuItem(
                         value: cat,
-                        child: Text(cat,
-                            style: TextStyle(color: Colors.grey[900])),
+                        child: Text(cat, style: TextStyle(color: textPrimary)),
                       ))
                   .toList(),
               onChanged: (v) => setState(() => _selectedCategory = v!),
@@ -157,38 +154,43 @@ class _UploadDocumentScreenState extends State<UploadDocumentScreen> {
             // ── Select File ───────────────────────────────────────────────
             Text(
               'Select File',
-              style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.bold,
-                color: Colors.grey[900],
-              ),
+              style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: textPrimary),
             ),
             const SizedBox(height: 10),
             Container(
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: cardBg,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.grey[300]!),
+                border: Border.all(color: borderSub),
               ),
               child: Column(
                 children: [
                   _fileTile(
+                    cardBg: cardBg,
+                    textPrimary: textPrimary,
+                    textBody: textBody,
                     icon: Icons.camera_alt,
                     iconColor: Colors.blue[700]!,
                     title: 'Take Photo',
                     subtitle: 'Capture document with camera',
                     onTap: _takePhoto,
                   ),
-                  Divider(height: 1, color: Colors.grey[200]),
+                  Divider(height: 1, color: borderSub),
                   _fileTile(
+                    cardBg: cardBg,
+                    textPrimary: textPrimary,
+                    textBody: textBody,
                     icon: Icons.photo_library,
                     iconColor: Colors.green[700]!,
                     title: 'Choose from Gallery',
                     subtitle: 'Select existing photo',
                     onTap: _chooseFromGallery,
                   ),
-                  Divider(height: 1, color: Colors.grey[200]),
+                  Divider(height: 1, color: borderSub),
                   _fileTile(
+                    cardBg: cardBg,
+                    textPrimary: textPrimary,
+                    textBody: textBody,
                     icon: Icons.insert_drive_file,
                     iconColor: Colors.orange[700]!,
                     title: 'Choose File',
@@ -203,33 +205,30 @@ class _UploadDocumentScreenState extends State<UploadDocumentScreen> {
             if (_selectedFilePath != null) ...[
               const SizedBox(height: 12),
               Container(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 14, vertical: 12),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                 decoration: BoxDecoration(
-                  color: Colors.green[50],
+                  color: isDark ? Colors.green[900]!.withValues(alpha: 0.4) : Colors.green[50],
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(color: Colors.green[400]!),
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.check_circle,
-                        color: Colors.green[700], size: 20),
+                    Icon(Icons.check_circle, color: Colors.green[400], size: 20),
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(
                         _selectedFilePath!.split('/').last,
                         style: TextStyle(
-                            color: Colors.green[900],
+                            color: isDark ? Colors.green[300] : Colors.green[900],
                             fontWeight: FontWeight.w500),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
                     GestureDetector(
-                      onTap: () =>
-                          setState(() => _selectedFilePath = null),
-                      child: Icon(Icons.close,
-                          size: 20, color: Colors.green[700]),
+                      onTap: () => setState(() => _selectedFilePath = null),
+                      child: Icon(Icons.close, size: 20,
+                          color: isDark ? Colors.green[300] : Colors.green[700]),
                     ),
                   ],
                 ),
@@ -242,17 +241,15 @@ class _UploadDocumentScreenState extends State<UploadDocumentScreen> {
             SizedBox(
               height: 52,
               child: ElevatedButton.icon(
-                onPressed:
-                    _selectedFilePath == null ? null : _uploadDocument,
+                onPressed: _selectedFilePath == null ? null : _uploadDocument,
                 icon: const Icon(Icons.upload, size: 20),
                 label: const Text('Upload Document',
-                    style: TextStyle(
-                        fontSize: 16, fontWeight: FontWeight.w600)),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.deepOrange[700],
                   foregroundColor: Colors.white,
-                  disabledBackgroundColor: Colors.grey[200],
-                  disabledForegroundColor: Colors.grey[500],
+                  disabledBackgroundColor: isDark ? Colors.white12 : Colors.grey[200],
+                  disabledForegroundColor: isDark ? Colors.white38 : Colors.grey[500],
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12)),
                 ),
@@ -265,13 +262,13 @@ class _UploadDocumentScreenState extends State<UploadDocumentScreen> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: cardBg,
                 borderRadius: BorderRadius.circular(12),
                 border: Border(
                   left: BorderSide(color: Colors.amber[600]!, width: 4),
-                  top: BorderSide(color: Colors.amber[300]!),
-                  right: BorderSide(color: Colors.amber[300]!),
-                  bottom: BorderSide(color: Colors.amber[300]!),
+                  top: BorderSide(color: isDark ? const Color(0xFF3D393A) : Colors.amber[300]!),
+                  right: BorderSide(color: isDark ? const Color(0xFF3D393A) : Colors.amber[300]!),
+                  bottom: BorderSide(color: isDark ? const Color(0xFF3D393A) : Colors.amber[300]!),
                 ),
               ),
               child: Column(
@@ -279,24 +276,23 @@ class _UploadDocumentScreenState extends State<UploadDocumentScreen> {
                 children: [
                   Row(
                     children: [
-                      Icon(Icons.lightbulb_outline,
-                          color: Colors.amber[700], size: 20),
+                      Icon(Icons.lightbulb_outline, color: Colors.amber[500], size: 20),
                       const SizedBox(width: 8),
                       Text(
                         'Tips for Document Photos',
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 14,
-                          color: Colors.grey[900],
+                          color: textPrimary,
                         ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 10),
-                  _tip('Ensure good lighting'),
-                  _tip('Capture the entire document'),
-                  _tip('Keep the document flat and readable'),
-                  _tip('Avoid shadows and glare'),
+                  _tip('Ensure good lighting', textSecondary),
+                  _tip('Capture the entire document', textSecondary),
+                  _tip('Keep the document flat and readable', textSecondary),
+                  _tip('Avoid shadows and glare', textSecondary),
                 ],
               ),
             ),
@@ -308,6 +304,9 @@ class _UploadDocumentScreenState extends State<UploadDocumentScreen> {
   }
 
   Widget _fileTile({
+    required Color cardBg,
+    required Color textPrimary,
+    required Color textBody,
     required IconData icon,
     required Color iconColor,
     required String title,
@@ -324,7 +323,7 @@ class _UploadDocumentScreenState extends State<UploadDocumentScreen> {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: iconColor.withValues(alpha: 0.1),
+                  color: iconColor.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(icon, color: iconColor, size: 22),
@@ -336,37 +335,35 @@ class _UploadDocumentScreenState extends State<UploadDocumentScreen> {
                   children: [
                     Text(title,
                         style: TextStyle(
-                            color: Colors.grey[900],
+                            color: textPrimary,
                             fontWeight: FontWeight.w600,
                             fontSize: 15)),
                     const SizedBox(height: 2),
                     Text(subtitle,
-                        style: TextStyle(
-                            color: Colors.grey[600], fontSize: 13)),
+                        style: TextStyle(color: textBody, fontSize: 13)),
                   ],
                 ),
               ),
-              Icon(Icons.chevron_right, color: Colors.grey[400], size: 20),
+              Icon(Icons.chevron_right, color: textBody, size: 20),
             ],
           ),
         ),
       );
 
-  Widget _tip(String text) => Padding(
+  Widget _tip(String text, Color textColor) => Padding(
         padding: const EdgeInsets.only(bottom: 6),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text('• ',
                 style: TextStyle(
-                    color: Colors.amber[700],
+                    color: Colors.amber[500],
                     fontWeight: FontWeight.bold,
                     fontSize: 14)),
             Expanded(
               child: Text(
                 text,
-                style:
-                    TextStyle(fontSize: 13, color: Colors.grey[800], height: 1.4),
+                style: TextStyle(fontSize: 13, color: textColor, height: 1.4),
               ),
             ),
           ],
