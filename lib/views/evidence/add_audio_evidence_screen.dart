@@ -114,7 +114,7 @@ class _AddAudioEvidenceScreenState extends State<AddAudioEvidenceScreen> {
                   SizedBox(height: 24),
                   Text(
                     'Recording...',
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.grey[850]),
                   ),
                   SizedBox(height: 8),
                   Text(
@@ -138,7 +138,7 @@ class _AddAudioEvidenceScreenState extends State<AddAudioEvidenceScreen> {
                       children: [
                         Text(
                           'Recordings (${_recordings.length})',
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.grey[850]),
                         ),
                         SizedBox(height: 12),
                         ..._recordings.asMap().entries.map((entry) {

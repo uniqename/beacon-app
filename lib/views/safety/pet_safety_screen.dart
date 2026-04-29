@@ -106,7 +106,7 @@ class _PetSafetyScreenState extends State<PetSafetyScreen> {
                             backgroundColor: Colors.brown[100],
                             child: Icon(_getPetIcon(pet.type), color: Colors.brown[700]),
                           ),
-                          title: Text(pet.name, style: TextStyle(fontWeight: FontWeight.bold)),
+                          title: Text(pet.name, style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey[850])),
                           subtitle: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [

@@ -110,7 +110,7 @@ class _DocumentVaultScreenState extends State<DocumentVaultScreen> {
               children: [
                 Icon(Icons.folder, color: Colors.deepOrange[700], size: 20),
                 SizedBox(width: 8),
-                Text('My Documents', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                Text('My Documents', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.grey[850])),
                 Spacer(),
                 Text('${_documents.length}', style: TextStyle(color: Colors.grey[600])),
               ],
@@ -147,7 +147,7 @@ class _DocumentVaultScreenState extends State<DocumentVaultScreen> {
                                   color: _getCategoryColor(doc.category),
                                 ),
                               ),
-                              title: Text(doc.title, style: TextStyle(fontWeight: FontWeight.bold)),
+                              title: Text(doc.title, style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey[850])),
                               subtitle: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [

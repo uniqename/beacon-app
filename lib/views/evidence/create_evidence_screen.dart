@@ -157,7 +157,7 @@ class _CreateEvidenceScreenState extends State<CreateEvidenceScreen> {
             SizedBox(height: 24),
 
             // Photo Evidence Section
-            Text('Photo Evidence', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            Text('Photo Evidence', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.grey[850])),
             SizedBox(height: 8),
             Row(
               children: [
@@ -213,7 +213,7 @@ class _CreateEvidenceScreenState extends State<CreateEvidenceScreen> {
             SizedBox(height: 24),
 
             // Audio Recording Section
-            Text('Audio Recording', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            Text('Audio Recording', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.grey[850])),
             SizedBox(height: 8),
             ElevatedButton.icon(
               onPressed: _toggleAudioRecording,

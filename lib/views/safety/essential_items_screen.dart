@@ -160,7 +160,7 @@ class _EssentialItemsScreenState extends State<EssentialItemsScreen> {
                   children: [
                     Text(
                       'Items Packed',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.grey[850]),
                     ),
                     Text(
                       '$checkedCount of $totalCount',

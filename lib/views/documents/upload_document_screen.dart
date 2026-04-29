@@ -22,22 +22,27 @@ class _UploadDocumentScreenState extends State<UploadDocumentScreen> {
   @override
   Widget build(BuildContext context) {
     final categories = _service.getDocumentCategories();
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
+      backgroundColor: colorScheme.surface,
       appBar: AppBar(
-        title: Text('Upload Document'),
+        title: const Text('Upload Document'),
         backgroundColor: Colors.deepOrange[700],
+        foregroundColor: Colors.white,
       ),
       body: Form(
         key: _formKey,
         child: ListView(
-          padding: EdgeInsets.all(16),
+          padding: const EdgeInsets.all(16),
           children: [
+            // Secure upload banner
             Container(
-              padding: EdgeInsets.all(16),
+              padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: Colors.deepOrange[50],
                 borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.deepOrange[200]!),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -45,11 +50,18 @@ class _UploadDocumentScreenState extends State<UploadDocumentScreen> {
                   Row(
                     children: [
                       Icon(Icons.security, color: Colors.deepOrange[700]),
-                      SizedBox(width: 12),
-                      Text('Secure Upload', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                      const SizedBox(width: 12),
+                      Text(
+                        'Secure Upload',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                          color: Colors.deepOrange[900],
+                        ),
+                      ),
                     ],
                   ),
-                  SizedBox(height: 8),
+                  const SizedBox(height: 8),
                   Text(
                     'Documents are encrypted with AES-256 before storage. Only you can access them.',
                     style: TextStyle(color: Colors.deepOrange[900], fontSize: 13),
@@ -57,74 +69,118 @@ class _UploadDocumentScreenState extends State<UploadDocumentScreen> {
                 ],
               ),
             ),
-            SizedBox(height: 24),
+            const SizedBox(height: 24),
             TextFormField(
               controller: _titleController,
+              style: TextStyle(color: colorScheme.onSurface),
               decoration: InputDecoration(
                 labelText: 'Document Title *',
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.title),
+                border: const OutlineInputBorder(),
+                prefixIcon: const Icon(Icons.title),
                 helperText: 'Give this document a descriptive name',
+                filled: true,
+                fillColor: colorScheme.surfaceContainerHighest,
               ),
-              validator: (value) => value?.trim().isEmpty ?? true ? 'Title required' : null,
+              validator: (value) =>
+                  value?.trim().isEmpty ?? true ? 'Title required' : null,
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             DropdownButtonFormField<String>(
               initialValue: _selectedCategory,
+              dropdownColor: colorScheme.surface,
+              style: TextStyle(color: colorScheme.onSurface),
               decoration: InputDecoration(
                 labelText: 'Category',
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.category),
+                border: const OutlineInputBorder(),
+                prefixIcon: const Icon(Icons.category),
+                filled: true,
+                fillColor: colorScheme.surfaceContainerHighest,
               ),
-              items: categories.map((cat) => DropdownMenuItem(value: cat, child: Text(cat))).toList(),
-              onChanged: (value) => setState(() => _selectedCategory = value!),
+              items: categories
+                  .map((cat) => DropdownMenuItem(
+                        value: cat,
+                        child: Text(cat,
+                            style: TextStyle(color: colorScheme.onSurface)),
+                      ))
+                  .toList(),
+              onChanged: (value) =>
+                  setState(() => _selectedCategory = value!),
             ),
-            SizedBox(height: 24),
-            Text('Select File', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-            SizedBox(height: 12),
+            const SizedBox(height: 24),
+            Text(
+              'Select File',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: colorScheme.onSurface,
+              ),
+            ),
+            const SizedBox(height: 12),
             Container(
               decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey[300]!),
-                borderRadius: BorderRadius.circular(8),
+                color: colorScheme.surfaceContainerHighest,
+                border: Border.all(color: colorScheme.outlineVariant),
+                borderRadius: BorderRadius.circular(12),
               ),
               child: Column(
                 children: [
                   ListTile(
-                    leading: Icon(Icons.camera_alt, color: Colors.blue),
-                    title: Text('Take Photo'),
-                    subtitle: Text('Capture document with camera'),
+                    leading:
+                        Icon(Icons.camera_alt, color: Colors.blue[700]),
+                    title: Text('Take Photo',
+                        style: TextStyle(
+                            color: colorScheme.onSurface,
+                            fontWeight: FontWeight.w600)),
+                    subtitle: Text('Capture document with camera',
+                        style: TextStyle(
+                            color: colorScheme.onSurfaceVariant,
+                            fontSize: 13)),
                     onTap: _takePhoto,
                   ),
-                  Divider(height: 1),
+                  Divider(height: 1, color: colorScheme.outlineVariant),
                   ListTile(
-                    leading: Icon(Icons.photo_library, color: Colors.green),
-                    title: Text('Choose from Gallery'),
-                    subtitle: Text('Select existing photo'),
+                    leading:
+                        Icon(Icons.photo_library, color: Colors.green[700]),
+                    title: Text('Choose from Gallery',
+                        style: TextStyle(
+                            color: colorScheme.onSurface,
+                            fontWeight: FontWeight.w600)),
+                    subtitle: Text('Select existing photo',
+                        style: TextStyle(
+                            color: colorScheme.onSurfaceVariant,
+                            fontSize: 13)),
                     onTap: _chooseFromGallery,
                   ),
-                  Divider(height: 1),
+                  Divider(height: 1, color: colorScheme.outlineVariant),
                   ListTile(
-                    leading: Icon(Icons.insert_drive_file, color: Colors.orange),
-                    title: Text('Choose File'),
-                    subtitle: Text('PDF, DOC, or other document'),
+                    leading:
+                        Icon(Icons.insert_drive_file, color: Colors.orange[700]),
+                    title: Text('Choose File',
+                        style: TextStyle(
+                            color: colorScheme.onSurface,
+                            fontWeight: FontWeight.w600)),
+                    subtitle: Text('PDF, DOC, or other document',
+                        style: TextStyle(
+                            color: colorScheme.onSurfaceVariant,
+                            fontSize: 13)),
                     onTap: _chooseFile,
                   ),
                 ],
               ),
             ),
             if (_selectedFilePath != null) ...[
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               Container(
-                padding: EdgeInsets.all(12),
+                padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   color: Colors.green[50],
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.green[200]!),
+                  border: Border.all(color: Colors.green[300]!),
                 ),
                 child: Row(
                   children: [
                     Icon(Icons.check_circle, color: Colors.green[700]),
-                    SizedBox(width: 12),
+                    const SizedBox(width: 12),
                     Expanded(
                       child: Text(
                         'File selected: ${_selectedFilePath!.split('/').last}',
@@ -132,77 +188,114 @@ class _UploadDocumentScreenState extends State<UploadDocumentScreen> {
                       ),
                     ),
                     IconButton(
-                      icon: Icon(Icons.close, size: 20),
-                      onPressed: () => setState(() => _selectedFilePath = null),
+                      icon: const Icon(Icons.close, size: 20),
+                      color: Colors.green[800],
+                      onPressed: () =>
+                          setState(() => _selectedFilePath = null),
                     ),
                   ],
                 ),
               ),
             ],
-            SizedBox(height: 32),
+            const SizedBox(height: 32),
             ElevatedButton.icon(
               onPressed: _selectedFilePath == null ? null : _uploadDocument,
-              icon: Icon(Icons.upload),
-              label: Text('Upload Document'),
+              icon: const Icon(Icons.upload),
+              label: const Text('Upload Document',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.deepOrange[700],
-                padding: EdgeInsets.symmetric(vertical: 16),
+                foregroundColor: Colors.white,
+                disabledBackgroundColor: colorScheme.surfaceContainerHighest,
+                disabledForegroundColor: colorScheme.onSurfaceVariant,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
               ),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
+            // Tips box
             Container(
-              padding: EdgeInsets.all(12),
+              padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: Colors.amber[50],
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.amber[200]!),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.amber[300]!),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
                     children: [
-                      Icon(Icons.info_outline, color: Colors.amber[700], size: 20),
-                      SizedBox(width: 8),
-                      Text('Tips for Document Photos', style: TextStyle(fontWeight: FontWeight.bold)),
+                      Icon(Icons.info_outline,
+                          color: Colors.amber[800], size: 20),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Tips for Document Photos',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.amber[900],
+                          fontSize: 14,
+                        ),
+                      ),
                     ],
                   ),
-                  SizedBox(height: 8),
-                  Text('• Ensure good lighting', style: TextStyle(fontSize: 12)),
-                  Text('• Capture the entire document', style: TextStyle(fontSize: 12)),
-                  Text('• Keep the document flat and readable', style: TextStyle(fontSize: 12)),
-                  Text('• Avoid shadows and glare', style: TextStyle(fontSize: 12)),
+                  const SizedBox(height: 10),
+                  _tip('Ensure good lighting'),
+                  _tip('Capture the entire document'),
+                  _tip('Keep the document flat and readable'),
+                  _tip('Avoid shadows and glare'),
                 ],
               ),
             ),
+            const SizedBox(height: 24),
           ],
         ),
       ),
     );
   }
 
+  Widget _tip(String text) => Padding(
+        padding: const EdgeInsets.only(bottom: 4),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('• ', style: TextStyle(color: Colors.amber[900])),
+            Expanded(
+              child: Text(
+                text,
+                style: TextStyle(fontSize: 13, color: Colors.amber[900]),
+              ),
+            ),
+          ],
+        ),
+      );
+
   Future<void> _takePhoto() async {
     try {
-      final ImagePicker picker = ImagePicker();
-      final XFile? photo = await picker.pickImage(
+      final picker = ImagePicker();
+      final photo = await picker.pickImage(
         source: ImageSource.camera,
         maxWidth: 1920,
         maxHeight: 1080,
         imageQuality: 85,
       );
-
       if (photo != null) {
         setState(() => _selectedFilePath = photo.path);
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Photo captured successfully'), backgroundColor: Colors.green),
+            const SnackBar(
+                content: Text('Photo captured successfully'),
+                backgroundColor: Colors.green),
           );
         }
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error accessing camera: $e'), backgroundColor: Colors.red),
+          SnackBar(
+              content: Text('Error accessing camera: $e'),
+              backgroundColor: Colors.red),
         );
       }
     }
@@ -210,26 +303,29 @@ class _UploadDocumentScreenState extends State<UploadDocumentScreen> {
 
   Future<void> _chooseFromGallery() async {
     try {
-      final ImagePicker picker = ImagePicker();
-      final XFile? image = await picker.pickImage(
+      final picker = ImagePicker();
+      final image = await picker.pickImage(
         source: ImageSource.gallery,
         maxWidth: 1920,
         maxHeight: 1080,
         imageQuality: 85,
       );
-
       if (image != null) {
         setState(() => _selectedFilePath = image.path);
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Image selected successfully'), backgroundColor: Colors.green),
+            const SnackBar(
+                content: Text('Image selected successfully'),
+                backgroundColor: Colors.green),
           );
         }
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error accessing gallery: $e'), backgroundColor: Colors.red),
+          SnackBar(
+              content: Text('Error accessing gallery: $e'),
+              backgroundColor: Colors.red),
         );
       }
     }
@@ -237,23 +333,26 @@ class _UploadDocumentScreenState extends State<UploadDocumentScreen> {
 
   Future<void> _chooseFile() async {
     try {
-      FilePickerResult? result = await FilePicker.platform.pickFiles(
+      final result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
         allowedExtensions: ['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png'],
       );
-
       if (result != null && result.files.single.path != null) {
         setState(() => _selectedFilePath = result.files.single.path);
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('File selected successfully'), backgroundColor: Colors.green),
+            const SnackBar(
+                content: Text('File selected successfully'),
+                backgroundColor: Colors.green),
           );
         }
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error selecting file: $e'), backgroundColor: Colors.red),
+          SnackBar(
+              content: Text('Error selecting file: $e'),
+              backgroundColor: Colors.red),
         );
       }
     }
@@ -261,7 +360,6 @@ class _UploadDocumentScreenState extends State<UploadDocumentScreen> {
 
   Future<void> _uploadDocument() async {
     if (!_formKey.currentState!.validate() || _selectedFilePath == null) return;
-
     try {
       await _service.uploadDocument(
         userId: widget.userId,
@@ -269,17 +367,21 @@ class _UploadDocumentScreenState extends State<UploadDocumentScreen> {
         category: _selectedCategory,
         filePath: _selectedFilePath!,
       );
-
       if (mounted) {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Document uploaded and encrypted'), backgroundColor: Colors.green),
+          const SnackBar(
+              content: Text('Document uploaded and encrypted'),
+              backgroundColor: Colors.green),
         );
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Upload error: $e'), backgroundColor: Colors.red),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text('Upload error: $e'), backgroundColor: Colors.red),
+        );
+      }
     }
   }
 

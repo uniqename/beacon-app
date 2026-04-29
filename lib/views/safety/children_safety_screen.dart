@@ -87,7 +87,7 @@ class _ChildrenSafetyScreenState extends State<ChildrenSafetyScreen> {
                       backgroundColor: Colors.pink[100],
                       child: Text(child.name[0], style: TextStyle(color: Colors.pink[700])),
                     ),
-                    title: Text(child.name, style: TextStyle(fontWeight: FontWeight.bold)),
+                    title: Text(child.name, style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey[850])),
                     subtitle: Text('Age: ${child.age}${child.school.isNotEmpty ? " • ${child.school}" : ""}'),
                     children: [
                       Padding(

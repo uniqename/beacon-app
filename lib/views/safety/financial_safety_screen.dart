@@ -108,7 +108,7 @@ class _FinancialSafetyScreenState extends State<FinancialSafetyScreen> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text('Total Hidden Savings:', style: TextStyle(fontWeight: FontWeight.bold)),
+                      Text('Total Hidden Savings:', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey[850])),
                       Text(
                         _showAmounts ? 'GH₵ ${totalSavings.toStringAsFixed(2)}' : '••••••',
                         style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.teal[700]),
@@ -152,7 +152,7 @@ class _FinancialSafetyScreenState extends State<FinancialSafetyScreen> {
                             backgroundColor: Colors.teal[100],
                             child: Icon(Icons.place, color: Colors.teal[700]),
                           ),
-                          title: Text(saving.location, style: TextStyle(fontWeight: FontWeight.bold)),
+                          title: Text(saving.location, style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey[850])),
                           subtitle: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
