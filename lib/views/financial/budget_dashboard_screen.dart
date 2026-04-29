@@ -377,12 +377,12 @@ class _BudgetDashboardScreenState extends State<BudgetDashboardScreen>
                   children: [
                     Icon(e.value.$1,
                         size: 14,
-                        color: selected ? _accent : Colors.white38),
+                        color: selected ? _accent : Colors.white70),
                     const SizedBox(width: 5),
                     Text(
                       e.value.$2,
                       style: TextStyle(
-                        color: selected ? _accent : Colors.white38,
+                        color: selected ? _accent : Colors.white70,
                         fontWeight: selected
                             ? FontWeight.bold
                             : FontWeight.normal,
@@ -680,7 +680,7 @@ class _BudgetDashboardScreenState extends State<BudgetDashboardScreen>
           const SizedBox(height: 2),
           Text(label,
               style:
-                  const TextStyle(color: Colors.white38, fontSize: 10)),
+                  const TextStyle(color: Colors.white70, fontSize: 10)),
         ],
       ),
     );
@@ -716,7 +716,7 @@ class _BudgetDashboardScreenState extends State<BudgetDashboardScreen>
           const SizedBox(height: 4),
           const Text(
               '50% needs · 30% wants · 20% savings — the road to financial freedom',
-              style: TextStyle(color: Colors.white38, fontSize: 11)),
+              style: TextStyle(color: Colors.white70, fontSize: 11)),
           const SizedBox(height: 14),
           _buildRuleBar(
               'Needs / Expenses', needsPct, 50, _accentRed),
@@ -750,7 +750,7 @@ class _BudgetDashboardScreenState extends State<BudgetDashboardScreen>
                     fontWeight: FontWeight.bold)),
             Text('(target ${target.toInt()}%)',
                 style: const TextStyle(
-                    color: Colors.white30, fontSize: 10)),
+                    color: Colors.white70, fontSize: 10)),
           ],
         ),
         const SizedBox(height: 4),
@@ -950,7 +950,7 @@ class _BudgetDashboardScreenState extends State<BudgetDashboardScreen>
           Text('$earned/$max',
               style: TextStyle(
                   color: color,
-                  fontSize: 10,
+                  fontSize: 12,
                   fontWeight: FontWeight.bold)),
         ],
       ),
@@ -1091,7 +1091,7 @@ class _BudgetDashboardScreenState extends State<BudgetDashboardScreen>
           const SizedBox(height: 4),
           const Text(
               'The 4% rule: your freedom number = 25× annual expenses',
-              style: TextStyle(color: Colors.white38, fontSize: 11)),
+              style: TextStyle(color: Colors.white70, fontSize: 11)),
           const SizedBox(height: 14),
           if (suggestedFire > 0)
             Container(
@@ -1153,7 +1153,7 @@ class _BudgetDashboardScreenState extends State<BudgetDashboardScreen>
                       Text(
                           '$_cs${(_freedomNumber - _netWorth).clamp(0, double.infinity).toStringAsFixed(0)} to go',
                           style: const TextStyle(
-                              color: Colors.white38, fontSize: 11)),
+                              color: Colors.white70, fontSize: 11)),
                     ],
                   ),
                   const SizedBox(height: 8),
@@ -1221,7 +1221,7 @@ class _BudgetDashboardScreenState extends State<BudgetDashboardScreen>
           ),
           const SizedBox(height: 4),
           const Text('Target: 6 months of living expenses',
-              style: TextStyle(color: Colors.white38, fontSize: 11)),
+              style: TextStyle(color: Colors.white70, fontSize: 11)),
           const SizedBox(height: 14),
           // Monthly expenses input
           Row(
@@ -1300,7 +1300,7 @@ class _BudgetDashboardScreenState extends State<BudgetDashboardScreen>
           if (_assets.isEmpty)
             const Text(
                 'No assets added yet. Tap + to add savings accounts, property, investments etc.',
-                style: TextStyle(color: Colors.white38, fontSize: 12))
+                style: TextStyle(color: Colors.white70, fontSize: 12))
           else
             ..._assets.map((a) => _buildAssetTile(a)),
           const Divider(color: Colors.white12, height: 20),
@@ -1365,7 +1365,7 @@ class _BudgetDashboardScreenState extends State<BudgetDashboardScreen>
                         fontSize: 13)),
                 Text(a.type.toUpperCase(),
                     style: const TextStyle(
-                        color: Colors.white38, fontSize: 10)),
+                        color: Colors.white70, fontSize: 10)),
               ],
             ),
           ),
@@ -1381,7 +1381,7 @@ class _BudgetDashboardScreenState extends State<BudgetDashboardScreen>
               await _savePrefs();
             },
             child: const Icon(Icons.close,
-                color: Colors.white24, size: 16),
+                color: Colors.white60, size: 16),
           ),
         ],
       ),
@@ -1433,13 +1433,13 @@ class _BudgetDashboardScreenState extends State<BudgetDashboardScreen>
                 const SizedBox(height: 16),
                 const Text('No debts tracked',
                     style: TextStyle(
-                        color: Colors.white54, fontSize: 16)),
+                        color: Colors.white70, fontSize: 16)),
                 const SizedBox(height: 8),
                 const Text(
                     'Add loans, credit cards, or any debt to track payoff progress',
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                        color: Colors.white30, fontSize: 13)),
+                        color: Colors.white70, fontSize: 13)),
                 const SizedBox(height: 24),
                 ElevatedButton.icon(
                   onPressed: _showAddDebtDialog,
@@ -1517,7 +1517,7 @@ class _BudgetDashboardScreenState extends State<BudgetDashboardScreen>
                       color: _accent, fontSize: 11)),
               Text('${(progress * 100).toInt()}% cleared',
                   style: const TextStyle(
-                      color: Colors.white38, fontSize: 11)),
+                      color: Colors.white70, fontSize: 11)),
             ],
           ),
         ],
@@ -1611,7 +1611,7 @@ class _BudgetDashboardScreenState extends State<BudgetDashboardScreen>
           const SizedBox(height: 4),
           Text(desc,
               style:
-                  const TextStyle(color: Colors.white38, fontSize: 10)),
+                  const TextStyle(color: Colors.white70, fontSize: 10)),
           const SizedBox(height: 6),
           Text('Focus: $focusDebt',
               style: TextStyle(
@@ -1649,12 +1649,12 @@ class _BudgetDashboardScreenState extends State<BudgetDashboardScreen>
               ),
               Text('${d.interestRate.toStringAsFixed(1)}% p.a.',
                   style: const TextStyle(
-                      color: Colors.white38, fontSize: 11)),
+                      color: Colors.white70, fontSize: 11)),
               const SizedBox(width: 8),
               GestureDetector(
                 onTap: () => _showUpdateDebtDialog(d),
                 child: const Icon(Icons.edit,
-                    color: Colors.white30, size: 16),
+                    color: Colors.white70, size: 16),
               ),
               const SizedBox(width: 6),
               GestureDetector(
@@ -1664,7 +1664,7 @@ class _BudgetDashboardScreenState extends State<BudgetDashboardScreen>
                   await _savePrefs();
                 },
                 child: const Icon(Icons.delete_outline,
-                    color: Colors.white24, size: 16),
+                    color: Colors.white60, size: 16),
               ),
             ],
           ),
@@ -1695,7 +1695,7 @@ class _BudgetDashboardScreenState extends State<BudgetDashboardScreen>
                       fontSize: 13)),
               Text('Min: $_cs${d.minimumPayment.toStringAsFixed(0)}/mo',
                   style: const TextStyle(
-                      color: Colors.white38, fontSize: 11)),
+                      color: Colors.white70, fontSize: 11)),
               Text('${(progress * 100).toInt()}% paid',
                   style: const TextStyle(
                       color: _accent, fontSize: 11)),
@@ -1869,7 +1869,7 @@ class _BudgetDashboardScreenState extends State<BudgetDashboardScreen>
           Expanded(
             child: Text(title,
                 style: TextStyle(
-                    color: done ? Colors.white : Colors.white38,
+                    color: done ? Colors.white : Colors.white70,
                     fontSize: 13,
                     decoration:
                         done ? TextDecoration.none : null)),
@@ -1885,7 +1885,7 @@ class _BudgetDashboardScreenState extends State<BudgetDashboardScreen>
               child: const Text('Done',
                   style: TextStyle(
                       color: _accent,
-                      fontSize: 9,
+                      fontSize: 12,
                       fontWeight: FontWeight.bold)),
             ),
         ],
@@ -1965,7 +1965,7 @@ class _BudgetDashboardScreenState extends State<BudgetDashboardScreen>
                             fontSize: 15)),
                     Text(subtitle,
                         style: const TextStyle(
-                            color: Colors.white38, fontSize: 11)),
+                            color: Colors.white70, fontSize: 11)),
                   ],
                 ),
               ),
@@ -1984,7 +1984,7 @@ class _BudgetDashboardScreenState extends State<BudgetDashboardScreen>
                   style: const TextStyle(color: Colors.white, fontSize: 18),
                   decoration: InputDecoration(
                     hintText: '0',
-                    hintStyle: const TextStyle(color: Colors.white24),
+                    hintStyle: const TextStyle(color: Colors.white60),
                     enabledBorder: UnderlineInputBorder(
                         borderSide: BorderSide(
                             color: color.withValues(alpha: 0.4))),
@@ -2063,7 +2063,7 @@ class _BudgetDashboardScreenState extends State<BudgetDashboardScreen>
                     Text(
                         'Private funds not visible unless you toggle Show Hidden',
                         style: TextStyle(
-                            color: Colors.white38, fontSize: 11)),
+                            color: Colors.white70, fontSize: 11)),
                   ],
                 ),
               ),
@@ -2115,10 +2115,10 @@ class _BudgetDashboardScreenState extends State<BudgetDashboardScreen>
             const Icon(Icons.receipt_long, size: 64, color: Colors.white12),
             const SizedBox(height: 16),
             const Text('No transactions yet',
-                style: TextStyle(color: Colors.white54, fontSize: 16)),
+                style: TextStyle(color: Colors.white70, fontSize: 16)),
             const SizedBox(height: 8),
             const Text('Tap + to add your first entry',
-                style: TextStyle(color: Colors.white38, fontSize: 13)),
+                style: TextStyle(color: Colors.white70, fontSize: 13)),
           ],
         ),
       );
@@ -2181,7 +2181,7 @@ class _BudgetDashboardScreenState extends State<BudgetDashboardScreen>
                         child: const Text('Hidden',
                             style: TextStyle(
                                 color: _accentGold,
-                                fontSize: 9,
+                                fontSize: 12,
                                 fontWeight: FontWeight.bold)),
                       ),
                   ],
@@ -2190,7 +2190,7 @@ class _BudgetDashboardScreenState extends State<BudgetDashboardScreen>
                 Text(
                     '${t.category} · ${t.date.toString().substring(0, 10)}',
                     style: const TextStyle(
-                        color: Colors.white38, fontSize: 11)),
+                        color: Colors.white70, fontSize: 11)),
               ],
             ),
           ),
@@ -2481,7 +2481,7 @@ class _BudgetDashboardScreenState extends State<BudgetDashboardScreen>
         children: [
           Text(label,
               style: const TextStyle(
-                  color: Colors.white38, fontSize: 10)),
+                  color: Colors.white70, fontSize: 10)),
           const SizedBox(height: 4),
           Text(value,
               style: TextStyle(
@@ -2533,7 +2533,7 @@ class _BudgetDashboardScreenState extends State<BudgetDashboardScreen>
           TextButton(
               onPressed: () => Navigator.pop(ctx),
               child: const Text('Cancel',
-                  style: TextStyle(color: Colors.white38))),
+                  style: TextStyle(color: Colors.white70))),
           ElevatedButton(
             onPressed: () async {
               if (nameCtrl.text.isEmpty) return;
@@ -2591,7 +2591,7 @@ class _BudgetDashboardScreenState extends State<BudgetDashboardScreen>
           TextButton(
               onPressed: () => Navigator.pop(ctx),
               child: const Text('Cancel',
-                  style: TextStyle(color: Colors.white38))),
+                  style: TextStyle(color: Colors.white70))),
           ElevatedButton(
             onPressed: () async {
               final remaining =
@@ -2647,7 +2647,7 @@ class _BudgetDashboardScreenState extends State<BudgetDashboardScreen>
                 decoration: InputDecoration(
                   labelText: 'Type',
                   labelStyle:
-                      const TextStyle(color: Colors.white54),
+                      const TextStyle(color: Colors.white70),
                   enabledBorder: UnderlineInputBorder(
                       borderSide: BorderSide(
                           color: _accentPurple
@@ -2671,7 +2671,7 @@ class _BudgetDashboardScreenState extends State<BudgetDashboardScreen>
             TextButton(
                 onPressed: () => Navigator.pop(ctx),
                 child: const Text('Cancel',
-                    style: TextStyle(color: Colors.white38))),
+                    style: TextStyle(color: Colors.white70))),
             ElevatedButton(
               onPressed: () async {
                 if (nameCtrl.text.isEmpty) return;
@@ -2709,7 +2709,7 @@ class _BudgetDashboardScreenState extends State<BudgetDashboardScreen>
       style: TextStyle(color: color),
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle: const TextStyle(color: Colors.white30),
+        hintStyle: const TextStyle(color: Colors.white70),
         enabledBorder: UnderlineInputBorder(
             borderSide:
                 BorderSide(color: color.withValues(alpha: 0.3))),

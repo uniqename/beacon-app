@@ -338,7 +338,7 @@ class _BeaconQuizBuilderScreenState extends State<BeaconQuizBuilderScreen> {
               Icons.image_outlined),
           const SizedBox(height: 12),
           const Text('Answers — tap circle to mark correct:',
-              style: TextStyle(fontSize: 12, color: Colors.white54)),
+              style: TextStyle(fontSize: 12, color: Colors.white70)),
           const SizedBox(height: 8),
           ...List.generate(4, (i) {
             final isCorrect = q.correctIndex == i;

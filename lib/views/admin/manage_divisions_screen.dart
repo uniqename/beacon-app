@@ -316,7 +316,7 @@ class _ManageDivisionsScreenState extends State<ManageDivisionsScreen> {
           Text(
             text,
             style: TextStyle(
-              fontSize: 10,
+              fontSize: 12,
               color: color,
               fontWeight: FontWeight.w600,
             ),

@@ -215,7 +215,7 @@ class _PlanCalendarScreenState extends State<PlanCalendarScreen> {
                 BoxDecoration(color: color, shape: BoxShape.circle)),
         const SizedBox(width: 4),
         Text(label,
-            style: const TextStyle(fontSize: 11, color: Colors.black54)),
+            style: const TextStyle(fontSize: 12, color: Colors.black87)),
       ],
     );
   }
@@ -301,7 +301,7 @@ class _PlanCalendarScreenState extends State<PlanCalendarScreen> {
         return Center(
           child: Text(
             'No events on ${_fmtDate(day)}',
-            style: TextStyle(color: Colors.grey[500]),
+            style: TextStyle(color: Colors.grey[700]),
           ),
         );
       }
@@ -382,7 +382,7 @@ class _PlanCalendarScreenState extends State<PlanCalendarScreen> {
             style: TextStyle(fontSize: 12, color: Colors.grey[600])),
         trailing: Text(
           _fmtDate(date),
-          style: TextStyle(fontSize: 11, color: Colors.grey[500]),
+          style: TextStyle(fontSize: 12, color: Colors.grey[700]),
         ),
       ),
     );

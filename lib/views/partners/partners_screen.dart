@@ -305,7 +305,7 @@ class _PartnersScreenState extends State<PartnersScreen> {
                             child: const Text('Partner',
                                 style: TextStyle(
                                     color: Colors.white,
-                                    fontSize: 9,
+                                    fontSize: 12,
                                     fontWeight: FontWeight.bold)),
                           ),
                         if (partner.isVerified && !partner.isBeaconPartner)

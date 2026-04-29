@@ -649,7 +649,7 @@ class _EnhancedDonationScreenState extends State<EnhancedDonationScreen> {
                               network,
                               textAlign: TextAlign.center,
                               style: TextStyle(
-                                fontSize: 11,
+                                fontSize: 12,
                                 fontWeight: FontWeight.bold,
                                 color: _selectedMomoNetwork == network ? Color(0xFFF0562D) : cs.onSurfaceVariant,
                               ),
@@ -1026,7 +1026,7 @@ class _EnhancedDonationScreenState extends State<EnhancedDonationScreen> {
             Text('Transaction ID:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
             Text(
               transactionId,
-              style: TextStyle(fontSize: 11, color: Colors.grey[600]),
+              style: TextStyle(fontSize: 12, color: Colors.grey[600]),
             ),
             SizedBox(height: 16),
             Container(

@@ -1010,7 +1010,7 @@ class _HorizontalCardRow extends StatelessWidget {
                   Text(
                     card.label,
                     style: TextStyle(
-                      fontSize: 10,
+                      fontSize: 12,
                       fontWeight: FontWeight.w600,
                       color: Theme.of(context).colorScheme.onSurface,
                     ),

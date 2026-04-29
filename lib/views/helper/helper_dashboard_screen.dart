@@ -832,7 +832,7 @@ class _HelperDashboardScreenState extends State<HelperDashboardScreen> {
                     child: Text(
                       priority.toUpperCase(),
                       style: TextStyle(
-                        fontSize: 9,
+                        fontSize: 12,
                         fontWeight: FontWeight.bold,
                         color: priorityColor,
                       ),
@@ -870,7 +870,7 @@ class _HelperDashboardScreenState extends State<HelperDashboardScreen> {
                     child: Text(
                       status.toUpperCase().replaceAll('_', ' '),
                       style: TextStyle(
-                        fontSize: 9,
+                        fontSize: 12,
                         fontWeight: FontWeight.bold,
                         color: status == 'resolved'
                             ? Colors.green

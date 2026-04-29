@@ -146,7 +146,7 @@ class _CaseProgramDetailScreenState extends State<CaseProgramDetailScreen> {
                   priorityLabel,
                   style: const TextStyle(
                       color: Colors.white,
-                      fontSize: 11,
+                      fontSize: 12,
                       fontWeight: FontWeight.bold),
                 ),
               ),
@@ -343,7 +343,7 @@ class _CaseProgramDetailScreenState extends State<CaseProgramDetailScreen> {
         subtitle: action.completed && action.completedAt != null
             ? Text(
                 'Done ${_fmt(action.completedAt!)}',
-                style: TextStyle(fontSize: 11, color: Colors.grey[400]),
+                style: TextStyle(fontSize: 12, color: Colors.grey[400]),
               )
             : null,
         activeColor: const Color(0xFFE65100),
@@ -448,11 +448,11 @@ class _CaseProgramDetailScreenState extends State<CaseProgramDetailScreen> {
               const SizedBox(width: 4),
               Text(note.createdBy,
                   style:
-                      TextStyle(fontSize: 11, color: Colors.grey[500])),
+                      TextStyle(fontSize: 12, color: Colors.grey[500])),
               const Spacer(),
               Text(_fmt(note.createdAt),
                   style:
-                      TextStyle(fontSize: 11, color: Colors.grey[500])),
+                      TextStyle(fontSize: 12, color: Colors.grey[500])),
             ],
           ),
         ],

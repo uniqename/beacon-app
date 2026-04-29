@@ -318,7 +318,7 @@ class _MySupportPlanScreenState extends State<MySupportPlanScreen> {
                         Text(
                           '${program.completedActionCount}/${program.totalActionCount}',
                           style: TextStyle(
-                              fontSize: 11, color: Colors.grey[600]),
+                              fontSize: 12, color: Colors.grey[600]),
                         ),
                       ],
                     ),
@@ -367,7 +367,7 @@ class _MySupportPlanScreenState extends State<MySupportPlanScreen> {
                   Text(
                     _fmt(note.createdAt),
                     style: TextStyle(
-                        fontSize: 11, color: Colors.grey[500]),
+                        fontSize: 12, color: Colors.grey[700]),
                   ),
                 ],
               ),

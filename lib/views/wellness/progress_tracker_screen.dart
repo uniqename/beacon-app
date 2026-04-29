@@ -243,7 +243,7 @@ class _ProgressTrackerScreenState extends State<ProgressTrackerScreen>
                   child: Text(
                     '${day.day}',
                     style: TextStyle(
-                      fontSize: 10,
+                      fontSize: 12,
                       fontWeight: isToday ? FontWeight.bold : FontWeight.normal,
                       color: activityCount > 0 ? Colors.white : Colors.grey[400],
                     ),
@@ -274,7 +274,7 @@ class _ProgressTrackerScreenState extends State<ProgressTrackerScreen>
       children: [
         Container(width: 12, height: 12, decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(2))),
         const SizedBox(width: 4),
-        Text(label, style: TextStyle(fontSize: 10, color: Colors.grey[600])),
+        Text(label, style: TextStyle(fontSize: 12, color: Colors.grey[600])),
       ],
     );
   }
@@ -435,7 +435,7 @@ class _ProgressTrackerScreenState extends State<ProgressTrackerScreen>
                     color: milestone.color.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: Text('✓ Done', style: TextStyle(fontSize: 11, color: milestone.color, fontWeight: FontWeight.bold)),
+                  child: Text('✓ Done', style: TextStyle(fontSize: 12, color: milestone.color, fontWeight: FontWeight.bold)),
                 ),
             ],
           ),
@@ -454,7 +454,7 @@ class _ProgressTrackerScreenState extends State<ProgressTrackerScreen>
           const SizedBox(height: 4),
           Text(
             '${(milestone.progress * 100).toInt()}% — ${milestone.achievedText}',
-            style: TextStyle(fontSize: 11, color: Colors.grey[500]),
+            style: TextStyle(fontSize: 12, color: Colors.grey[700]),
           ),
         ],
       ),
@@ -531,7 +531,7 @@ class _ProgressTrackerScreenState extends State<ProgressTrackerScreen>
           Icon(icon, color: color, size: 24),
           const SizedBox(height: 6),
           Text(value, style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: color)),
-          Text(label, style: TextStyle(fontSize: 10, color: Colors.grey[600]), textAlign: TextAlign.center),
+          Text(label, style: TextStyle(fontSize: 12, color: Colors.grey[600]), textAlign: TextAlign.center),
         ],
       ),
     );

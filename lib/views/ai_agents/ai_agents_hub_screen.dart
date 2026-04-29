@@ -311,7 +311,7 @@ class _AgentCard extends StatelessWidget {
                               'AI',
                               style: TextStyle(
                                 color: agent.accent,
-                                fontSize: 9,
+                                fontSize: 12,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
