@@ -28,8 +28,11 @@ class _ArticleReaderScreenState extends State<ArticleReaderScreen> {
   Widget build(BuildContext context) {
     final content = widget.content;
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final titleColor = isDark ? Colors.white : const Color(0xFF1E293B);
+    final bodyColor  = isDark ? Colors.white70 : Colors.grey[800]!;
+
     return Scaffold(
-      backgroundColor: Colors.white,
       appBar: AppBar(
         title: Text(
           content.category,
@@ -76,7 +79,7 @@ class _ArticleReaderScreenState extends State<ArticleReaderScreen> {
                 fontSize: _fontSize + 10,
                 fontWeight: FontWeight.bold,
                 height: 1.3,
-                color: const Color(0xFF1E293B),
+                color: titleColor,
               ),
             ),
             const SizedBox(height: 10),
@@ -105,12 +108,12 @@ class _ArticleReaderScreenState extends State<ArticleReaderScreen> {
             Text(
               _articleBody(content.id),
               style: TextStyle(
-                  fontSize: _fontSize, height: 1.7, color: Colors.grey[800]),
+                  fontSize: _fontSize, height: 1.7, color: bodyColor),
             ),
             const SizedBox(height: 36),
 
             // Support callout
-            _buildSupportBox(),
+            _buildSupportBox(isDark),
             const SizedBox(height: 32),
 
             // Related articles
@@ -159,13 +162,13 @@ class _ArticleReaderScreenState extends State<ArticleReaderScreen> {
 
   // ─── Support callout ─────────────────────────────────────────────────────
 
-  Widget _buildSupportBox() {
+  Widget _buildSupportBox(bool isDark) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.amber[50],
+        color: isDark ? Colors.amber[900]!.withValues(alpha: 0.2) : Colors.amber[50],
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.amber[200]!),
+        border: Border.all(color: isDark ? Colors.amber[700]! : Colors.amber[200]!),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
