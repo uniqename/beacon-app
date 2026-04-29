@@ -388,10 +388,46 @@ class AuthService {
               }
               return appUser;
             }
-          } else if (response != null) {
-            developer.log('❌ [Auth] Found in Supabase but password doesn\'t match');
           } else {
-            developer.log('❌ [Auth] Not found in Supabase either');
+            // Hash mismatch OR user not in users table — try Supabase Auth directly.
+            // This handles accounts created outside the app (e.g. via admin API)
+            // where password_hash was never stored.
+            developer.log('🔐 [Auth] Hash check failed — trying Supabase Auth sign-in for $email');
+            try {
+              final authResp = await client.auth.signInWithPassword(email: email, password: password);
+              if (authResp.user != null) {
+                developer.log('✅ [Auth] Supabase Auth sign-in OK for $email');
+                final profileResp = response ??
+                    await client.from('users').select().eq('id', authResp.user!.id).maybeSingle();
+                if (profileResp != null) {
+                  const localCols = {
+                    'id', 'email', 'phone', 'display_name', 'user_type', 'password_hash',
+                    'encrypted_data', 'created_at', 'last_updated', 'is_anonymous',
+                    'emergency_contact', 'emergency_contact_phone', 'support_needs',
+                    'current_location', 'has_active_cases', 'specialization',
+                    'qualifications', 'is_available', 'admin_secret_validated',
+                    'approval_status', 'approval_notes', 'approved_by', 'approved_at',
+                  };
+                  final localData = Map<String, dynamic>.from(profileResp)
+                    ..removeWhere((k, _) => !localCols.contains(k));
+                  localData['password_hash'] = passwordHash;
+                  await db.insert('users', localData, conflictAlgorithm: ConflictAlgorithm.replace);
+                  final appUser = AppUser.fromMap(localData);
+                  await _updateLastLogin(appUser.id);
+                  _currentUser = appUser;
+                  _authStateController.add(_currentUser);
+                  await _saveAnonymousStatus(appUser.isAnonymous);
+                  await _saveUserSession(appUser.id, email, appUser.displayName ?? 'User');
+                  developer.log('✅ [Auth] Supabase Auth login OK, cached locally for $email');
+                  try {
+                    await CaseManagementService.tryAutoLinkByEmail(appUser.id, email);
+                  } catch (_) {}
+                  return appUser;
+                }
+              }
+            } catch (supaErr) {
+              developer.log('⚠️ [Auth] Supabase Auth fallback failed: $supaErr');
+            }
           }
         } catch (e) {
           developer.log('⚠️ [Auth] Supabase fallback failed: $e');
