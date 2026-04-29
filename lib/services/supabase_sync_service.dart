@@ -327,4 +327,14 @@ class SupabaseSyncService {
   }
 
   bool get isConnectedToSupabase => _client != null;
+
+  Future<void> updateUserPasswordHash(String userId, String passwordHash) async {
+    if (_client == null) return;
+    try {
+      await _client!.from('users').update({'password_hash': passwordHash}).eq('id', userId);
+      developer.log('✅ [Sync] password_hash updated for $userId');
+    } catch (e) {
+      developer.log('⚠️ [Sync] updateUserPasswordHash failed: $e');
+    }
+  }
 }

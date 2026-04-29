@@ -528,7 +528,7 @@ class AuthService {
 
       await client.auth.resetPasswordForEmail(
         email,
-        redirectTo: 'https://beaconnewbeginnings.org/reset-password',
+        redirectTo: 'beaconnewbeginnings://reset-password',
       );
 
       developer.log('✅ [Auth] Password reset email sent to $email');
@@ -624,6 +624,61 @@ class AuthService {
     await prefs.setString('currentUserId', userId);
     await prefs.setString('userEmail', email);
     await prefs.setString('userDisplayName', displayName);
+  }
+
+  // Admin-only: set a user's password directly (updates public.users + local SQLite).
+  // Used when a user was created by an admin and needs an initial/reset password.
+  Future<bool> setUserPasswordByAdmin({
+    required String userId,
+    required String newPassword,
+  }) async {
+    try {
+      if (newPassword.length < 6) throw Exception('Password must be at least 6 characters');
+      final newHash = _hashPassword(newPassword);
+
+      // Update local SQLite
+      final db = await LocalDatabaseService.database;
+      await db.update('users', {'password_hash': newHash}, where: 'id = ?', whereArgs: [userId]);
+
+      // Update Supabase public.users
+      try {
+        final supabaseUrl = dotenv.env['SUPABASE_URL'] ?? '';
+        final supabaseAnonKey = dotenv.env['SUPABASE_ANON_KEY'] ?? '';
+        if (supabaseUrl.isNotEmpty && supabaseAnonKey.isNotEmpty) {
+          sb.SupabaseClient client;
+          try { client = sb.Supabase.instance.client; }
+          catch (_) { await sb.Supabase.initialize(url: supabaseUrl, anonKey: supabaseAnonKey); client = sb.Supabase.instance.client; }
+          await client.from('users').update({'password_hash': newHash}).eq('id', userId);
+          developer.log('✅ [Auth] Admin password set for $userId');
+        }
+      } catch (e) {
+        developer.log('⚠️ [Auth] Supabase password update failed (local only): $e');
+      }
+      return true;
+    } catch (e) {
+      developer.log('❌ [Auth] setUserPasswordByAdmin error: $e');
+      return false;
+    }
+  }
+
+  // Update password hash after a Supabase Auth recovery session.
+  // Called from ResetPasswordScreen after supabase.auth.updateUser() succeeds.
+  Future<bool> syncPasswordHash(String userId, String newPassword) async {
+    try {
+      final newHash = _hashPassword(newPassword);
+      final db = await LocalDatabaseService.database;
+      await db.update('users', {'password_hash': newHash}, where: 'id = ?', whereArgs: [userId]);
+      try {
+        final client = sb.Supabase.instance.client;
+        await client.from('users').update({'password_hash': newHash}).eq('id', userId);
+      } catch (e) {
+        developer.log('⚠️ [Auth] Supabase hash sync failed: $e');
+      }
+      return true;
+    } catch (e) {
+      developer.log('❌ [Auth] syncPasswordHash error: $e');
+      return false;
+    }
   }
 
   Future<bool> verifyPassword(String password) async {

@@ -1,7 +1,7 @@
 name: ngo_support_app
 description: "Beacon of New Beginnings - Walking the path from pain to power, hand in hand"
 publish_to: 'none'
-version: 2.2.11+160
+version: 2.2.13+163
 
 environment:
   sdk: ^3.8.1
@@ -46,6 +46,7 @@ dependencies:
   flutter_paypal_payment: ^1.0.8
   flutter_stripe: ^10.2.0
   supabase_flutter: ^2.8.4
+  app_links: ^7.0.0
   firebase_core: ^3.14.0
   firebase_messaging: ^15.2.4
   cloud_firestore: ^5.6.6

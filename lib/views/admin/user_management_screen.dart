@@ -233,6 +233,16 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
                                   ],
                                 ),
                               ),
+                              const PopupMenuItem(
+                                value: 'set_password',
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.key, size: 16, color: Colors.orange),
+                                    SizedBox(width: 8),
+                                    Text('Set Password'),
+                                  ],
+                                ),
+                              ),
                               if (user.userType != UserType.admin)
                                 const PopupMenuItem(
                                   value: 'delete',
@@ -342,10 +352,87 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
       case 'deactivate':
         _toggleUserStatus(user);
         break;
+      case 'set_password':
+        _showSetPasswordDialog(user);
+        break;
       case 'delete':
         _showDeleteConfirmation(user);
         break;
     }
+  }
+
+  void _showSetPasswordDialog(AppUser user) {
+    final passwordController = TextEditingController();
+    final confirmController = TextEditingController();
+    bool obscure = true;
+
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) => AlertDialog(
+          title: Text('Set Password — ${user.displayName ?? user.email}'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: passwordController,
+                obscureText: obscure,
+                decoration: InputDecoration(
+                  labelText: 'New Password',
+                  suffixIcon: IconButton(
+                    icon: Icon(obscure ? Icons.visibility_off : Icons.visibility),
+                    onPressed: () => setDialogState(() => obscure = !obscure),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: confirmController,
+                obscureText: obscure,
+                decoration: const InputDecoration(labelText: 'Confirm Password'),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+            ElevatedButton(
+              onPressed: () async {
+                final pw = passwordController.text.trim();
+                final cf = confirmController.text.trim();
+                if (pw.length < 6) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Password must be at least 6 characters')));
+                  return;
+                }
+                if (pw != cf) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Passwords do not match')));
+                  return;
+                }
+                Navigator.pop(ctx);
+                try {
+                  final newHash = _hashPassword(pw);
+                  final db = await LocalDatabaseService.database;
+                  await db.update('users', {'password_hash': newHash}, where: 'id = ?', whereArgs: [user.id]);
+                  await SupabaseSyncService().updateUserPasswordHash(user.id, newHash);
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Password updated for ${user.displayName ?? user.email}')));
+                  }
+                } catch (e) {
+                  developer.log('Set password error: $e');
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Failed to update password')));
+                  }
+                }
+              },
+              child: const Text('Save'),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   String _hashPassword(String password) {
