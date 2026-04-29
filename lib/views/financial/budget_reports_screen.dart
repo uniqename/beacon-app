@@ -140,7 +140,7 @@ class _BudgetReportsScreenState extends State<BudgetReportsScreen> {
             children: [
               Text(
                 '$_cs${entry.value.toStringAsFixed(0)}',
-                style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
+                style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 4),
               Container(
@@ -154,7 +154,7 @@ class _BudgetReportsScreenState extends State<BudgetReportsScreen> {
               SizedBox(height: 8),
               Text(
                 entry.key,
-                style: TextStyle(fontSize: 10),
+                style: TextStyle(fontSize: 11),
                 textAlign: TextAlign.center,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,

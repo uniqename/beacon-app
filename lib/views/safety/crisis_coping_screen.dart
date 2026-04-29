@@ -469,7 +469,7 @@ class _CrisisCoopingScreenState extends State<CrisisCoopingScreen> {
                         fontSize: 14, fontWeight: FontWeight.w600)),
                 Text(desc,
                     style:
-                        TextStyle(fontSize: 11, color: Colors.grey[600])),
+                        TextStyle(fontSize: 12, color: Colors.grey[600])),
               ],
             ),
           ),

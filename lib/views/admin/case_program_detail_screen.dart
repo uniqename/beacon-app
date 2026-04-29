@@ -272,7 +272,7 @@ class _CaseProgramDetailScreenState extends State<CaseProgramDetailScreen> {
                   ? 'No actions yet — tap "Add" to create action items'
                   : 'No action items yet',
               style: TextStyle(
-                  color: Colors.grey[400],
+                  color: Colors.grey[600],
                   fontStyle: FontStyle.italic,
                   fontSize: 13),
             ),
@@ -343,7 +343,7 @@ class _CaseProgramDetailScreenState extends State<CaseProgramDetailScreen> {
         subtitle: action.completed && action.completedAt != null
             ? Text(
                 'Done ${_fmt(action.completedAt!)}',
-                style: TextStyle(fontSize: 12, color: Colors.grey[400]),
+                style: TextStyle(fontSize: 12, color: Colors.grey[600]),
               )
             : null,
         activeColor: const Color(0xFFE65100),
@@ -415,7 +415,7 @@ class _CaseProgramDetailScreenState extends State<CaseProgramDetailScreen> {
           ? Text(
               'No notes yet',
               style: TextStyle(
-                  color: Colors.grey[400],
+                  color: Colors.grey[600],
                   fontStyle: FontStyle.italic,
                   fontSize: 13),
             )

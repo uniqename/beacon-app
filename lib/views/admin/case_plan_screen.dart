@@ -520,7 +520,7 @@ class _CasePlanScreenState extends State<CasePlanScreen> {
                         ] else
                           Text('No actions yet',
                               style: TextStyle(
-                                  fontSize: 11, color: Colors.grey[400])),
+                                  fontSize: 12, color: Colors.grey[600])),
                         const Spacer(),
                         if (program.deadlineLabel != null)
                           Text(

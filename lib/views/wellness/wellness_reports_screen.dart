@@ -336,7 +336,7 @@ class _WellnessReportsScreenState extends State<WellnessReportsScreen> {
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
                           if (moodVal != null)
-                            Text('$moodVal', style: const TextStyle(fontSize: 7, color: Colors.grey)),
+                            Text('$moodVal', style: const TextStyle(fontSize: 10, color: Colors.grey)),
                           Container(
                             height: height,
                             decoration: BoxDecoration(
@@ -357,9 +357,9 @@ class _WellnessReportsScreenState extends State<WellnessReportsScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(DateFormat('MMM d').format(now.subtract(Duration(days: days - 1))),
-                  style: TextStyle(fontSize: 10, color: Colors.grey[400])),
+                  style: TextStyle(fontSize: 11, color: Colors.grey[600])),
               Text(DateFormat('MMM d').format(now),
-                  style: TextStyle(fontSize: 10, color: Colors.grey[400])),
+                  style: TextStyle(fontSize: 11, color: Colors.grey[600])),
             ],
           ),
           const SizedBox(height: 12),
