@@ -79,10 +79,49 @@ class _HomeScreenState extends State<HomeScreen> {
     final isApprovedHelper = (userType == UserType.counselor || userType == UserType.volunteer)
         && approvalStatus == 'approved';
 
+    final isHelperRole = userType == UserType.counselor || userType == UserType.volunteer;
+
     if (isApprovedHelper) {
-      // Approved helper view: Dashboard, Resources, Community, Profile
+      // Approved helper view: same home tools + Dashboard tab
       screens = [
+        const HomeTabScreen(),
+        const ResourcesScreen(),
+        const CommunityScreen(),
         const HelperDashboardScreen(),
+        const ProfileScreen(),
+      ];
+
+      navItems = const [
+        BottomNavigationBarItem(
+          icon: Icon(Icons.home_outlined),
+          activeIcon: Icon(Icons.home),
+          label: 'Home',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.library_books_outlined),
+          activeIcon: Icon(Icons.library_books),
+          label: 'Resources',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.people_outline),
+          activeIcon: Icon(Icons.people),
+          label: 'Community',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.dashboard_outlined),
+          activeIcon: Icon(Icons.dashboard),
+          label: 'Dashboard',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.person_outline),
+          activeIcon: Icon(Icons.person),
+          label: 'Profile',
+        ),
+      ];
+    } else if (isHelperRole) {
+      // Pending helper — same home tools as survivors
+      screens = [
+        const HomeTabScreen(),
         const ResourcesScreen(),
         const CommunityScreen(),
         const ProfileScreen(),
@@ -90,9 +129,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
       navItems = const [
         BottomNavigationBarItem(
-          icon: Icon(Icons.dashboard_outlined),
-          activeIcon: Icon(Icons.dashboard),
-          label: 'Dashboard',
+          icon: Icon(Icons.home_outlined),
+          activeIcon: Icon(Icons.home),
+          label: 'Home',
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.library_books_outlined),
@@ -111,11 +150,12 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ];
     } else if (userType == UserType.admin) {
-      // Admin view: Regular home + Admin tab
+      // Admin view: same home tools + Dashboard + Admin tab
       screens = [
         const HomeTabScreen(),
         const ResourcesScreen(),
         const CommunityScreen(),
+        const HelperDashboardScreen(),
         AdminDashboardScreen(user: currentUser!),
         const ProfileScreen(),
       ];
@@ -135,6 +175,11 @@ class _HomeScreenState extends State<HomeScreen> {
           icon: Icon(Icons.people_outline),
           activeIcon: Icon(Icons.people),
           label: 'Community',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.dashboard_outlined),
+          activeIcon: Icon(Icons.dashboard),
+          label: 'Dashboard',
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.admin_panel_settings_outlined),
