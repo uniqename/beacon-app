@@ -411,19 +411,27 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
                 }
                 Navigator.pop(ctx);
                 try {
+                  final sync = SupabaseSyncService();
                   final newHash = _hashPassword(pw);
+                  // Update local SQLite
                   final db = await LocalDatabaseService.database;
                   await db.update('users', {'password_hash': newHash}, where: 'id = ?', whereArgs: [user.id]);
-                  await SupabaseSyncService().updateUserPasswordHash(user.id, newHash);
+                  // Update password_hash in Supabase users table
+                  await sync.updateUserPasswordHash(user.id, newHash);
+                  // Update actual Supabase Auth password so login works
+                  await sync.adminResetUserPassword(user.id, pw);
                   if (mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Password updated for ${user.displayName ?? user.email}')));
+                      SnackBar(
+                        content: Text('Password updated for ${user.displayName ?? user.email}'),
+                        backgroundColor: Colors.green,
+                      ));
                   }
                 } catch (e) {
                   developer.log('Set password error: $e');
                   if (mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Failed to update password')));
+                      const SnackBar(content: Text('Failed to update password'), backgroundColor: Colors.red));
                   }
                 }
               },

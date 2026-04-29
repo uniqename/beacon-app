@@ -1,8 +1,10 @@
 import 'dart:async' show Future, Timer, unawaited;
 import 'dart:convert';
 import 'dart:developer' as developer;
+import 'package:http/http.dart' as http;
 import 'package:sqflite/sqflite.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../constants/admin_config.dart';
 import 'local_database_service.dart';
 
 /// Supabase-first sync service.
@@ -335,6 +337,31 @@ class SupabaseSyncService {
       developer.log('✅ [Sync] password_hash updated for $userId');
     } catch (e) {
       developer.log('⚠️ [Sync] updateUserPasswordHash failed: $e');
+    }
+  }
+
+  /// Updates the user's actual Supabase Auth password via the admin API.
+  /// This is the call that makes the new password work at login.
+  Future<void> adminResetUserPassword(String userId, String newPassword) async {
+    try {
+      final response = await http.patch(
+        Uri.parse('${AdminConfig.supabaseUrl}/auth/v1/admin/users/$userId'),
+        headers: {
+          'Authorization': 'Bearer ${AdminConfig.supabaseServiceRoleKey}',
+          'apikey': AdminConfig.supabaseServiceRoleKey,
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({'password': newPassword}),
+      );
+      if (response.statusCode == 200) {
+        developer.log('✅ [Sync] Supabase Auth password reset for $userId');
+      } else {
+        developer.log('⚠️ [Sync] adminResetUserPassword failed: ${response.body}');
+        throw Exception('Password reset failed: ${response.statusCode}');
+      }
+    } catch (e) {
+      developer.log('⚠️ [Sync] adminResetUserPassword error: $e');
+      rethrow;
     }
   }
 }
