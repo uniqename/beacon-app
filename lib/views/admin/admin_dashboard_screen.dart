@@ -13,6 +13,7 @@ import 'admin_inquiry_management_screen.dart';
 import 'admin_helper_approvals_screen.dart';
 import 'admin_content_management_screen.dart';
 import 'case_management_screen.dart';
+import 'mentor_applications_screen.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
   final AppUser user;
@@ -486,6 +487,17 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 MaterialPageRoute(builder: (context) => const AdminContentManagementScreen()),
               ),
             ),
+            if (AppConfigService.instance.config.orgKey == 'us')
+              _buildActionCard(
+                'SheBelongs Applications',
+                'Review online and paper mentor applications',
+                Icons.volunteer_activism,
+                Colors.orange,
+                () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const MentorApplicationsScreen()),
+                ),
+              ),
             _buildActionCard(
               'Case Management',
               'Intake clients and manage multi-program support plans',
