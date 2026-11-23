@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../services/auth_service.dart';
+import '../../services/app_config_service.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../services/affirmation_service.dart';
 import '../../models/user.dart';
 import '../emergency/emergency_screen.dart';
@@ -749,6 +751,21 @@ class _HomeTabScreenState extends State<HomeTabScreen> {
 
               const SizedBox(height: 20),
 
+              // ── SheBelongs (US only) ─────────────────────────────────────
+              if (AppConfigService.instance.config.orgKey == 'us') ...[
+                _SectionHeader(title: 'SheBelongs', icon: Icons.people_alt_outlined, color: Colors.orange),
+                const SizedBox(height: 10),
+                _HorizontalCardRow(cards: [
+                  _CardData(Icons.volunteer_activism_outlined, 'Become a Mentor', Colors.orange, () {
+                    _openWebLink(context, 'https://beaconnewbeginnings.org/become-a-mentor');
+                  }),
+                  _CardData(Icons.info_outline, 'About SheBelongs', Colors.deepOrange, () {
+                    _openWebLink(context, 'https://beaconnewbeginnings.org/shebelongs');
+                  }),
+                ]),
+                const SizedBox(height: 20),
+              ],
+
               // ── Services & Support ───────────────────────────────────────
               _SectionHeader(title: 'Services & Support', icon: Icons.local_hospital, color: Colors.purple),
               const SizedBox(height: 10),
@@ -1024,6 +1041,15 @@ class _HorizontalCardRow extends StatelessWidget {
           );
         },
       ),
+    );
+  }
+}
+/// Opens a Beacon web page in the browser. Shows a message if it cannot open.
+Future<void> _openWebLink(BuildContext context, String url) async {
+  final ok = await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+  if (!ok && context.mounted) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Could not open $url')),
     );
   }
 }

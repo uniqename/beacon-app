@@ -104,6 +104,9 @@ const usConfig = OrgConfig(
     'Crisis Text Line': 'Text HOME to 741741',
     'RAINN (Sexual Assault)': '1-800-656-4673',
     'Suicide & Crisis Lifeline': '988',
+    'Ohio Domestic Violence Network': '1-800-934-9840',
+    'Ohio Human Trafficking Hotline': '844-363-6448',
+    'Ohio Child Abuse Reporting (OH CHILD)': '1-855-642-4453',
   },
   dvHotline: '1-800-799-7233',
   dvHotlineLabel: 'National Domestic Violence Hotline',
@@ -112,10 +115,12 @@ const usConfig = OrgConfig(
       'Violence Against Women Act (VAWA) and applicable state DV statutes',
   legalAidName: 'local Legal Aid society',
   culturalContext:
-      'Users are in the United States. Reference US services such as the '
-      'National Domestic Violence Hotline (1-800-799-7233), local DV shelters, '
-      'RAINN, and state-specific legal aid. Use language appropriate for a '
-      'US survivor support context.',
+      'Users are in the United States, mostly in central Ohio. Reference US '
+      'services such as the National Domestic Violence Hotline (1-800-799-7233), '
+      'the Ohio Domestic Violence Network (1-800-934-9840), 211 for local help, '
+      'and RAINN. Beacon of New Beginnings does not currently run shelters, '
+      'counseling, legal services or a crisis line in the US; only refer people '
+      'to outside services. Use language appropriate for a US survivor support context.',
   primaryGateway: 'stripe',
   merchantCountryCode: 'US',
 );
