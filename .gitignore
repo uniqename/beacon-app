@@ -6,7 +6,6 @@ build/
 .env.*.local
 
 # API keys and secrets
-lib/constants/admin_config.dart
 
 # Flutter/Dart
 .dart_tool/
@@ -65,3 +64,7 @@ android/key.properties
 android/app/*.jks
 android/app/*.keystore
 releases/
+
+# macOS AppleDouble metadata from external drives
+._*
+**/._*
