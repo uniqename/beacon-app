@@ -83,6 +83,23 @@ class SupabaseSyncService {
     await _cloudUpsert(table: table, data: data);
   }
 
+  // Case records are written through the staff-only case-sync function and read
+  // from the device's local database. The public key cannot read or write them.
+  static const Set<String> caseTables = {
+    'client_intakes',
+    'case_plans',
+    'case_programs',
+    'case_notes',
+    'case_referrals',
+  };
+
+  Future<void> _caseWrite(Map<String, dynamic> body) async {
+    final res = await _client!.functions.invoke('case-sync', body: body);
+    if (res.status != 200) {
+      throw Exception('case-sync returned ${res.status}');
+    }
+  }
+
   /// Delete record [id] from [table].
   Future<void> delete({
     required String table,
@@ -97,7 +114,11 @@ class SupabaseSyncService {
 
     if (_client != null) {
       try {
-        await _client!.from(table).delete().eq('id', id);
+        if (caseTables.contains(table)) {
+          await _caseWrite({'table': table, 'op': 'delete', 'id': id});
+        } else {
+          await _client!.from(table).delete().eq('id', id);
+        }
         developer.log('✅ [Sync] Supabase delete OK → $table/$id');
         await _clearPendingSync(table, id);
         return;
@@ -124,7 +145,7 @@ class SupabaseSyncService {
     String? orderBy,
     bool ascending = false,
   }) async {
-    if (_client != null) {
+    if (_client != null && !caseTables.contains(table)) {
       try {
         final entries = filters?.entries.toList() ?? [];
         List<dynamic> rows;
@@ -165,7 +186,7 @@ class SupabaseSyncService {
     required String id,
     required Future<Map<String, dynamic>?> Function(String id) localRead,
   }) async {
-    if (_client != null) {
+    if (_client != null && !caseTables.contains(table)) {
       try {
         final rows =
             await _client!.from(table).select().eq('id', id).limit(1);
@@ -189,7 +210,11 @@ class SupabaseSyncService {
   }) async {
     if (_client != null) {
       try {
-        await _client!.from(table).upsert(data);
+        if (caseTables.contains(table)) {
+          await _caseWrite({'table': table, 'op': 'upsert', 'row': data});
+        } else {
+          await _client!.from(table).upsert(data);
+        }
         developer.log('✅ [Sync] Supabase upsert OK → $table');
         await _clearPendingSync(table, data['id'] as String?);
         return;
@@ -276,10 +301,19 @@ class SupabaseSyncService {
         final retryCount = (row['retry_count'] as int?) ?? 0;
 
         try {
+          final isCase = caseTables.contains(table);
           if (operation == 'upsert') {
-            await _client!.from(table).upsert(data);
+            if (isCase) {
+              await _caseWrite({'table': table, 'op': 'upsert', 'row': data});
+            } else {
+              await _client!.from(table).upsert(data);
+            }
           } else if (operation == 'delete') {
-            await _client!.from(table).delete().eq('id', recordId);
+            if (isCase) {
+              await _caseWrite({'table': table, 'op': 'delete', 'id': recordId});
+            } else {
+              await _client!.from(table).delete().eq('id', recordId);
+            }
           }
 
           await db.delete(
